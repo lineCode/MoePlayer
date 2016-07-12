@@ -1,0 +1,13 @@
+{
+	"name": "Moe Player",
+	"version": "0.1.0",
+	"description": "An Anime Music Player",
+	"Authro": "VenDream",
+	"license": "MIT",
+	"scripts": {
+		"start": "electron ."
+	},
+	"devDependencies": {
+		"electron-prebuilt": "^1.2.6"
+	}
+}
