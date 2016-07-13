@@ -1,9 +1,10 @@
 {
-	"name": "Moe Player",
+	"name": "MoePlayer",
 	"version": "0.1.0",
 	"description": "An Anime Music Player",
-	"Authro": "VenDream",
+	"Author": "VenDream",
 	"license": "MIT",
+	"main": "main.js",
 	"scripts": {
 		"start": "electron ."
 	},
