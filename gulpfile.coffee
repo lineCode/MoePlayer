@@ -7,7 +7,7 @@
 
 # 全局定义
 options = {
-	verbose: true
+	verbose: false
 }
 
 # 引入自动化工具
@@ -59,7 +59,7 @@ gulp.task 'coffee', ->
 		.pipe extReplace '.js'
 		.pipe uglify()
 		.pipe gulp.dest 'dist/js'
-		.pipe livereload()
+		# .pipe livereload()
 
 	return
 
@@ -71,14 +71,15 @@ gulp.task 'less', ->
 		.pipe uglifycss()
 		.on 'error', logError
 		.pipe gulp.dest 'dist/css'
-		.pipe livereload()
+		# .pipe livereload()
 
 	return
 
 # 启动electron服务
 gulp.task 'server', ->
 	electron.start()
-	gulp.watch 'main.js', ['restart']
+	# gulp.watch 'main.js', ['restart']
+	gulp.watch 'main.html', ['reload']
 
 	return
 
@@ -99,7 +100,6 @@ gulp.task 'watch', ->
 	livereload.listen()
 	gulp.watch paths.coffeeSrc, ['coffee', 'reload']
 	gulp.watch paths.lessSrc, ['less', 'reload']
-	gulp.watch paths.views, ['reload']
 
 	return
 

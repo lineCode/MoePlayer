@@ -12,7 +12,7 @@ function createWin() {
 		height: 900
 	});
 
-	win.loadURL(`file://${__dirname}/index.html`);
+	win.loadURL(`file://${__dirname}/main.html`);
 
 	// 调试用控制台
 	if (config.debug === true) {
