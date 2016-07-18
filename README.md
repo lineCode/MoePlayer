@@ -1,2 +1,11 @@
 # MoePlayer
-基于Electron的音乐播放器
+An anime music player based on [electron](http://electron.atom.io)
+
+### Install
+- `npm install -g electron-prebuilt`
+- `npm install`
+
+if npm install failed with timeout, please try [cnpm](https://npm.taobao.org)
+
+### License
+- MIT
