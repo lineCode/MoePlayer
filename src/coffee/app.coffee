@@ -1,1 +1,1 @@
-console.log('program init');
+console.log 'program init'
