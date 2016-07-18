@@ -1,5 +1,5 @@
 const config = {
-	debug: false
+	debug: true
 };
 
 module.exports = config;
