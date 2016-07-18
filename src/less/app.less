@@ -1,2 +1,49 @@
-@import url(../../lib/bootstrap_3.3.5/css/bootstrap.min.css);
+// reset style
 @import url(../../lib/normalize.css);
+
+// 变量
+@import url(variables.less);
+
+// 组件
+@import url(components/SearchBox.less);
+
+* {
+	transition: all 0.2s ease-in-out;
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+	font-size: 10px;
+	min-width: 60em;
+}
+
+input {
+	outline: none;
+}
+
+.mp-container {
+	height: 100%;
+	width: 100%;
+
+	.mp-panel {
+		.panel-header {
+			display: flex;
+			display: -webkit-flex;
+			justify-content: space-around;
+			align-items: center;
+			
+			padding: 10px;
+			background-color: @black;
+			box-shadow: 0 0 10px @shadow;
+
+			.logo {
+				color: #ffffff;
+				font-size: 3rem;
+			}
+		}
+		.panel-body {
+			min-height: 50rem;
+		}
+	}
+}
