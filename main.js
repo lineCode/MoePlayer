@@ -9,7 +9,8 @@ let win;
 function createWin() {
 	win = new BrowserWindow({
 		width: 1200,
-		height: 900
+		height: 900,
+		resizable: config.resizable
 	});
 
 	win.loadURL(`file://${__dirname}/index.html`);
