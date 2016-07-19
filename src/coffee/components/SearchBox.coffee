@@ -5,6 +5,7 @@
 ##
 
 BaseComp = require './BaseComp'
+config = require '../../../config.js'
 
 class SearchBox extends BaseComp
 	constructor: (selector, eventBus) ->
@@ -13,7 +14,7 @@ class SearchBox extends BaseComp
 		@render()
 
 	init: ->
-		@api = ''
+		@api = "#{config.host}:#{config.port}/API/music/NetEase/search"
 
 		@input = @html.querySelector '.searchInput'
 		@btn = @html.querySelector '.goBtn'
