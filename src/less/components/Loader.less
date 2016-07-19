@@ -1,0 +1,69 @@
+/**
+ * Loader组件样式
+ * 位置和大小需要自行设置:
+ * 
+ * top(bottom)
+ * left(right)
+ * width
+ * height
+ * 
+ */
+
+@import url(../variables.less);
+@speed: 0.5s;
+
+.loader {
+	position: absolute;
+	border-radius: 50%;
+	background: @red;
+	background: -webkit-linear-gradient(left, fade(@red, 100%) 10%, fade(@red, 0%) 42%);
+	background: -moz-linear-gradient(left, fade(@red, 100%) 10%, fade(@red, 0%) 42%);
+	background: -ms-linear-gradient(left, fade(@red, 100%) 10%, fade(@red, 0%) 42%);
+	background: -o-linear-gradient(left, fade(@red, 100%) 10%, fade(@red, 0%) 42%);
+	background: linear-gradient(to right, fade(@red, 100%) 10%, fade(@red, 0%) 42%);
+	-webkit-animation: loadingAni @speed infinite linear;
+	animation: loadingAni @speed infinite linear;
+	-webkit-transform: translateZ(0);
+	-ms-transform: translateZ(0);
+	transform: translateZ(0);
+
+	&:before {
+		width: 50%;
+		height: 50%;
+		background-color: @red;
+		border-radius: 100% 0 0 0;
+		position: absolute;
+		top: 0;
+		left: 0;
+		content: '';
+	}
+	&:after {
+		background-color: @black;
+		width: 75%;
+		height: 75%;
+		border-radius: 50%;
+		content: '';
+		margin: auto;
+		position: absolute;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		right: 0;
+	}
+}
+@-webkit-keyframes loadingAni {
+	.loadingAni-frames;
+}
+@keyframes loadingAni {
+	.loadingAni-frames;
+}
+.loadingAni-frames() {
+	0% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	100% {
+		-webkit-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}

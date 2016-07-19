@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Moe Player</title>
+		<link rel="stylesheet" href="dist/css/app.css">
+	</head>
+	<body>
+		<div class="mp-container">
+			<div class="mp-panel">
+				<div class="panel-header">
+					<span class="logo">
+						<span class="app-name">Moe Player</span>
+						<span class="app-ver">v0.1.0</span>
+					</span>
+					<div class="searchBox-c"></div>
+				</div>
+				<div class="panel-body"></div>
+			</div>
+			<div class="mp-player-c"></div>
+		</div>
+		<script type="text/javascript">
+			window.$ = window.jQuery = require(`${__dirname}/lib/jquery_3.1.0/jquery.min.js`);
+		</script>
+		<script type="text/javascript" src="dist/js/app.js"></script>
+	</body>
+</html>

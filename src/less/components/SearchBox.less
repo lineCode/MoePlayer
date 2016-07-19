@@ -1,0 +1,30 @@
+@import url(../variables.less);
+@import url(Loader.less);
+
+.searchBox {
+	position: relative;
+	font-size: 1.3rem;
+
+	.searchInput {
+		width: 25rem;
+		padding: 0.4rem 0.6rem;
+		border: 0.1rem solid @white;
+	}
+	.goBtn {
+		&:hover {
+			color: @black;
+			background-color: @white;
+		}
+		display: inline-block;
+		color: @white;
+		padding: 0.4rem 0.6rem;
+		border: 0.1rem solid @white;
+		cursor: pointer;
+	}
+	.loader {
+		top: 0.3rem;
+		right: -6rem;
+		width: 2rem;
+		height: 2rem;
+	}
+}

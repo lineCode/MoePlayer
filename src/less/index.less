@@ -1,0 +1,40 @@
+@import url(variables.less);
+
+.mp-container {
+	height: 100%;
+	width: 100%;
+
+	.mp-panel {
+		height: 100%;
+
+		.panel-header {
+			height: 8%;
+			display: flex;
+			display: -webkit-flex;
+			justify-content: space-around;
+			align-items: center;
+			padding: 1rem;
+			background-color: @black;
+			border-bottom: 0.2rem solid @red;
+
+			.logo {
+				color: @white;
+				cursor: pointer;
+
+				.app-name {
+					&:hover {
+						text-shadow: 0 0 8px @white;
+					}
+					font-size: 3rem;
+				}
+				.app-ver {
+					font-size: 1.2rem;
+				}
+			}
+		}
+		.panel-body {
+			height: 92%;
+			background-color: @grey;
+		}
+	}
+}
