@@ -11,8 +11,6 @@ class SearchBox extends BaseComp
 	constructor: (selector, eventBus) ->
 		super selector, eventBus
 
-		@render()
-
 	init: ->
 		@api = "#{config.host}:#{config.port}/API/music/NetEase/search"
 
@@ -29,7 +27,7 @@ class SearchBox extends BaseComp
 			<div class="searchBox">
 				<input name="musicInfo" type="text" class="searchInput" 
 					placeholder="输入歌曲信息（名称、歌手）" />
-				<div class="goBtn">搜索</div>
+				<div class="goBtn notSelect">搜索</div>
 				<div class="loader"></div>
 			</div>
 			"""
@@ -38,11 +36,12 @@ class SearchBox extends BaseComp
 		@emit 'renderFinished'
 
 	eventBinding: ->
+		$(@btn).attr 'data-searching', '0'
+
 		$(@btn).on 'click', =>
 			sstr = $(@input).val()
-			sstr && (
+			if sstr and $(@btn).attr('data-searching') is '0'
 				@doSearch sstr
-			)
 
 	# 执行搜索
 	# @param {string} sstr 关键词
@@ -51,18 +50,23 @@ class SearchBox extends BaseComp
 			type: 'POST',
 			url: @api,
 			data: {
+				page: 1,
 				sstr: sstr
 			},
 			beforeSend: =>
+				$(@btn).attr 'data-searching', '1'
 				$(@loader).fadeIn 200
 			,
 			complete: =>
+				$(@btn).attr 'data-searching', '0'
 				$(@loader).fadeOut 200	
 			success: (data) =>
-				console.log data
+				if data and data.status is 'success'
+					@eventBus.emit 'SearchBox::GetSearchResult', data.data
 			,
 			error: (err) =>
 				console.log err
+				@eventBus.emit 'SearchBox::NetworkError', err
 		}
 
 module.exports = SearchBox

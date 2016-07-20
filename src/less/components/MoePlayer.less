@@ -1,0 +1,58 @@
+@import url(variables.less);
+@cover-size: 4rem;
+@control-size: 2.5rem;
+
+.moePlayer {
+	width: 100%;
+	height: 100%;
+	border-top: 0.1rem solid @table-border;
+	font-size: 0;
+
+	.mp-part {
+		display: inline-block;
+		vertical-align: top;
+		height: 100%;
+		font-size: 1.3rem;
+	}
+	.mp-cover {
+		width: 4.9rem;
+
+		.cover-c {
+			width: 100%;
+			height: 100%;
+			display: flex;
+			display: -webkit-flex;
+			justify-content: center;
+			align-items: center;
+			border-right: 0.1rem solid @table-border;
+
+			img {
+				max-width: @cover-size;
+				max-height: @cover-size;
+			}
+		}
+	}
+	.mp-control {
+		width: 15%;
+
+		.control-c {
+			width: 100%;
+			height: 100%;
+			display: flex;
+			display: -webkit-flex;
+			justify-content: space-around;
+			align-items: center;
+			border-right: 0.1rem solid @table-border;
+
+			img {
+				max-width: @control-size;
+				max-height: @control-size;
+			}
+		}
+		.prev-song, .play-status, .next-song {
+			cursor: pointer;
+			max-width: @control-size;
+			max-height: @control-size;
+		}
+	}
+}

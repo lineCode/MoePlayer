@@ -1,32 +1,23 @@
 // RESET
 @import url(../../lib/normalize.css);
-
 // 变量
-@import url(variables.less);
-
-// 组件
-@import url(index.less);
-@import url(components/SearchBox.less);
+@import url(components/variables.less);
 
 // 全局
-* {
-	box-sizing: inherit;
-	transition: all 0.2s ease-in-out;
-}
+@import url(components/globals.less);
 
-html, body {
-	height: 100%;
-	width: 100%;
-	font-size: 10px;
-	min-width: 60em;
-	min-height: 60em;
-	box-sizing: border-box;
-}
+// 组件
+@import url(components/index.less);
 
-input {
-	outline: none;
-}
-
-.hidden  {
+// 通用
+.hidden {
 	display: none !important;
+}
+.notSelect {
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select: none;
+	user-select: none;
 }

@@ -1,0 +1,38 @@
+@import url(variables.less);
+
+* {
+	box-sizing: inherit;
+	transition: all 0.2s ease-in-out;
+}
+::selection {
+	color: @red;
+}
+::-moz-selection {
+	color: @red;
+}
+html, body {
+	height: 100%;
+	width: 100%;
+	font-size: 10px;
+	min-width: 60em;
+	min-height: 60em;
+	box-sizing: border-box;
+}
+input {
+	outline: none;
+}
+table {
+	width: 100%;
+	border-collapse: collapse;
+
+	tr {
+		color: @table-font;
+		font-size: 1.3rem;
+
+		th, td {
+			padding: 0.5rem;
+			font-weight: normal;
+			border: 0.1rem solid @table-border;
+		}
+	}
+}

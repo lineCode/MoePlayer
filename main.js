@@ -8,8 +8,8 @@ let win;
 
 function createWin() {
 	win = new BrowserWindow({
-		width: 1200,
-		height: 900,
+		width: config.width,
+		height: config.height,
 		resizable: config.resizable
 	});
 

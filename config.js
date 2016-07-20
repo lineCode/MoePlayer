@@ -6,7 +6,11 @@ const config = {
 	// 是否开启调试面板
 	debug: true,
 	// 是否可以调整窗口大小
-	resizable: true
+	resizable: false,
+	// 窗口宽度
+	width: 1000,
+	// 窗口高度
+	height: 800
 };
 
 module.exports = config;

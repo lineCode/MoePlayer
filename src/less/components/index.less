@@ -1,14 +1,18 @@
 @import url(variables.less);
+@import url(SearchBox.less);
+@import url(MusicList.less);
+@import url(MoePlayer.less);
 
 .mp-container {
 	height: 100%;
 	width: 100%;
+	background-color: @bg;
 
 	.mp-panel {
-		height: 100%;
+		height: 93%;
 
 		.panel-header {
-			height: 8%;
+			height: 7%;
 			display: flex;
 			display: -webkit-flex;
 			justify-content: space-around;
@@ -33,8 +37,10 @@
 			}
 		}
 		.panel-body {
-			height: 92%;
-			background-color: @grey;
+			height: 93%;
 		}
+	}
+	.moePlayer-c {
+		height: 7%;
 	}
 }
