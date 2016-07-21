@@ -6,20 +6,26 @@
 	font-size: 1.3rem;
 
 	.searchInput {
+		&:hover {
+			border-color: @white;
+		}
 		width: 25rem;
+		color: @white;
+		background-color: @bg;
 		padding: 0.4rem 0.6rem;
-		border: 0.1rem solid @white;
+		border: 0.1rem solid @table-border;
 	}
 	.goBtn {
 		&:hover {
-			color: @black;
-			background-color: @white;
+			color: @white;
+			border-color: @white;
 		}
-		display: inline-block;
-		color: @white;
-		padding: 0.4rem 0.6rem;
-		border: 0.1rem solid @white;
 		cursor: pointer;
+		display: inline-block;
+		color: @table-font;
+		padding: 0.4rem 0.6rem;
+		border: 0.1rem solid @table-border;
+		background-color: @bg;
 	}
 	.loader {
 		top: 0.3rem;

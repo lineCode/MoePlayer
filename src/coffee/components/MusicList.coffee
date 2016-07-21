@@ -5,6 +5,7 @@
 ##
 
 BaseComp = require './BaseComp'
+Util = require './Util'
 
 class MusicList extends BaseComp
 	constructor: (selector, eventBus) ->
@@ -71,16 +72,17 @@ class MusicList extends BaseComp
 
 		# 渲染新的数据
 		list.map (s, i) =>
-			idx = @fixZero i + 1, @totalCount
+			idx = Util.fixZero i + 1, @totalCount
 			trHtml = 
 				"""
 				<tr class="song">
-					<td>#{idx}</td>
+					<td class="index-col">#{idx}</td>
 					<td class="title-col">#{s.title}</td>
 					<td>#{s.artist}</td>
 					<td class="operation-col" 
 						data-cover="#{s.cover}" 
-						data-url="#{s.url}">播放</td>
+						data-url="#{s.url}"
+						data-idx="#{i}">播放</td>
 				</tr>
 				"""
 			$tr = $(trHtml)
@@ -95,26 +97,11 @@ class MusicList extends BaseComp
 			$target = $(evt.target)
 
 			song = {
+				idx: $target.attr('data-idx')
 				url: $target.attr('data-url'),
 				cover: $target.attr('data-cover')
 			}
 
 			@eventBus.emit 'MusicList::PlaySong', song
-
-	# 根据总数进行补零操作
-	# @param {number} n 待补零的数字
-	# @param {number} t 总数
-	fixZero: (n, t) ->
-		totalLen = t.toString().length
-		curLen = n.toString().length
-
-		if totalLen is 1
-			n = '0' + n
-		else
-			while curLen < totalLen
-				n = '0' + n
-				curLen += 1
-
-		return n
 
 module.exports = MusicList

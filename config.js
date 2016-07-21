@@ -8,9 +8,9 @@ const config = {
 	// 是否可以调整窗口大小
 	resizable: false,
 	// 窗口宽度
-	width: 1000,
+	width: 800,
 	// 窗口高度
-	height: 800
+	height: 600
 };
 
 module.exports = config;

@@ -24,6 +24,7 @@ eventBinding = ->
 	# 搜索逻辑
 	eventBus.on 'SearchBox::GetSearchResult', (data) ->
 		musicList && musicList.show(data)
+		moePlayer && moePlayer.updateList(data)
 	eventBus.on 'SearchBox::NetworkError', (err) ->
 		musicList && musicList.showError()
 
