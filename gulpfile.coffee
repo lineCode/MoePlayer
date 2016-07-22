@@ -57,7 +57,7 @@ gulp.task 'coffee', ->
 			extensions: ['.coffee']
 		.on 'error', logError
 		.pipe extReplace '.js'
-		.pipe uglify()
+		# .pipe uglify()
 		.pipe gulp.dest 'dist/js'
 		# .pipe livereload()
 
@@ -68,7 +68,7 @@ gulp.task 'less', ->
 	del.sync 'dist/css'
 	gulp.src paths.lessSrc
 		.pipe less()
-		.pipe uglifycss()
+		# .pipe uglifycss()
 		.on 'error', logError
 		.pipe gulp.dest 'dist/css'
 		# .pipe livereload()

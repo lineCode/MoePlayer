@@ -10,7 +10,10 @@ function createWin() {
 	win = new BrowserWindow({
 		width: config.width,
 		height: config.height,
-		resizable: config.resizable
+		resizable: config.resizable,
+		webPreferences: {
+			backgroundThrottling: false
+		}
 	});
 
 	win.loadURL(`file://${__dirname}/index.html`);

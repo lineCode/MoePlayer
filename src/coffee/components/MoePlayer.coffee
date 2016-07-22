@@ -1,18 +1,19 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-7-20 15:44:27
+# @Update 2016-7-22 14:10:03
 ##
 
 BaseComp = require './BaseComp'
 Util = require './Util'
+Timer = require './Timer'
 
 class MoePlayer extends BaseComp
 	constructor: (selector, eventBus) ->
 		super selector, eventBus
 
 		@LIST = []
-		@TIMER = 0
+		@TIMER = null
 		@CUR_TIME = 0
 
 		@ICONS = {
@@ -20,7 +21,8 @@ class MoePlayer extends BaseComp
 			PREV: 'assets/prev.png',
 			NEXT: 'assets/next.png',
 			PLAY: 'assets/play.png',
-			PAUSE: 'assets/pause.png'
+			PAUSE: 'assets/pause.png',
+			VOLUMN: 'assets/volumn.png'
 		}
 
 	init: ->
@@ -29,6 +31,7 @@ class MoePlayer extends BaseComp
 		@cover = @html.querySelector '.mp-cover'
 		@control = @html.querySelector '.mp-control'
 		@time = @html.querySelector '.mp-time'
+		@volumn = @html.querySelector '.mp-volumn'
 		@addons = @html.querySelector '.mp-addons'
 
 		# detail child
@@ -37,8 +40,10 @@ class MoePlayer extends BaseComp
 		@next = @control.querySelector '.next-song'
 		@playedTime = @time.querySelector '.played-time'
 		@progressBar = @time.querySelector '.progress-bar'
-		@dragBar = @time.querySelector '.drag-bar'
+		@dragBar = @time.querySelector '.progress-drag-bar'
 		@totalTime = @time.querySelector '.total-time'
+
+		@TIMER = new Timer()
 
 		@eventBinding()
 
@@ -69,12 +74,28 @@ class MoePlayer extends BaseComp
 					<div class="time-c">
 						<div class="played-time">00:00</div>
 						<div class="progress-bar">
-							<div class="drag-bar"></div>
+							<div class="progress-drag-bar"></div>
 						</div>
 						<div class="total-time">00:00</div>
 					</div>
 				</div>
-				<div class="mp-part mp-addons"></div>
+				<div class="mp-part mp-volumn">
+					<div class="volumn-c">
+						<div class="volumn-icon">
+								<img src="#{@ICONS.VOLUMN}" alt="音量">
+							</div>
+						<div class="volumn-bar">
+							<div class="volumn-drag-bar"></div>
+						</div>
+					</div>
+				</div>
+				<div class="mp-part mp-addons not-select">
+					<div class="addons-c">
+						<div class="play-mode" data-mode=0>
+							顺序
+						</div>
+					</div>
+				</div>
 			</div>
 			"""
 
@@ -97,7 +118,7 @@ class MoePlayer extends BaseComp
 				@pause()
 			# 暂停状态
 			else
-				@continue()
+				@resume()
 
 		# 切换歌曲
 		$(@prev).on 'click', (evt) =>
@@ -123,7 +144,37 @@ class MoePlayer extends BaseComp
 			nextSong.idx = nextIndex
 			@play nextSong
 
+	# 开始同步播放进度
+	# @param {number} timeWidth 总时间长度
+	startProgress: (timeWidth = @player.duration) ->
+		# 进度指示器回到最初的位置
+		@CUR_TIME = 0
+		$(@playedTime).text '00:00'
+		oriPos = -parseFloat($(@dragBar).css('width')) / 2
+		$(@dragBar).css('left', oriPos + 'px')
+
+		# 计算每一秒进度指示器应该移动多少距离
+		barWidth = parseFloat $(@progressBar).css('width')
+		stepWidth = barWidth / timeWidth
+
+		# 逐秒更新位置
+		updatePos = =>
+			if @player.ended is true
+				@stop()
+				return
+
+			curPos = parseFloat $(@dragBar).css('left')
+			newPos = curPos + stepWidth
+			@CUR_TIME += 1
+
+			$(@dragBar).css('left', newPos + 'px')
+			$(@playedTime).text @normalizeSeconds(@CUR_TIME)
+
+		@TIMER.set updatePos, 1000
+			.start()
+
 	# 把秒数格式化为 mm:ss 的格式
+	# @param {number} secs 秒数
 	normalizeSeconds: (secs) ->
 		secs = Math.floor secs
 		m = Math.floor secs / 60
@@ -138,30 +189,39 @@ class MoePlayer extends BaseComp
 	# 播放
 	# param {object} song 歌曲对象
 	play: (song) ->
-		# 记录正在播放的歌曲
+		@pause()
+
+		# 切换新歌曲
 		@curIndex = parseInt(song.idx)
-		# 载入歌曲URL
-		$(@player).attr 'src', song.url
-		# 载入封面
-		if song.cover
-			$(@cover).find('img').attr 'src', song.cover
+
 		# 切换图标状态
 		$(@status).addClass 'playing'
 			.find('img').attr 'src', @ICONS.PAUSE
 
-		# 加载并播放歌曲
-		$(@player).on 'loadeddata', =>
-			@player.play()
+		# 载入歌曲URL
+		$(@player).attr 'src', song.url
+		@player.load()
+
+		# 加载数据并播放
+		$(@player).unbind().on 'loadedmetadata', =>
+			# 载入封面
+			if song.cover
+				$(@cover).find('img').attr 'src', song.cover
+			else
+				$(@cover).find('img').attr 'src', @ICONS.COVER
+			# 载入总时长
 			$(@totalTime).text @normalizeSeconds(@player.duration)
-			@updateProgross @player.duration, true
+		.on 'canplay', =>
+			@player.play()
+			@startProgress @player.duration
 
 	# 继续播放
-	continue: ->
+	resume: ->
 		@player.play()
 		$(@status).addClass 'playing'
 		$(@status).find('img').attr 'src', @ICONS.PAUSE
 
-		@updateProgross()
+		@TIMER.resume()
 
 	# 暂停播放
 	pause: ->
@@ -169,38 +229,22 @@ class MoePlayer extends BaseComp
 		$(@status).removeClass 'playing'
 		$(@status).find('img').attr 'src', @ICONS.PLAY
 
-		clearTimeout @TIMER
+		@TIMER.pause()
+
+	# 停止播放
+	stop: ->
+		$(@status).removeClass 'playing'
+		$(@status).find('img').attr 'src', @ICONS.PLAY
+
+		oriPos = -parseFloat($(@dragBar).css('width')) / 2
+		$(@dragBar).css('left', oriPos + 'px')
+
+		@TIMER.stop()
 	
 	# 更新播放列表
 	# @param {object} data 数据对象
 	updateList: (data) ->
 		if data and data.list
 			@LIST = data.list
-
-	# 更新播放进度
-	# @param {number} timeWidth 总时间长度
-	updateProgross: (timeWidth = @player.duration, isRestart = false) ->
-		# 是否重新开始
-		if isRestart is true
-			@CUR_TIME = 0
-			clearTimeout @TIMER
-			oriPos = -parseFloat($(@dragBar).css('width')) / 2
-			$(@dragBar).css('left', oriPos + 'px')
-
-		# 计算每一秒进度指示器应该移动多少距离
-		barWidth = parseFloat $(@progressBar).css('width')
-		stepWidth = barWidth / timeWidth
-
-		# 逐秒更新位置
-		updatePos = =>
-			curPos = parseFloat $(@dragBar).css('left')
-			newPos = curPos + stepWidth
-			$(@dragBar).css('left', newPos + 'px')
-			@CUR_TIME += 1
-			$(@playedTime).text @normalizeSeconds(@CUR_TIME)
-			@TIMER = setTimeout updatePos, 1000
-
-		updatePos()
-			
 
 module.exports = MoePlayer

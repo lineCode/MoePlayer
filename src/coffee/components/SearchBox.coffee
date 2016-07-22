@@ -14,8 +14,8 @@ class SearchBox extends BaseComp
 	init: ->
 		@api = "#{config.host}:#{config.port}/API/music/NetEase/search"
 
-		@input = @html.querySelector '.searchInput'
-		@btn = @html.querySelector '.goBtn'
+		@input = @html.querySelector '.search-input'
+		@btn = @html.querySelector '.go-btn'
 		@loader = @html.querySelector '.loader'
 
 		$(@loader).fadeOut 0
@@ -25,9 +25,9 @@ class SearchBox extends BaseComp
 		htmls = 
 			"""
 			<div class="searchBox">
-				<input name="musicInfo" type="text" class="searchInput" 
+				<input name="music-info" type="text" class="search-input" 
 					placeholder="输入歌曲信息（名称、歌手）" />
-				<div class="goBtn notSelect">搜索</div>
+				<div class="go-btn not-select">搜索</div>
 				<div class="loader"></div>
 			</div>
 			"""
