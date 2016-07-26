@@ -7,6 +7,7 @@
 BaseComp = require './BaseComp'
 Util = require './Util'
 Timer = require './Timer'
+Dragger = require './Dragger'
 
 class MoePlayer extends BaseComp
 	constructor: (selector, eventBus) ->
@@ -14,6 +15,7 @@ class MoePlayer extends BaseComp
 
 		@LIST = []
 		@TIMER = null
+		@DRAGGER = null
 		@CUR_TIME = 0
 
 		@ICONS = {
@@ -22,7 +24,8 @@ class MoePlayer extends BaseComp
 			NEXT: 'assets/next.png',
 			PLAY: 'assets/play.png',
 			PAUSE: 'assets/pause.png',
-			VOLUMN: 'assets/volumn.png'
+			VOLUMN: 'assets/volumn.png',
+			MUTE: 'assets/mute.png'
 		}
 
 	init: ->
@@ -38,12 +41,19 @@ class MoePlayer extends BaseComp
 		@prev = @control.querySelector '.prev-song'
 		@status = @control.querySelector '.play-status'
 		@next = @control.querySelector '.next-song'
+
 		@playedTime = @time.querySelector '.played-time'
 		@progressBar = @time.querySelector '.progress-bar'
-		@dragBar = @time.querySelector '.progress-drag-bar'
+		@progressDragBar = @time.querySelector '.progress-drag-bar'
 		@totalTime = @time.querySelector '.total-time'
 
+		@volumnIcon = @volumn.querySelector '.volumn-icon'
+		@volumnBar = @volumn.querySelector '.volumn-bar'
+		@volumnDragBar = @volumn.querySelector '.volumn-drag-bar'
+
+
 		@TIMER = new Timer()
+		@DRAGGER = new Dragger()
 
 		@eventBinding()
 
@@ -104,6 +114,21 @@ class MoePlayer extends BaseComp
 		@emit 'renderFinished'
 
 	eventBinding: ->
+		# 拖拽绑定
+		vbw = $(@volumnBar).width()
+		vdbw = $(@volumnDragBar).width()
+		$icon = $(@volumnIcon).find('img')
+		@DRAGGER.enableDragging @volumnDragBar, -vdbw / 2, vbw - vdbw / 2, 0
+		# 调节音量
+		@DRAGGER.on 'Dragger::Dragging', (percent) =>
+			@player.volumn = percent
+
+			if percent is 0
+				$icon.attr 'src', @ICONS.MUTE
+			else
+				if $icon.attr('src') isnt @ICONS.VOLUMN
+					$icon.attr 'src', @ICONS.VOLUMN
+		
 		# 播放暂停
 		$(@status).on 'click', (evt) =>
 			evt.stopPropagation()
@@ -150,8 +175,8 @@ class MoePlayer extends BaseComp
 		# 进度指示器回到最初的位置
 		@CUR_TIME = 0
 		$(@playedTime).text '00:00'
-		oriPos = -parseFloat($(@dragBar).css('width')) / 2
-		$(@dragBar).css('left', oriPos + 'px')
+		oriPos = -$(@progressDragBar).width() / 2
+		$(@progressDragBar).css('left', oriPos + 'px')
 
 		# 计算每一秒进度指示器应该移动多少距离
 		barWidth = parseFloat $(@progressBar).css('width')
@@ -163,11 +188,11 @@ class MoePlayer extends BaseComp
 				@stop()
 				return
 
-			curPos = parseFloat $(@dragBar).css('left')
+			curPos = parseFloat $(@progressDragBar).css('left')
 			newPos = curPos + stepWidth
 			@CUR_TIME += 1
 
-			$(@dragBar).css('left', newPos + 'px')
+			$(@progressDragBar).css('left', newPos + 'px')
 			$(@playedTime).text @normalizeSeconds(@CUR_TIME)
 
 		@TIMER.set updatePos, 1000
@@ -236,8 +261,8 @@ class MoePlayer extends BaseComp
 		$(@status).removeClass 'playing'
 		$(@status).find('img').attr 'src', @ICONS.PLAY
 
-		oriPos = -parseFloat($(@dragBar).css('width')) / 2
-		$(@dragBar).css('left', oriPos + 'px')
+		oriPos = -$(@progressDragBar)('width') / 2
+		$(@progressDragBar).css('left', oriPos + 'px')
 
 		@TIMER.stop()
 	
