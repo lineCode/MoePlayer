@@ -1,7 +1,7 @@
 ##
 # 拖拽组件
 # @Author VenDream
-# @Update 2016-7-26 15:48:03
+# @Update 2016-7-27 14:16:43
 ##
 
 EventEmitter = require 'eventemitter3'
@@ -27,8 +27,10 @@ class Dragger extends EventEmitter
 	# @param {number}  min       拖拽范围下界
 	# @param {number}  max       拖拽范围上界
 	# @param {number}  direction 拖拽方向(0 = 水平，1 = 竖直)
-	enableDragging: (ele, min = 0, max = 100, direction = 0) ->
+	# @param {element} zone      拖拽生效的区域
+	enableDragging: (ele, min = 0, max = 100, direction = 0, zone = ele) ->
 		$ele = $(ele)
+		$zone = $(zone)
 		start = 0
 		end = 0
 		delta = 0
@@ -36,9 +38,13 @@ class Dragger extends EventEmitter
 		origin = parseFloat($ele.css style)
 		newPos = 0
 
+		$ele.addClass 'draggable'
+
 		# 拖拽开始，记录起始位置
-		$ele.unbind().on @dragStart, (evt) =>
-			$ele.addClass 'dragging'
+		$zone.unbind().on @dragStart, (evt) =>
+			$target = $(evt.target)
+			if $target.hasClass('draggable') is true
+				$target.addClass 'dragging'
 			if @isMobile is true
 				start = if direction is 0 \
 						then evt.touches[0].pageX \
@@ -52,6 +58,8 @@ class Dragger extends EventEmitter
 		.on @dragMove, (evt) =>
 			if $ele.hasClass('dragging') is false
 				return false
+
+			$zone.css 'cursor', 'pointer'
 
 			if @isMobile is true
 				move = if direction is 0 \
@@ -78,6 +86,8 @@ class Dragger extends EventEmitter
 		.on @dragEnd, (evt) =>
 			if $ele.hasClass('dragging') is false
 				return false
+
+			$zone.css 'cursor', 'default'
 
 			if @isMobile is true
 				end = if direction is 0 \

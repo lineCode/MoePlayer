@@ -44,8 +44,7 @@ class Timer
 		return @
 
 	# 恢复计时
-	# @param {}
-	resume: (isStart) ->
+	resume: ->
 		@startTL = new Date()
 		@timeId = setTimeout =>
 			@excute()

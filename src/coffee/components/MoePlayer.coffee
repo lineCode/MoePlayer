@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-7-22 14:10:03
+# @Update 2016-7-27 14:35:02
 ##
 
 BaseComp = require './BaseComp'
@@ -17,6 +17,7 @@ class MoePlayer extends BaseComp
 		@TIMER = null
 		@DRAGGER = null
 		@CUR_TIME = 0
+		@PLAY_MODE = 0
 
 		@ICONS = {
 			COVER: 'assets/cover.png',
@@ -24,7 +25,7 @@ class MoePlayer extends BaseComp
 			NEXT: 'assets/next.png',
 			PLAY: 'assets/play.png',
 			PAUSE: 'assets/pause.png',
-			VOLUMN: 'assets/volumn.png',
+			VOLUME: 'assets/volume.png',
 			MUTE: 'assets/mute.png'
 		}
 
@@ -32,24 +33,27 @@ class MoePlayer extends BaseComp
 		# common child
 		@player = @html.querySelector '.mp-player'
 		@cover = @html.querySelector '.mp-cover'
+		#-------------
 		@control = @html.querySelector '.mp-control'
 		@time = @html.querySelector '.mp-time'
-		@volumn = @html.querySelector '.mp-volumn'
+		@volume = @html.querySelector '.mp-volume'
 		@addons = @html.querySelector '.mp-addons'
 
 		# detail child
 		@prev = @control.querySelector '.prev-song'
 		@status = @control.querySelector '.play-status'
 		@next = @control.querySelector '.next-song'
-
+		#-------------
 		@playedTime = @time.querySelector '.played-time'
 		@progressBar = @time.querySelector '.progress-bar'
 		@progressDragBar = @time.querySelector '.progress-drag-bar'
 		@totalTime = @time.querySelector '.total-time'
-
-		@volumnIcon = @volumn.querySelector '.volumn-icon'
-		@volumnBar = @volumn.querySelector '.volumn-bar'
-		@volumnDragBar = @volumn.querySelector '.volumn-drag-bar'
+		#-------------
+		@volumeIcon = @volume.querySelector '.volume-icon'
+		@volumeBar = @volume.querySelector '.volume-bar'
+		@volumeDragBar = @volume.querySelector '.volume-drag-bar'
+		#-------------
+		@playMode = @addons.querySelector '.play-mode'
 
 
 		@TIMER = new Timer()
@@ -62,12 +66,12 @@ class MoePlayer extends BaseComp
 			"""
 			<div class="moePlayer">
 				<audio class="mp-player hidden"></audio>
-				<div class="mp-part mp-cover">
+				<div class="mp-part mp-cover" not-select>
 					<div class="cover-c">
 						<img src="#{@ICONS.COVER}" alt="封面图片">
 					</div>
 				</div>
-				<div class="mp-part mp-control">
+				<div class="mp-part mp-control" not-select>
 					<div class="control-c">
 						<div class="prev-song">
 							<img src="#{@ICONS.PREV}" alt="上一首">
@@ -80,7 +84,7 @@ class MoePlayer extends BaseComp
 						</div>
 					</div>
 				</div>
-				<div class="mp-part mp-time">
+				<div class="mp-part mp-time not-select">
 					<div class="time-c">
 						<div class="played-time">00:00</div>
 						<div class="progress-bar">
@@ -89,13 +93,13 @@ class MoePlayer extends BaseComp
 						<div class="total-time">00:00</div>
 					</div>
 				</div>
-				<div class="mp-part mp-volumn">
-					<div class="volumn-c">
-						<div class="volumn-icon">
-								<img src="#{@ICONS.VOLUMN}" alt="音量">
+				<div class="mp-part mp-volume not-select">
+					<div class="volume-c">
+						<div class="volume-icon">
+								<img src="#{@ICONS.VOLUME}" alt="音量">
 							</div>
-						<div class="volumn-bar">
-							<div class="volumn-drag-bar"></div>
+						<div class="volume-bar">
+							<div class="volume-drag-bar"></div>
 						</div>
 					</div>
 				</div>
@@ -114,26 +118,44 @@ class MoePlayer extends BaseComp
 		@emit 'renderFinished'
 
 	eventBinding: ->
+		@volumeControl()
+		@playModeControl()
+		@playControl()
+
+	# 音量控制
+	volumeControl: ->
 		# 拖拽绑定
-		vbw = $(@volumnBar).width()
-		vdbw = $(@volumnDragBar).width()
-		$icon = $(@volumnIcon).find('img')
-		@DRAGGER.enableDragging @volumnDragBar, -vdbw / 2, vbw - vdbw / 2, 0
+		vbw = $(@volumeBar).width()
+		vdbw = $(@volumeDragBar).width()
+		$vIcon = $(@volumeIcon).find('img')
+		@DRAGGER.enableDragging @volumeDragBar, -vdbw / 2, vbw - vdbw / 2, 0, @volume
+
 		# 调节音量
 		@DRAGGER.on 'Dragger::Dragging', (percent) =>
-			@player.volumn = percent
+			@player.volume = percent
 
 			if percent is 0
-				$icon.attr 'src', @ICONS.MUTE
+				$vIcon.attr 'src', @ICONS.MUTE
 			else
-				if $icon.attr('src') isnt @ICONS.VOLUMN
-					$icon.attr 'src', @ICONS.VOLUMN
-		
+				if $vIcon.attr('src') isnt @ICONS.VOLUME
+					$vIcon.attr 'src', @ICONS.VOLUME
+
+	# 播放模式控制
+	playModeControl: ->
+		$(@playMode).on 'click', (evt) =>
+			if @PLAY_MODE is 0
+				@PLAY_MODE = 1
+				$(@playMode).text '随机'
+			else
+				@PLAY_MODE = 0
+				$(@playMode).text '顺序'
+
+	# 播放控制
+	playControl: ->
 		# 播放暂停
 		$(@status).on 'click', (evt) =>
 			evt.stopPropagation()
 			$target = $(evt.currentTarget)
-			$icon = $target.find('img')
 
 			if not $(@player).attr('src') or $(@player).attr('src') is ''
 				return
@@ -150,9 +172,16 @@ class MoePlayer extends BaseComp
 			evt.stopPropagation()
 			$target = $(evt.currentTarget)
 
-			if @LIST.length is 0 or @curIndex is undefined or @curIndex is 0
+			if @LIST.length is 0 or @curIndex is undefined
 				return false
-			prevIndex = Math.max(@curIndex - 1, 0)
+
+			# 顺序播放
+			if @PLAY_MODE is 0
+				prevIndex = Math.max(@curIndex - 1, 0)
+			# 随机播放
+			else
+				prevIndex = Util.random 0, @LIST.length - 1, @curIndex
+
 			prevSong = @LIST[prevIndex]
 			prevSong.idx = prevIndex
 			@play prevSong
@@ -161,13 +190,20 @@ class MoePlayer extends BaseComp
 			evt.stopPropagation()
 			$target = $(evt.currentTarget)
 
-			if @LIST.length is 0 or @curIndex is undefined or @curIndex is @LIST.length - 1
+			if @LIST.length is 0 or @curIndex is undefined
 				return false
 
-			nextIndex = Math.min(@curIndex + 1, @LIST.length - 1)
+			# 顺序播放
+			if @PLAY_MODE is 0
+				nextIndex = Math.min(@curIndex + 1, @LIST.length - 1)
+			# 随机播放
+			else
+				nextIndex = Util.random 0, @LIST.length - 1, @curIndex
+			
 			nextSong = @LIST[nextIndex]
 			nextSong.idx = nextIndex
 			@play nextSong
+
 
 	# 开始同步播放进度
 	# @param {number} timeWidth 总时间长度
@@ -261,7 +297,7 @@ class MoePlayer extends BaseComp
 		$(@status).removeClass 'playing'
 		$(@status).find('img').attr 'src', @ICONS.PLAY
 
-		oriPos = -$(@progressDragBar)('width') / 2
+		oriPos = -$(@progressDragBar).width() / 2
 		$(@progressDragBar).css('left', oriPos + 'px')
 
 		@TIMER.stop()
