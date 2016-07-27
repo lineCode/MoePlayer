@@ -102,9 +102,9 @@ class Dragger extends EventEmitter
 			$ele.removeClass 'dragging'
 
 	# 为元素取消拖拽绑定
-	# @param {element} ele 取消对象
-	disableDragging: (ele) ->
-		$ele = $(ele)
-		$ele.unbind()
+	# @param {element} ele  取消对象
+	# @param {element} zone 拖拽区域
+	disableDragging: (ele, zone = ele) ->
+		$(zone).unbind()
 
 module.exports = Dragger
