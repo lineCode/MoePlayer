@@ -1,47 +1,62 @@
+@import url(variables.less);
+@import url(Paginator.less);
+
 @odd-row-color: #16181c;
 @even-row-color: #1a1c20;
 @title-color: #ffffff;
 @hover-color: #2c2e32;
 
 .musicList {
-	table {
-		tr {
-			&:hover {
-				background-color: @hover-color !important;
-			}
-			text-align: left;
+	.table-c {
+		min-height: 38.6rem;
 
-			td {
-				border: none;
+		table {
+			table-layout: fixed;
+
+			tr {
+				&:hover {
+					background-color: @hover-color !important;
+				}
+				text-align: left;
+
+				td {
+					border: none;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+				}
+				.list-index {
+					width: 6%;
+				}
+				.list-title {
+					width: 30%;
+				}
+				.list-artist {
+					width: 20%;
+				}
+				.list-album {
+					width: 24%;
+				}
+				.list-operation {
+					width: 20%;
+				}
+				.index-col {
+					text-align: center;
+				}
+				.title-col {
+					color: @title-color;
+				}
+				.operation-col {
+					cursor: pointer;
+				}
 			}
-			.list-index {
-				width: 6%;
-			}
-			.list-title {
-				width: 37%;
-			}
-			.list-artist {
-				width: 37%;
-			}
-			.list-operation {
-				width: 20%;
-			}
-			.index-col {
+			.tips-row {
+				background-color: @odd-row-color !important;
 				text-align: center;
 			}
-			.title-col {
-				color: @title-color;
+			tr:nth-child(even) {
+				background-color: @even-row-color;
 			}
-			.operation-col {
-				cursor: pointer;
-			}
-		}
-		.tips-row {
-			background-color: @odd-row-color !important;
-			text-align: center;
-		}
-		tr:nth-child(even) {
-			background-color: @even-row-color;
 		}
 	}
 }

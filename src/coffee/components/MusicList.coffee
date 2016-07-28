@@ -1,11 +1,13 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-7-20 09:15:58
+# @Update 2016-7-28 17:29:25
 ##
 
 BaseComp = require './BaseComp'
 Util = require './Util'
+Paginator = require './Paginator'
+config = require '../../../config'
 
 class MusicList extends BaseComp
 	constructor: (selector, eventBus) ->
@@ -17,25 +19,33 @@ class MusicList extends BaseComp
 			NETWORK_ERROR: '服务器错误，请重试QAQ'
 		}
 
+		@PAGINATOR = null
+
 	init: ->
 		@table = @html.querySelector 'table'
 		@tipsRow = @html.querySelector '.tips-row'
+
+		@updatePagination 0
 
 	render: ->
 		htmls =
 			"""
 			<div class="musicList">
-				<table>
-					<tr>
-						<th class="list-index"></th>
-						<th class="list-title">标题</th>
-						<th class="list-artist">歌手</th>
-						<th class="list-operation">操作</th>
-					</tr>
-					<tr class="tips-row">
-						<td colspan=4>#{@TIPS.SUGGEST}</td>
-					</tr>
-				</table>
+				<div class="table-c">
+					<table>
+						<tr>
+							<th class="list-index"></th>
+							<th class="list-title">标题</th>
+							<th class="list-artist">歌手</th>
+							<th class="list-album">专辑</th>
+							<th class="list-operation">操作</th>
+						</tr>
+						<tr class="tips-row">
+							<td colspan=5>#{@TIPS.SUGGEST}</td>
+						</tr>
+					</table>
+				</div>
+				<div class="mpc"></div>
 			</div>
 			"""
 
@@ -43,20 +53,28 @@ class MusicList extends BaseComp
 
 		@emit 'renderFinished'
 
-	show: (data) ->
+	# 渲染数据
+	# @param {object}  data    数据
+	# @param {boolean} refresh 是否为新的请求
+	show: (data, refresh = true) ->
 		$(@tipsRow).fadeOut 0
 
-		if data and data.count
-			@totalCount = data.count
+		if data and data.status is 'success'
+			if data.data.songs
+				base = (data.data.page - 1) * config.num_per_page
+				@totalCount = data.data.count
+				@showResult data.data.songs, base
+				# 是否为新的搜索
+				refresh && @updatePagination()
 
-		if data.list and data.list.length > 0
-			@showResult data.list
+			if @totalCount is 0
+				@showTips @TIPS.NOT_FOUND
 		else
-			@showError @TIPS.NOT_FOUND
+			@showTips @TIPS.NETWORK_ERROR
 
 	# 显示错误提示信息
 	# @param {string} msg 错误提示
-	showError: (msg = @TIPS.NETWORK_ERROR) ->
+	showTips: (msg = @TIPS.NETWORK_ERROR) ->
 		# 清空原来的数据
 		$(@table).find('.song').remove()
 
@@ -65,43 +83,65 @@ class MusicList extends BaseComp
 		$(@tipsRow).fadeIn 200
 
 	# 显示搜索结果
-	# @param {array} list 歌曲数组
-	showResult: (list) ->
+	# @param {array}  songs 歌曲数组
+	# @param {number} base  歌曲偏移基数
+	showResult: (songs, base) ->
 		# 清空原来的数据
 		$(@table).find('.song').remove()
 
 		# 渲染新的数据
-		list.map (s, i) =>
-			idx = Util.fixZero i + 1, @totalCount
+		songs.map (s, i) =>
+			idx = Util.fixZero base + i + 1, @totalCount
 			trHtml = 
 				"""
 				<tr class="song">
 					<td class="index-col">#{idx}</td>
-					<td class="title-col">#{s.title}</td>
-					<td>#{s.artist}</td>
+					<td class="title-col">#{s.song_name}</td>
+					<td class="artist-col">#{s.artist_name}</td>
+					<td class="album-col">#{s.album_name}</td>
 					<td class="operation-col" 
-						data-cover="#{s.cover}" 
-						data-url="#{s.url}"
+						data-aid="#{s.album_id}" 
+						data-sid="#{s.song_id}"
 						data-idx="#{i}">播放</td>
 				</tr>
 				"""
 			$tr = $(trHtml)
 
+			$tr.find('.album-col').map (i, t) ->
+				$(t).attr 'title', $(@).text()
+
 			$(@table).append $tr
 
 		@eventBinding()
 
+	# 更新分页
+	updatePagination: (maxEntries = @totalCount) ->
+		if not @PAGINATOR?
+			@PAGINATOR = new Paginator '.mpc', @eventBus, maxEntries, {
+				callback: (pageIndex, container) =>
+					@eventBus.emit 'MusicList::SelectPage', pageIndex + 1
+			}
+		else
+			@PAGINATOR.doPagination maxEntries
+
+	# 清空搜索结果
+	clear: ->
+		$(@table).find('.song').remove()
+
+		@updatePagination 0
+		@showTips @TIPS.SUGGEST
+
 	# 事件绑定
 	eventBinding: ->
-		$(@table).find('.song .operation-col').on 'click', (evt) =>
-			$target = $(evt.target)
+		# $(@table).find('.song .operation-col').on 'click', (evt) =>
+		# 	$target = $(evt.target)
 
-			song = {
-				idx: $target.attr('data-idx')
-				url: $target.attr('data-url'),
-				cover: $target.attr('data-cover')
-			}
+		# 	song = {
+		# 		idx: $target.attr('data-idx')
+		# 		url: $target.attr('data-url'),
+		# 		cover: $target.attr('data-cover')
+		# 	}
 
-			@eventBus.emit 'MusicList::PlaySong', song
+		# 	@eventBus.emit 'MusicList::PlaySong', song
 
 module.exports = MusicList

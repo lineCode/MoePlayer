@@ -23,10 +23,16 @@ initComp = ->
 eventBinding = ->
 	# 搜索逻辑
 	eventBus.on 'SearchBox::GetSearchResult', (data) ->
-		musicList && musicList.show(data)
+		musicList && musicList.show data.data, data.refresh
 		moePlayer && moePlayer.updateList(data)
+	eventBus.on 'SearchBox::ClearSearchResult', ->
+		musicList && musicList.clear()
 	eventBus.on 'SearchBox::NetworkError', (err) ->
-		musicList && musicList.showError()
+		musicList && musicList.showTips()
+
+	# 选择分页
+	eventBus.on 'MusicList::SelectPage', (pageIndex) ->
+		searchBox && searchBox.doSearch null, pageIndex
 
 	# 选中播放逻辑
 	eventBus.on 'MusicList::PlaySong', (song) ->
