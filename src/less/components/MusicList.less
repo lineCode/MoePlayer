@@ -60,12 +60,24 @@
 				color: @white;
 				background-color: @hover-color !important;
 
-				.list-index {
+				.index-col {
 					position: relative;
 					color: transparent;
 
-					&:hover {
-						
+					&, &:before {
+						transition: none;
+					}
+					&:before {
+						content: '';
+						background-image: url(../../assets/playing.png);
+						background-size: 35% 65%;
+						background-position: center;
+						background-repeat: no-repeat;
+						position: absolute;
+						top: 0;
+						left: 0;
+						height: 100%;
+						width: 100%;
 					}
 				}
 			}

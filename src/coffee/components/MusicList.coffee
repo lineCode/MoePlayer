@@ -24,6 +24,7 @@ class MusicList extends BaseComp
 
 	init: ->
 		@api = "#{config.host}:#{config.port}/api/music/netease/song_info"
+		@curSongId = ''
 
 		@table = @html.querySelector 'table'
 		@tipsRow = @html.querySelector '.tips-row'
@@ -106,7 +107,9 @@ class MusicList extends BaseComp
 			idx = Util.fixZero base + i + 1, @totalCount
 			trHtml = 
 				"""
-				<tr class="song" data-sid="#{s.song_id}">
+				<tr class="song #{
+					if String(s.song_id) is String(@curSongId) then 'playing' else ''
+				}" data-sid="#{s.song_id}">
 					<td class="index-col">#{idx}</td>
 					<td class="title-col">#{s.song_name}</td>
 					<td class="artist-col">#{s.artist_name}</td>
@@ -171,6 +174,7 @@ class MusicList extends BaseComp
 	# 更新显示正在播放的歌曲
 	# @param {string} sid 歌曲ID
 	updatePlayingSong: (sid) ->
+		@curSongId = sid
 		$sr = $('.song[data-sid="' + sid + '"]')
 		$sr.length > 0 && (
 			$('.song').removeClass 'playing'
