@@ -1,7 +1,7 @@
 ##
 # 分页组件(封装Jquery的Pagination组件)
 # @Author VenDream
-# @Update 2016-7-28 17:29:45
+# @Update 2016-7-29 18:12:02
 ##
 
 BaseComp = require './BaseComp'
@@ -78,6 +78,8 @@ class Paginator extends BaseComp
 		@html.innerHTML = htmls
 		@emit 'renderFinished'
 
+	# 计算总页数
+	# @param {number} maxEntries 数据项总数
 	calMaxPage: (maxEntries = @maxEntries) ->
 		tmpMaxPages = Math.ceil(maxEntries / @userConfig.items_per_page)
 		if tmpMaxPages is 0
@@ -86,6 +88,8 @@ class Paginator extends BaseComp
 			@maxPages = tmpMaxPages
 
 	# 调用Jquery的分页操作
+	# @param {number} maxEntries 数据项总数
+	# @param {object} config     用户配置
 	doPagination: (maxEntries = @maxEntries, config = @userConfig) ->
 		@curPage = 0
 		

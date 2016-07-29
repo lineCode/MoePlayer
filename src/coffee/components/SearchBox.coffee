@@ -1,7 +1,7 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2016-7-28 17:29:34
+# @Update 2016-7-29 18:12:28
 ##
 
 BaseComp = require './BaseComp'
@@ -15,7 +15,7 @@ class SearchBox extends BaseComp
 		@page = 1
 
 	init: ->
-		@api = "#{config.host}:#{config.port}/API/music/NetEase/search"
+		@api = "#{config.host}:#{config.port}/api/music/netease/search"
 
 		@input = @html.querySelector '.search-input'
 		@goBtn = @html.querySelector '.go-btn'
@@ -64,6 +64,7 @@ class SearchBox extends BaseComp
 
 	# 执行搜索
 	# @param {string} sstr 关键词
+	# @param {number} page 页码
 	doSearch: (sstr = @sstr, page = @page) ->
 		refresh = if sstr is @sstr then false else true
 		if sstr is ''

@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-7-28 17:29:25
+# @Update 2016-7-29 18:12:14
 ##
 
 BaseComp = require './BaseComp'
@@ -16,12 +16,15 @@ class MusicList extends BaseComp
 		@TIPS = {
 			SUGGEST: '搜索点什么听听吧ww',
 			NOT_FOUND: '搜索不到相关的东西惹QAQ',
-			NETWORK_ERROR: '服务器错误，请重试QAQ'
+			NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
+			SONG_INFO_ERROR: '获取歌曲播放地址失败鸟（┬＿┬）\n\n原因：1.歌曲失效 2.收费歌曲'
 		}
 
 		@PAGINATOR = null
 
 	init: ->
+		@api = "#{config.host}:#{config.port}/api/music/netease/song_info"
+
 		@table = @html.querySelector 'table'
 		@tipsRow = @html.querySelector '.tips-row'
 
@@ -52,6 +55,15 @@ class MusicList extends BaseComp
 		@html.innerHTML = htmls
 
 		@emit 'renderFinished'
+
+	# 事件绑定
+	eventBinding: ->
+		$(@table).find('.song .operation-col').on 'click', (evt) =>
+			$target = $(evt.target)
+			idx = $target.attr 'data-idx'
+			sid = $target.attr 'data-sid'
+
+			sid && @getSongInfoAndPlay sid, idx
 
 	# 渲染数据
 	# @param {object}  data    数据
@@ -94,7 +106,7 @@ class MusicList extends BaseComp
 			idx = Util.fixZero base + i + 1, @totalCount
 			trHtml = 
 				"""
-				<tr class="song">
+				<tr class="song" data-sid="#{s.song_id}">
 					<td class="index-col">#{idx}</td>
 					<td class="title-col">#{s.song_name}</td>
 					<td class="artist-col">#{s.artist_name}</td>
@@ -115,6 +127,7 @@ class MusicList extends BaseComp
 		@eventBinding()
 
 	# 更新分页
+	# @param {number} maxEntries 数据项总数
 	updatePagination: (maxEntries = @totalCount) ->
 		if not @PAGINATOR?
 			@PAGINATOR = new Paginator '.mpc', @eventBus, maxEntries, {
@@ -131,17 +144,37 @@ class MusicList extends BaseComp
 		@updatePagination 0
 		@showTips @TIPS.SUGGEST
 
-	# 事件绑定
-	eventBinding: ->
-		# $(@table).find('.song .operation-col').on 'click', (evt) =>
-		# 	$target = $(evt.target)
+	# 根据歌曲ID获取歌曲信息
+	# @param {string} sid 歌曲ID
+	# @param {number} idx 歌曲索引
+	getSongInfoAndPlay: (sid, idx) ->
+		$.ajax {
+			type: 'POST',
+			url: @api,
+			data: {
+				song_id: sid
+			},
+			success: (data) =>
+				if data and data.status is 'success'
+					if $.isEmptyObject(data.data.song_info) is false
+						data.data.song_info.idx = idx
+						@updatePlayingSong sid
+						@eventBus.emit 'MusicList::PlaySong', data.data
+					else
+						alert @TIPS.SONG_INFO_ERROR
+						return false
+			, 
+			error: (err) =>
+				console.log err
+		}
 
-		# 	song = {
-		# 		idx: $target.attr('data-idx')
-		# 		url: $target.attr('data-url'),
-		# 		cover: $target.attr('data-cover')
-		# 	}
-
-		# 	@eventBus.emit 'MusicList::PlaySong', song
+	# 更新显示正在播放的歌曲
+	# @param {string} sid 歌曲ID
+	updatePlayingSong: (sid) ->
+		$sr = $('.song[data-sid="' + sid + '"]')
+		$sr.length > 0 && (
+			$('.song').removeClass 'playing'
+			$sr.addClass 'playing'
+		)
 
 module.exports = MusicList

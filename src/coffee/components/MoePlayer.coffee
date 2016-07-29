@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-7-27 14:35:02
+# @Update 2016-7-29 18:12:21
 ##
 
 BaseComp = require './BaseComp'
@@ -183,8 +183,11 @@ class MoePlayer extends BaseComp
 				prevIndex = Util.random 0, @LIST.length - 1, @curIndex
 
 			prevSong = @LIST[prevIndex]
-			prevSong.idx = prevIndex
-			@play prevSong
+
+			@eventBus.emit 'MoePlayer::PlayPrevSong', {
+				song_id: prevSong.song_id,
+				idx: prevIndex
+			}
 
 		$(@next).on 'click', (evt) =>
 			evt.stopPropagation()
@@ -201,8 +204,10 @@ class MoePlayer extends BaseComp
 				nextIndex = Util.random 0, @LIST.length - 1, @curIndex
 			
 			nextSong = @LIST[nextIndex]
-			nextSong.idx = nextIndex
-			@play nextSong
+			@eventBus.emit 'MoePlayer::PlayNextSong', {
+				song_id: nextSong.song_id,
+				idx: nextIndex
+			}
 
 
 	# 开始同步播放进度
@@ -222,6 +227,7 @@ class MoePlayer extends BaseComp
 		updatePos = =>
 			if @player.ended is true
 				@stop()
+				$(@next).trigger 'click'
 				return
 
 			curPos = parseFloat $(@progressDragBar).css('left')
@@ -253,21 +259,21 @@ class MoePlayer extends BaseComp
 		@pause()
 
 		# 切换新歌曲
-		@curIndex = parseInt(song.idx)
+		@curIndex = parseInt(song.song_info.idx)
 
 		# 切换图标状态
 		$(@status).addClass 'playing'
 			.find('img').attr 'src', @ICONS.PAUSE
 
 		# 载入歌曲URL
-		$(@player).attr 'src', song.url
+		$(@player).attr 'src', song.song_info.song_url
 		@player.load()
 
 		# 加载数据并播放
 		$(@player).unbind().on 'loadedmetadata', =>
 			# 载入封面
-			if song.cover
-				$(@cover).find('img').attr 'src', song.cover
+			if song.song_info.song_cover
+				$(@cover).find('img').attr 'src', song.song_info.song_cover
 			else
 				$(@cover).find('img').attr 'src', @ICONS.COVER
 			# 载入总时长
@@ -305,7 +311,7 @@ class MoePlayer extends BaseComp
 	# 更新播放列表
 	# @param {object} data 数据对象
 	updateList: (data) ->
-		if data and data.list
-			@LIST = data.list
+		if data and data.songs
+			@LIST = data.songs
 
 module.exports = MoePlayer

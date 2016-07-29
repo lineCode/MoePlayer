@@ -24,7 +24,7 @@ eventBinding = ->
 	# 搜索逻辑
 	eventBus.on 'SearchBox::GetSearchResult', (data) ->
 		musicList && musicList.show data.data, data.refresh
-		moePlayer && moePlayer.updateList(data)
+		moePlayer && moePlayer.updateList data.data.data
 	eventBus.on 'SearchBox::ClearSearchResult', ->
 		musicList && musicList.clear()
 	eventBus.on 'SearchBox::NetworkError', (err) ->
@@ -34,8 +34,18 @@ eventBinding = ->
 	eventBus.on 'MusicList::SelectPage', (pageIndex) ->
 		searchBox && searchBox.doSearch null, pageIndex
 
-	# 选中播放逻辑
+	# 选中播放
 	eventBus.on 'MusicList::PlaySong', (song) ->
 		moePlayer.play song
+
+	# 切换歌曲
+	eventBus.on 'MoePlayer::PlayPrevSong', (data) ->
+		musicList && (
+			musicList.getSongInfoAndPlay data.song_id, data.idx
+		)
+	eventBus.on 'MoePlayer::PlayNextSong', (data) ->
+		musicList && (
+			musicList.getSongInfoAndPlay data.song_id, data.idx
+		)
 
 $(document).ready initComp

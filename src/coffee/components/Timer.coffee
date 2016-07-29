@@ -1,7 +1,7 @@
 ##
 # 计时器组件
 # @Author VenDream
-# @Update 2016-7-22 11:25:34
+# @Update 2016-7-29 18:13:23
 ##
 
 class Timer
@@ -46,7 +46,11 @@ class Timer
 	# 恢复计时
 	resume: ->
 		@startTL = new Date()
+
+		# console.time 'Action 实际执行间隔'
 		@timeId = setTimeout =>
+			# console.log 'Action 期望执行间隔: %sms', @delay.toFixed(3)
+			# console.timeEnd 'Action 实际执行间隔'
 			@excute()
 		, @remain
 
