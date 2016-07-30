@@ -21,12 +21,18 @@ initComp = ->
 	eventBinding()
 
 eventBinding = ->
+	# 快捷键绑定
+	$('body').on 'keydown', (evt) ->
+		kc = evt.keyCode
+		moePlayer && moePlayer.hotKeyResponse kc
+
 	# 搜索逻辑
 	eventBus.on 'SearchBox::GetSearchResult', (data) ->
 		musicList && musicList.show data.data, data.refresh
 		moePlayer && moePlayer.updateList data.data.data
 	eventBus.on 'SearchBox::ClearSearchResult', ->
 		musicList && musicList.clear()
+		moePlayer && moePlayer.clearList()
 	eventBus.on 'SearchBox::NetworkError', (err) ->
 		musicList && musicList.showTips()
 

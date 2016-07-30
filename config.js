@@ -8,9 +8,9 @@ const config = {
 	// 是否可以调整窗口大小
 	resizable: false,
 	// 窗口宽度
-	width: 800,
+	width: 1000,
 	// 窗口高度
-	height: 600,
+	height: 700,
 	// 每页显示的歌曲数
 	num_per_page: 15
 };

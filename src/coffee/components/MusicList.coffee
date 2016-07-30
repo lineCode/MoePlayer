@@ -42,10 +42,11 @@ class MusicList extends BaseComp
 							<th class="list-title">标题</th>
 							<th class="list-artist">歌手</th>
 							<th class="list-album">专辑</th>
+							<th class="list-duration">时长</th>
 							<th class="list-operation">操作</th>
 						</tr>
 						<tr class="tips-row">
-							<td colspan=5>#{@TIPS.SUGGEST}</td>
+							<td colspan=6>#{@TIPS.SUGGEST}</td>
 						</tr>
 					</table>
 				</div>
@@ -59,12 +60,23 @@ class MusicList extends BaseComp
 
 	# 事件绑定
 	eventBinding: ->
-		$(@table).find('.song .operation-col').on 'click', (evt) =>
-			$target = $(evt.target)
+		# 双击播放
+		$(@table).find('.song').unbind().on 'dblclick', (evt) =>
+			evt.stopPropagation()
+			$target = $(evt.currentTarget)
 			idx = $target.attr 'data-idx'
 			sid = $target.attr 'data-sid'
 
 			sid && @getSongInfoAndPlay sid, idx
+
+		# 单击播放
+		$(@table).find('.playBtn').on 'click', (evt) =>
+			evt.stopPropagation()
+			$song = $(evt.currentTarget).parents('.song')
+			$song.trigger 'dblclick'
+
+		$(@table).find('.dlBtn').on 'click', (evt) =>
+			alert '功能开发中，敬请期待0v0'
 
 	# 渲染数据
 	# @param {object}  data    数据
@@ -107,17 +119,19 @@ class MusicList extends BaseComp
 			idx = Util.fixZero base + i + 1, @totalCount
 			trHtml = 
 				"""
-				<tr class="song #{
+				<tr class="song not-select #{
 					if String(s.song_id) is String(@curSongId) then 'playing' else ''
-				}" data-sid="#{s.song_id}">
+				}" data-sid="#{s.song_id}" data-idx="#{i}">
 					<td class="index-col">#{idx}</td>
 					<td class="title-col">#{s.song_name}</td>
 					<td class="artist-col">#{s.artist_name}</td>
 					<td class="album-col">#{s.album_name}</td>
-					<td class="operation-col" 
-						data-aid="#{s.album_id}" 
-						data-sid="#{s.song_id}"
-						data-idx="#{i}">播放</td>
+					<td class="duration-col">#{Util.normalizeSeconds(s.duration)}</td>
+					<td class="operation-col">
+						<span class="btn playBtn">播放</span>
+						|
+						<span class="btn dlBtn">下载</span>
+					</td>
 				</tr>
 				"""
 			$tr = $(trHtml)

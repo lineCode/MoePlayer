@@ -26,4 +26,14 @@ module.exports = {
 				@random min, max, une
 			else
 				return result
+
+	# 把秒数格式化为 mm:ss 的格式
+	# @param {number} secs 秒数
+	# @param {number} base 单位(默认为毫秒)
+	normalizeSeconds: (secs, base = 1000) ->
+		secs = Math.floor(secs / base)
+		m = Math.floor secs / 60
+		s = secs % 60
+
+		return "#{@fixZero(m, 99)}:#{@fixZero(s, 99)}"
 }

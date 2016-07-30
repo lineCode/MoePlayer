@@ -58,6 +58,7 @@ class SearchBox extends BaseComp
 
 		# Enter快捷键搜索
 		$(@input).on 'keydown', (evt) =>
+			evt.stopPropagation()
 			kc = evt.keyCode
 			if kc is 13
 				$(@goBtn).trigger 'click'

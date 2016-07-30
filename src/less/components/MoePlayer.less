@@ -93,7 +93,7 @@
 			.progress-bar {
 				position: relative;
 				height: 0.3rem;
-				width: 75%;
+				width: 65%;
 				background-color: @progress-bar;
 
 				.progress-drag-bar {
@@ -121,6 +121,26 @@
 					border: 0.1rem solid @bg;
 					border-radius: @drag-bar-radius;
 				}
+			}
+			.song-quality {
+				color: @white;
+				width: 4.6rem;
+				text-align: center;
+				font-size: 1.2rem;
+				padding: 0.2rem 0.4rem;
+				border: 0.1rem solid @white;
+			}
+			.song-quality.high {
+				color: @green;
+				border-color: @green;
+			}
+			.song-quality.medium {
+				color: @yellow;
+				border-color: @yellow;
+			}
+			.song-quality.low {
+				color: @red;
+				border-color: @red;
 			}
 		}
 	}
@@ -195,7 +215,7 @@
 	 *                       附件组件样式
 	 ***********************************************************/
 	.mp-addons {
-		width: 6.5%;
+		width: 8.5%;
 
 		.addons-c {
 			width: 100%;
@@ -208,8 +228,8 @@
 			.play-mode {
 				&:hover {
 					opacity: 1;
-					color: @red;
-					border-color: @red;
+					color: @theme-color;
+					border-color: @theme-color;
 				}
 				opacity: 0.8;
 				font-size: 1.2rem;

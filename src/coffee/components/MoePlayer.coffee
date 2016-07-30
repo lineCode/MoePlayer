@@ -48,6 +48,7 @@ class MoePlayer extends BaseComp
 		@progressBar = @time.querySelector '.progress-bar'
 		@progressDragBar = @time.querySelector '.progress-drag-bar'
 		@totalTime = @time.querySelector '.total-time'
+		@quality = @time.querySelector '.song-quality'
 		#-------------
 		@volumeIcon = @volume.querySelector '.volume-icon'
 		@volumeBar = @volume.querySelector '.volume-bar'
@@ -91,6 +92,7 @@ class MoePlayer extends BaseComp
 							<div class="progress-drag-bar"></div>
 						</div>
 						<div class="total-time">00:00</div>
+						<div class="song-quality">默认</div>
 					</div>
 				</div>
 				<div class="mp-part mp-volume not-select">
@@ -211,13 +213,12 @@ class MoePlayer extends BaseComp
 
 
 	# 开始同步播放进度
-	# @param {number} timeWidth 总时间长度
-	startProgress: (timeWidth = @player.duration) ->
-		# 进度指示器回到最初的位置
+	# @param {number} timeWidth 总时间长度(毫秒)
+	startProgress: (timeWidth) ->
+		timeWidth = timeWidth / 1000
+
+		# 计数清零
 		@CUR_TIME = 0
-		$(@playedTime).text '00:00'
-		oriPos = -$(@progressDragBar).width() / 2
-		$(@progressDragBar).css('left', oriPos + 'px')
 
 		# 计算每一秒进度指示器应该移动多少距离
 		barWidth = parseFloat $(@progressBar).css('width')
@@ -235,19 +236,10 @@ class MoePlayer extends BaseComp
 			@CUR_TIME += 1
 
 			$(@progressDragBar).css('left', newPos + 'px')
-			$(@playedTime).text @normalizeSeconds(@CUR_TIME)
+			$(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
 
 		@TIMER.set updatePos, 1000
 			.start()
-
-	# 把秒数格式化为 mm:ss 的格式
-	# @param {number} secs 秒数
-	normalizeSeconds: (secs) ->
-		secs = Math.floor secs
-		m = Math.floor secs / 60
-		s = secs % 60
-
-		return "#{Util.fixZero(m, 99)}:#{Util.fixZero(s, 99)}"
 
 	#---------------------------------------------------
 	#                     对外接口
@@ -258,12 +250,30 @@ class MoePlayer extends BaseComp
 	play: (song) ->
 		@pause()
 
+		# 时间重置为 00:00
+		$(@playedTime).text '00:00'
+		# 进度指示器回到原位置
+		oriPos = -$(@progressDragBar).width() / 2
+		$(@progressDragBar).css('left', oriPos + 'px')
+
 		# 切换新歌曲
 		@curIndex = parseInt(song.song_info.idx)
 
 		# 切换图标状态
 		$(@status).addClass 'playing'
 			.find('img').attr 'src', @ICONS.PAUSE
+
+		# 切换音质显示
+		sq = parseInt(song.song_info.song_quality)
+		if sq >= 320
+			$(@quality).text '高音质'
+			@quality.className = 'song-quality high'
+		else if 128 <= sq < 320
+			$(@quality).text '中音质'
+			@quality.className = 'song-quality medium'
+		else
+			$(@quality).text '低音质'
+			@quality.className = 'song-quality low'
 
 		# 载入歌曲URL
 		$(@player).attr 'src', song.song_info.song_url
@@ -277,10 +287,10 @@ class MoePlayer extends BaseComp
 			else
 				$(@cover).find('img').attr 'src', @ICONS.COVER
 			# 载入总时长
-			$(@totalTime).text @normalizeSeconds(@player.duration)
+			$(@totalTime).text Util.normalizeSeconds(song.song_info.song_duration)
 		.on 'canplay', =>
 			@player.play()
-			@startProgress @player.duration
+			@startProgress song.song_info.song_duration
 
 	# 继续播放
 	resume: ->
@@ -303,6 +313,9 @@ class MoePlayer extends BaseComp
 		$(@status).removeClass 'playing'
 		$(@status).find('img').attr 'src', @ICONS.PLAY
 
+		# 时间重置为 00:00
+		$(@playedTime).text '00:00'
+		# 进度指示器回到原位置
 		oriPos = -$(@progressDragBar).width() / 2
 		$(@progressDragBar).css('left', oriPos + 'px')
 
@@ -313,5 +326,16 @@ class MoePlayer extends BaseComp
 	updateList: (data) ->
 		if data and data.songs
 			@LIST = data.songs
+
+	# 清空播放列表
+	clearList: ->
+		@LIST = []
+
+	# 空格键响应
+	hotKeyResponse: (kc) ->
+		switch kc
+			# 空格键
+			when 32
+				$(@status).trigger 'click'
 
 module.exports = MoePlayer
