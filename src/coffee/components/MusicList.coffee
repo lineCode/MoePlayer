@@ -17,7 +17,7 @@ class MusicList extends BaseComp
 			SUGGEST: '搜索点什么听听吧ww',
 			NOT_FOUND: '搜索不到相关的东西惹QAQ',
 			NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
-			SONG_INFO_ERROR: '获取歌曲播放地址失败鸟（┬＿┬）\n\n原因：1.歌曲失效 2.收费歌曲'
+			SONG_INFO_ERROR: '获取歌曲信息失败：歌曲已失效或需要付费'
 		}
 
 		@PAGINATOR = null
@@ -76,7 +76,8 @@ class MusicList extends BaseComp
 			$song.trigger 'dblclick'
 
 		$(@table).find('.dlBtn').on 'click', (evt) =>
-			alert '功能开发中，敬请期待0v0'
+			evt.stopPropagation()
+			Util.showMsg '功能开发中，敬请期待0v0', 3000
 
 	# 渲染数据
 	# @param {object}  data    数据
@@ -178,7 +179,7 @@ class MusicList extends BaseComp
 						@updatePlayingSong sid
 						@eventBus.emit 'MusicList::PlaySong', data.data
 					else
-						alert @TIPS.SONG_INFO_ERROR
+						Util.showMsg @TIPS.SONG_INFO_ERROR, 3000, 3
 						return false
 			, 
 			error: (err) =>

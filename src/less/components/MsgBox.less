@@ -1,0 +1,59 @@
+@import url(variables.less);
+
+.msgBox {
+	position: absolute;
+	z-index: 99;
+	bottom: 5.5rem;
+	left: 0;
+
+	.msg-c {
+		display: flex;
+		display: -webkit-flex;
+		justify-content: center;
+		align-items: center;
+		margin: 0.5rem 0;
+		padding: 0.4rem 1rem;
+		border: 1px solid @white;
+		opacity: 0;
+		-webkit-transform: translateX(-25rem);
+		-ms-transform: translateX(-25rem);
+		transform: translateX(-25rem);
+		color: @white;
+		font-size: 1.2rem;
+		line-height: 1.5rem;
+		width: 25rem;
+		min-height: 1rem;
+		transition-duration: 0.5s;
+	}
+	.normal {
+		color: @black;
+		border-color: @white;
+		background-color: @white;
+		box-shadow: 0 0 0.2rem @white;
+	}
+	.warning {
+		color: @white;
+		border-color: @orange;
+		background-color: @orange;
+		box-shadow: 0 0 0.2rem @orange;
+	}
+	.success {
+		color: @white;
+		border-color: @green;
+		background-color: @green;
+		box-shadow: 0 0 0.2rem @green;
+	}
+	.error {
+		color: @white;
+		border-color: @red;
+		background-color: @red;
+		box-shadow: 0 0 0.2rem @red;
+	}
+	.slideIn {
+		-webkit-transform: translateX(0);
+		-ms-transform: translateX(0);
+		transform: translateX(0);
+		opacity: 1;
+		filter: alpha(opacity=100);
+	}
+}

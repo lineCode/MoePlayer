@@ -67,12 +67,12 @@ class MoePlayer extends BaseComp
 			"""
 			<div class="moePlayer">
 				<audio class="mp-player hidden"></audio>
-				<div class="mp-part mp-cover" not-select>
+				<div class="mp-part mp-cover not-select">
 					<div class="cover-c">
 						<img src="#{@ICONS.COVER}" alt="封面图片">
 					</div>
 				</div>
-				<div class="mp-part mp-control" not-select>
+				<div class="mp-part mp-control not-select">
 					<div class="control-c">
 						<div class="prev-song">
 							<img src="#{@ICONS.PREV}" alt="上一首">

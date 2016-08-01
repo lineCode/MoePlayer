@@ -36,4 +36,54 @@ module.exports = {
 		s = secs % 60
 
 		return "#{@fixZero(m, 99)}:#{@fixZero(s, 99)}"
+
+	# 移除页面选中效果
+	clearSelection: ->
+		document.selection && document.selection.empty && document.selection.empty()
+		window.getSelection && window.getSelection().removeAllRanges()
+
+	# 展示消息提示
+	# @param {string} msg      提示文本（可含HTML标签）
+	# @param {number} duration 消息持续时间(负数表示一直存在直到用户点击)
+	# @param {number} level    级别（默认为正常）
+	showMsg: (msg, duration = 2000, level = 0) ->
+		if msg is ''
+			return false
+
+		$msgBox = $('.msgBox')
+		if $msgBox.length <= 0
+			$msgBox = $('<div class="msgBox"></div>')
+			$('body').append $msgBox
+
+		switch level
+			when 0
+				ln = 'normal'
+			when 1
+				ln = 'warning'
+			when 2
+				ln = 'success'
+			when 3
+				ln = 'error'
+			else
+				ln = 'normal'
+
+		$msgLine = $("""<div class="msg-c #{ln}">#{msg}</div>""")
+		$msgBox.append $msgLine
+
+		setTimeout ->
+			$msgLine.addClass 'slideIn'
+		, 0
+
+		if duration >= 0
+			setTimeout ->
+				te = 'webkitTramsitionEnd ' + 'mozTramsitionEnd ' + 
+				     'MSTramsitionEnd ' + 'otransitionend ' + 'transitionend'
+
+				$msgLine.one te, (evt) ->
+					# $(@).remove()
+					# if $msgBox.children().length is 0
+					# 	$msgBox.remove()
+
+				$msgLine.removeClass 'slideIn'
+			, duration
 }

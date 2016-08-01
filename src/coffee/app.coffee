@@ -2,6 +2,7 @@ EventEmitter = require 'eventemitter3'
 SearchBox = require './components/SearchBox'
 MusicList = require './components/MusicList'
 MoePlayer = require './components/MoePlayer'
+Util = require './components/Util'
 
 eventBus = null
 searchBox = null
