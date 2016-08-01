@@ -80,9 +80,9 @@ module.exports = {
 				     'MSTramsitionEnd ' + 'otransitionend ' + 'transitionend'
 
 				$msgLine.one te, (evt) ->
-					# $(@).remove()
-					# if $msgBox.children().length is 0
-					# 	$msgBox.remove()
+					$(@).remove()
+					if $msgBox.children().length is 0
+						$msgBox.remove()
 
 				$msgLine.removeClass 'slideIn'
 			, duration
