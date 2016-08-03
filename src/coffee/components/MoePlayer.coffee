@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-7-29 18:12:21
+# @Update 2016-8-3 18:06:18
 ##
 
 BaseComp = require './BaseComp'

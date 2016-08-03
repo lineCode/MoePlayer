@@ -1,0 +1,59 @@
+// 从左向右渐变滑出
+@-webkit-keyframes slideIn {
+	from {
+		opacity: 0;
+		filter: alpha(opacity=0);
+		-webkit-transform: translateX(-25rem);
+		transform: translateX(-25rem);
+	}
+	to {
+		opacity: 1;
+		filter: alpha(opacity=100);
+		-webkit-transform: translateX(0rem);
+		transform: translateX(0rem);
+	}
+}
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		filter: alpha(opacity=0);
+		-webkit-transform: translateX(-25rem);
+		transform: translateX(-25rem);
+	}
+	to {
+		opacity: 1;
+		filter: alpha(opacity=100);
+		-webkit-transform: translateX(0rem);
+		transform: translateX(0rem);
+	}
+}
+
+// 从右向左渐变滑进
+@-webkit-keyframes slideOut {
+	from {
+		opacity: 1;
+		filter: alpha(opacity=1);
+		-webkit-transform: translateX(0rem);
+		transform: translateX(0rem);
+	}
+	to {
+		opacity: 0;
+		filter: alpha(opacity=0);
+		-webkit-transform: translateX(-25rem);
+		transform: translateX(-25rem);
+	}
+}
+@keyframes slideOut {
+	from {
+		opacity: 1;
+		filter: alpha(opacity=1);
+		-webkit-transform: translateX(0rem);
+		transform: translateX(0rem);
+	}
+	to {
+		opacity: 0;
+		filter: alpha(opacity=0);
+		-webkit-transform: translateX(-25rem);
+		transform: translateX(-25rem);
+	}
+}

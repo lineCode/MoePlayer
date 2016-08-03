@@ -1,3 +1,9 @@
+##
+# 工具函数
+# @Author VenDream
+# @Update 2016-8-3 18:06:57
+##
+
 module.exports = {
 	# 根据总数进行补零操作
 	# @param {number} n 待补零的数字
@@ -67,23 +73,22 @@ module.exports = {
 			else
 				ln = 'normal'
 
-		$msgLine = $("""<div class="msg-c #{ln}">#{msg}</div>""")
+		$msgLine = $("""<div class="msg-c slideIn #{ln}">#{msg}</div>""")
 		$msgBox.append $msgLine
-
-		setTimeout ->
-			$msgLine.addClass 'slideIn'
-		, 0
 
 		if duration >= 0
 			setTimeout ->
 				te = 'webkitTramsitionEnd ' + 'mozTramsitionEnd ' + 
 				     'MSTramsitionEnd ' + 'otransitionend ' + 'transitionend'
+				ae = 'webkitAnimationEnd ' + 'mozAnimationEnd ' + 
+				     'MSAnimationEnd ' + 'oanimationend ' + 'animationend'
 
-				$msgLine.one te, (evt) ->
+				$msgLine.one ae, (evt) ->
 					$(@).remove()
 					if $msgBox.children().length is 0
 						$msgBox.remove()
 
 				$msgLine.removeClass 'slideIn'
+					.addClass 'slideOut'
 			, duration
 }

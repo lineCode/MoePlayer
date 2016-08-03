@@ -54,10 +54,10 @@ gulp.task 'coffee', ->
 		.pipe browserify
 			debug: false,
 			transform: ['coffeeify'],
-			extensions: ['.coffee']
+			extensions: ['.coffee'],
 		.on 'error', logError
 		.pipe extReplace '.js'
-		# .pipe uglify()
+		.pipe uglify()
 		.pipe gulp.dest 'dist/js'
 		# .pipe livereload()
 
@@ -68,7 +68,7 @@ gulp.task 'less', ->
 	del.sync 'dist/css'
 	gulp.src paths.lessSrc
 		.pipe less()
-		# .pipe uglifycss()
+		.pipe uglifycss()
 		.on 'error', logError
 		.pipe gulp.dest 'dist/css'
 		# .pipe livereload()
@@ -97,7 +97,7 @@ gulp.task 'restart', ->
 
 # 监听文件改动
 gulp.task 'watch', ->
-	livereload.listen()
+	# livereload.listen()
 	gulp.watch paths.coffeeSrc, ['coffee', 'reload']
 	gulp.watch paths.lessSrc, ['less', 'reload']
 

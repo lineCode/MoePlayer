@@ -1,13 +1,14 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-7-29 18:12:14
+# @Update 2016-8-3 18:06:32
 ##
 
 BaseComp = require './BaseComp'
 Util = require './Util'
 Paginator = require './Paginator'
 config = require '../../../config'
+ipcRenderer = window.require('electron').ipcRenderer
 
 class MusicList extends BaseComp
 	constructor: (selector, eventBus) ->
@@ -15,6 +16,9 @@ class MusicList extends BaseComp
 
 		@TIPS = {
 			SUGGEST: '搜索点什么听听吧ww',
+			DOWNLOAD_START: '开始下载歌曲',
+			DOWNLOAD_FAILED: '歌曲下载失败',
+			DOWNLOAD_SUCCESS: '歌曲下载完成',
 			NOT_FOUND: '搜索不到相关的东西惹QAQ',
 			NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
 			SONG_INFO_ERROR: '获取歌曲信息失败：歌曲已失效或需要付费'
@@ -28,6 +32,12 @@ class MusicList extends BaseComp
 
 		@table = @html.querySelector 'table'
 		@tipsRow = @html.querySelector '.tips-row'
+
+		# 下载响应
+		ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, sn) =>
+			Util.showMsg "#{@TIPS.DOWNLOAD_SUCCESS}: #{sn}", null, 2
+		ipcRenderer.on 'ipcMain::DownloadSongFailed', (event, err) =>
+			Util.showMsg "@TIPS.DOWNLOAD_FAILED: #{err}", null, 3
 
 		@updatePagination 0
 
@@ -75,9 +85,16 @@ class MusicList extends BaseComp
 			$song = $(evt.currentTarget).parents('.song')
 			$song.trigger 'dblclick'
 
+		# 下载歌曲
 		$(@table).find('.dlBtn').on 'click', (evt) =>
 			evt.stopPropagation()
-			Util.showMsg '功能开发中，敬请期待0v0', 3000
+			$song = $(evt.currentTarget).parents('.song')
+
+			sn = $song.find('.title-col').text()
+			sid = $song.attr 'data-sid'
+
+			Util.showMsg "#{@TIPS.DOWNLOAD_START}: #{sn}"
+			sid && @getSongInfoAndDownload sid
 
 	# 渲染数据
 	# @param {object}  data    数据
@@ -186,6 +203,26 @@ class MusicList extends BaseComp
 				console.log err
 		}
 
+	# 获取歌曲信息并执行下载
+	# @param {string} sid 歌曲ID
+	getSongInfoAndDownload: (sid) ->
+		$.ajax {
+			type: 'POST',
+			url: @api,
+			data: {
+				song_id: sid
+			},
+			success: (data) =>
+				if data and data.status is 'success'
+					if $.isEmptyObject(data.data.song_info) is false
+						ipcRenderer.send 'Renderer::DownloadSong', data.data.song_info
+					else
+						Util.showMsg @TIPS.SONG_INFO_ERROR, 3000, 3
+						return false
+			, 
+			error: (err) =>
+				console.log err
+		}
 	# 更新显示正在播放的歌曲
 	# @param {string} sid 歌曲ID
 	updatePlayingSong: (sid) ->

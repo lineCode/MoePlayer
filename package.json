@@ -23,6 +23,7 @@
     "gulp-livereload": "^3.8.0",
     "gulp-sequence": "^0.4.5",
     "gulp-uglify": "^1.2.0",
-    "gulp-uglifycss": "^1.0.4"
+    "gulp-uglifycss": "^1.0.4",
+    "underscore": "^1.8.3"
   }
 }
