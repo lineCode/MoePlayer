@@ -66,7 +66,7 @@ function dlSetting(event, item, webContents) {
 
 function dlSong(event, song) {
 	songInfo = song;
-	songInfo.savePath = `./download/${song.song_artist}/${song.song_artist} - ${song.song_name}.mp3`;
+	songInfo.savePath = `${config.save_path}/${song.song_artist}/${song.song_artist} - ${song.song_name}.mp3`;
 
 	fs.stat(songInfo.savePath, (err, stats) => {
 		// If Already Exists

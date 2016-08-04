@@ -27,7 +27,6 @@
 		transform: translateX(0rem);
 	}
 }
-
 // 从右向左渐变滑进
 @-webkit-keyframes slideOut {
 	from {
@@ -55,5 +54,26 @@
 		filter: alpha(opacity=0);
 		-webkit-transform: translateX(-25rem);
 		transform: translateX(-25rem);
+	}
+}
+// 旋转
+@-webkit-keyframes rotate {
+	from {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	to {
+		-webkit-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}
+@keyframes rotate {
+	from {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	to {
+		-webkit-transform: rotate(360deg);
+		transform: rotate(360deg);
 	}
 }

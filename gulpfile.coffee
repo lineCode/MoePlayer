@@ -85,11 +85,15 @@ gulp.task 'restart', ->
 
 # 监听文件改动
 gulp.task 'watch', ->
-	# livereload.listen()
+	# gulp.watch ['main.js'], ['restart']
+	
 	gulp.watch paths.coffeeSrc, ->
 		sequence('coffee', 'reload')
+
 	gulp.watch paths.lessSrc, ->
 		sequence('less', 'reload')
+
+	gulp.watch ['index.html'], ['reload']
 
 # 默认任务流程
 gulp.task 'default', ->

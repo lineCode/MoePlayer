@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-3 18:06:32
+# @Update 2016-8-4 18:13:36
 ##
 
 BaseComp = require './BaseComp'
@@ -16,7 +16,7 @@ class MusicList extends BaseComp
 
 		@TIPS = {
 			SUGGEST: '搜索点什么听听吧ww',
-			DOWNLOAD_START: '开始下载歌曲',
+			DOWNLOAD_START: '加入下载列表',
 			DOWNLOAD_FAILED: '歌曲下载失败',
 			DOWNLOAD_SUCCESS: '歌曲下载完成',
 			NOT_FOUND: '搜索不到相关的东西惹QAQ',
@@ -35,9 +35,9 @@ class MusicList extends BaseComp
 
 		# 下载响应
 		ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, sn) =>
-			Util.showMsg "#{@TIPS.DOWNLOAD_SUCCESS}: #{sn}", null, 2
+			Util.showMsg "#{@TIPS.DOWNLOAD_SUCCESS}: 《#{sn}》", null, 2
 		ipcRenderer.on 'ipcMain::DownloadSongFailed', (event, err) =>
-			Util.showMsg "@TIPS.DOWNLOAD_FAILED: #{err}", null, 3
+			Util.showMsg "#{@TIPS.DOWNLOAD_FAILED}: #{err}", null, 3
 
 		@updatePagination 0
 
@@ -93,7 +93,7 @@ class MusicList extends BaseComp
 			sn = $song.find('.title-col').text()
 			sid = $song.attr 'data-sid'
 
-			Util.showMsg "#{@TIPS.DOWNLOAD_START}: #{sn}"
+			Util.showMsg "#{@TIPS.DOWNLOAD_START}: 《#{sn}》"
 			sid && @getSongInfoAndDownload sid
 
 	# 渲染数据
@@ -146,14 +146,14 @@ class MusicList extends BaseComp
 					<td class="album-col">#{s.album_name}</td>
 					<td class="duration-col">#{Util.normalizeSeconds(s.duration)}</td>
 					<td class="operation-col">
-						<span class="btn playBtn">播放</span>
-						|
-						<span class="btn dlBtn">下载</span>
+						<div class="btn playBtn" title="播放"></div>
+						<div class="btn dlBtn" title="下载"></div>
 					</td>
 				</tr>
 				"""
 			$tr = $(trHtml)
 
+			# 设置title属性
 			$tr.find('.album-col').map (i, t) ->
 				$(t).attr 'title', $(@).text()
 
@@ -223,6 +223,7 @@ class MusicList extends BaseComp
 			error: (err) =>
 				console.log err
 		}
+
 	# 更新显示正在播放的歌曲
 	# @param {string} sid 歌曲ID
 	updatePlayingSong: (sid) ->

@@ -12,7 +12,9 @@ const config = {
 	// 窗口高度
 	height: 700,
 	// 每页显示的歌曲数
-	num_per_page: 15
+	num_per_page: 15,
+	// 歌曲存储路径
+	save_path: './download'
 };
 
 module.exports = config;

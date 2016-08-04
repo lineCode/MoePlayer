@@ -19,6 +19,10 @@ initComp = ->
 	musicList.render()
 	moePlayer.render()
 
+	setTimeout ->
+		$('.loading-mask').fadeOut 500
+	, 500
+
 	eventBinding()
 
 eventBinding = ->
