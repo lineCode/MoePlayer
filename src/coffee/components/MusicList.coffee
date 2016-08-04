@@ -215,7 +215,7 @@ class MusicList extends BaseComp
 			success: (data) =>
 				if data and data.status is 'success'
 					if $.isEmptyObject(data.data.song_info) is false
-						ipcRenderer.send 'Renderer::DownloadSong', data.data.song_info
+						ipcRenderer.send 'ipcRenderer::DownloadSong', data.data.song_info
 					else
 						Util.showMsg @TIPS.SONG_INFO_ERROR, 3000, 3
 						return false

@@ -95,4 +95,4 @@ app.on('activate', () => {
 	}
 });
 
-ipcMain.on('Renderer::DownloadSong', dlSong);
+ipcMain.on('ipcRenderer::DownloadSong', dlSong);

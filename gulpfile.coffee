@@ -11,6 +11,7 @@ options = {
 }
 
 # 引入自动化工具
+fs = require 'fs'
 gulp = require 'gulp'
 del = require 'del'
 coffee = require 'gulp-coffee'
@@ -20,7 +21,7 @@ livereload = require 'gulp-livereload'
 extReplace = require 'gulp-ext-replace'
 uglify = require 'gulp-uglify'
 uglifycss = require 'gulp-uglifycss'
-sequence = require 'gulp-sequence'
+sequence = require 'run-sequence'
 electron = (require 'electron-connect').server.create(options)
 
 # 定义项目相关路径
@@ -45,7 +46,6 @@ logError = (e) ->
 # 清空缓存文件夹
 gulp.task 'clean', ->
 	del.sync 'dist'
-	return
 
 # 把coffee文件编译为js文件
 gulp.task 'coffee', ->
@@ -61,8 +61,6 @@ gulp.task 'coffee', ->
 		.pipe gulp.dest 'dist/js'
 		# .pipe livereload()
 
-	return
-
 # 把less文件编译为css文件
 gulp.task 'less', ->
 	del.sync 'dist/css'
@@ -73,43 +71,32 @@ gulp.task 'less', ->
 		.pipe gulp.dest 'dist/css'
 		# .pipe livereload()
 
-	return
-
 # 启动electron服务
 gulp.task 'server', ->
 	electron.start()
-	# gulp.watch 'main.js', ['restart']
-	gulp.watch 'index.html', ['reload']
-
-	return
 
 # 重新装载文件
 gulp.task 'reload', ->
 	electron.reload()
 
-	return
-
 # 重新启动electron进程
 gulp.task 'restart', ->
 	electron.restart()
 
-	return
-
 # 监听文件改动
 gulp.task 'watch', ->
 	# livereload.listen()
-	gulp.watch paths.coffeeSrc, ['coffee', 'reload']
-	gulp.watch paths.lessSrc, ['less', 'reload']
-
-	return
+	gulp.watch paths.coffeeSrc, ->
+		sequence('coffee', 'reload')
+	gulp.watch paths.lessSrc, ->
+		sequence('less', 'reload')
 
 # 默认任务流程
-gulp.task 'default', sequence(
-	'clean', 
-	[
-		'coffee', 
-		'less'
-	],
-	'server',
-	'watch'
-)
+gulp.task 'default', ->
+	sequence(
+		'clean',
+		'coffee',
+		'less',
+		'server',
+		'watch'
+	)
