@@ -13,7 +13,7 @@ options = {
 # 引入自动化工具
 fs = require 'fs'
 gulp = require 'gulp'
-del = require 'del'
+clean = require 'gulp-clean'
 coffee = require 'gulp-coffee'
 less = require 'gulp-less'
 browserify = require 'gulp-browserify'
@@ -45,11 +45,11 @@ logError = (e) ->
 
 # 清空缓存文件夹
 gulp.task 'clean', ->
-	del.sync 'dist'
+	gulp.src 'dist/', {read: false}
+		.pipe clean({force: true})
 
 # 把coffee文件编译为js文件
 gulp.task 'coffee', ->
-	del.sync 'dist/js'
 	gulp.src paths.coffeeSrc, {read: false}
 		.pipe browserify
 			debug: false,
@@ -63,7 +63,6 @@ gulp.task 'coffee', ->
 
 # 把less文件编译为css文件
 gulp.task 'less', ->
-	del.sync 'dist/css'
 	gulp.src paths.lessSrc
 		.pipe less()
 		.pipe uglifycss()
@@ -93,7 +92,7 @@ gulp.task 'watch', ->
 	gulp.watch paths.lessSrc, ->
 		sequence('less', 'reload')
 
-	gulp.watch ['index.html'], ['reload']
+	# gulp.watch ['index.html'], ['reload']
 
 # 默认任务流程
 gulp.task 'default', ->

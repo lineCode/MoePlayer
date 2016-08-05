@@ -331,7 +331,7 @@ class MoePlayer extends BaseComp
 	clearList: ->
 		@LIST = []
 
-	# 空格键响应
+	# 快捷键响应
 	hotKeyResponse: (kc) ->
 		switch kc
 			# 空格键

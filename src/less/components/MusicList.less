@@ -34,13 +34,13 @@
 					width: 20%;
 				}
 				.list-album {
-					width: 24%;
+					width: 29%;
 				}
 				.list-duration {
 					width: 10%;
 				}
 				.list-operation {
-					width: 10%;
+					width: 5%;
 				}
 				.index-col {
 					text-align: center;
@@ -55,19 +55,15 @@
 						margin: 0 0.5rem;
 						cursor: pointer;
 					}
-					.playBtn {
-						height: 1.4rem;
-						width: 2rem;
-						background-image: url(../../assets/play.png);
-						background-size: 74%;
-						background-position: center;
-						background-repeat: no-repeat;
-					}
 					.dlBtn {
+						&:hover {
+							opacity: 1;
+						}
+						opacity: 0.5;
 						height: 1.4rem;
 						width: 2rem;
 						background-image: url(../../assets/download.png);
-						background-size: 80%;
+						background-size: 74%;
 						background-position: center;
 						background-repeat: no-repeat;
 					}
@@ -79,6 +75,14 @@
 			}
 			tr:nth-child(even) {
 				background-color: @even-row-color;
+			}
+			.song.hasDLed {
+				.operation-col {
+					.dlBtn {
+						cursor: default;
+						background-image: url(../../assets/success.png);
+					}
+				}
 			}
 			.song.playing {
 				color: @theme-color;

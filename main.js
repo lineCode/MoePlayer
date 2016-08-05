@@ -12,7 +12,6 @@ const client = require('electron-connect').client;
 let win;
 let session;
 let webController;
-
 let songInfo = null;
 
 /**************************************************
@@ -39,7 +38,7 @@ function createWin() {
 
 	win.loadURL(`file://${__dirname}/index.html`);
 
-	// 是否开启调试
+	// Whether To Open Dev Tools
 	if (config.debug === true) {
 		win.webContents.openDevTools();
 		client.create(win, {
@@ -48,6 +47,12 @@ function createWin() {
 	}
 }
 
+/**
+ * Download Item Setting
+ * @param  {object} event       event
+ * @param  {object} item        download item
+ * @param  {object} webContents webContents
+ */
 function dlSetting(event, item, webContents) {
 	let song = _.assign({}, songInfo);
 
@@ -57,13 +62,21 @@ function dlSetting(event, item, webContents) {
 	// Sync Download Status
 	item.once('done', (event, state) => {
 		if (state =='completed') {
-			webController.send('ipcMain::DownloadSongSuccess', song.song_name);
+			webController.send('ipcMain::DownloadSongSuccess', {
+				song_id: song.song_id,
+				song_name: song.song_name
+			});
 		} else {
 			webController.send('ipcMain::DownloadSongFailed', state);
 		}
 	});
 }
 
+/**
+ * Trigger To Download
+ * @param  {object} event event
+ * @param  {object} song  songInfo
+ */
 function dlSong(event, song) {
 	songInfo = song;
 	songInfo.savePath = `${config.save_path}/${song.song_artist}/${song.song_artist} - ${song.song_name}.mp3`;

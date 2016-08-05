@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-4 18:13:36
+# @Update 2016-8-5 17:44:54
 ##
 
 BaseComp = require './BaseComp'
@@ -9,6 +9,7 @@ Util = require './Util'
 Paginator = require './Paginator'
 config = require '../../../config'
 ipcRenderer = window.require('electron').ipcRenderer
+fs = window.require 'fs'
 
 class MusicList extends BaseComp
 	constructor: (selector, eventBus) ->
@@ -19,7 +20,7 @@ class MusicList extends BaseComp
 			DOWNLOAD_START: '加入下载列表',
 			DOWNLOAD_FAILED: '歌曲下载失败',
 			DOWNLOAD_SUCCESS: '歌曲下载完成',
-			NOT_FOUND: '搜索不到相关的东西惹QAQ',
+			NOT_FOUND_ERROR: '搜索不到相关的东西惹QAQ',
 			NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
 			SONG_INFO_ERROR: '获取歌曲信息失败：歌曲已失效或需要付费'
 		}
@@ -34,8 +35,9 @@ class MusicList extends BaseComp
 		@tipsRow = @html.querySelector '.tips-row'
 
 		# 下载响应
-		ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, sn) =>
-			Util.showMsg "#{@TIPS.DOWNLOAD_SUCCESS}: 《#{sn}》", null, 2
+		ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, s) =>
+			@updateDLedSong s.song_id
+			Util.showMsg "#{@TIPS.DOWNLOAD_SUCCESS}: 《#{s.song_name}》", null, 2
 		ipcRenderer.on 'ipcMain::DownloadSongFailed', (event, err) =>
 			Util.showMsg "#{@TIPS.DOWNLOAD_FAILED}: #{err}", null, 3
 
@@ -79,16 +81,13 @@ class MusicList extends BaseComp
 
 			sid && @getSongInfoAndPlay sid, idx
 
-		# 单击播放
-		$(@table).find('.playBtn').on 'click', (evt) =>
-			evt.stopPropagation()
-			$song = $(evt.currentTarget).parents('.song')
-			$song.trigger 'dblclick'
-
 		# 下载歌曲
-		$(@table).find('.dlBtn').on 'click', (evt) =>
+		$(@table).find('.dlBtn').unbind().on 'click', (evt) =>
 			evt.stopPropagation()
 			$song = $(evt.currentTarget).parents('.song')
+
+			if $song.hasClass('hasDLed') is true
+				return false
 
 			sn = $song.find('.title-col').text()
 			sid = $song.attr 'data-sid'
@@ -111,7 +110,7 @@ class MusicList extends BaseComp
 				refresh && @updatePagination()
 
 			if @totalCount is 0
-				@showTips @TIPS.NOT_FOUND
+				@showTips @TIPS.NOT_FOUND_ERROR
 		else
 			@showTips @TIPS.NETWORK_ERROR
 
@@ -134,11 +133,14 @@ class MusicList extends BaseComp
 
 		# 渲染新的数据
 		songs.map (s, i) =>
+			hasDLed = @checkDLed s
 			idx = Util.fixZero base + i + 1, @totalCount
 			trHtml = 
 				"""
 				<tr class="song not-select #{
 					if String(s.song_id) is String(@curSongId) then 'playing' else ''
+				} #{
+					if hasDLed is true then 'hasDLed' else ''
 				}" data-sid="#{s.song_id}" data-idx="#{i}">
 					<td class="index-col">#{idx}</td>
 					<td class="title-col">#{s.song_name}</td>
@@ -146,8 +148,9 @@ class MusicList extends BaseComp
 					<td class="album-col">#{s.album_name}</td>
 					<td class="duration-col">#{Util.normalizeSeconds(s.duration)}</td>
 					<td class="operation-col">
-						<div class="btn playBtn" title="播放"></div>
-						<div class="btn dlBtn" title="下载"></div>
+						<div class="btn dlBtn" title="#{
+							if hasDLed is true then '已下载' else '点击下载'
+						}"></div>
 					</td>
 				</tr>
 				"""
@@ -160,6 +163,20 @@ class MusicList extends BaseComp
 			$(@table).append $tr
 
 		@eventBinding()
+
+	# 检查该歌曲是否已下载
+	# @param {object} s 歌曲对象
+	checkDLed: (s) ->
+		filepath = "#{config.save_path}/#{s.artist_name}/#{s.artist_name} - #{s.song_name}.mp3"
+
+		try
+			stat = fs.statSync filepath
+			if stat
+				rlt = true
+		catch
+			rlt = false
+
+		return rlt
 
 	# 更新分页
 	# @param {number} maxEntries 数据项总数
@@ -179,7 +196,7 @@ class MusicList extends BaseComp
 		@updatePagination 0
 		@showTips @TIPS.SUGGEST
 
-	# 根据歌曲ID获取歌曲信息
+	# 获取歌曲信息并播放
 	# @param {string} sid 歌曲ID
 	# @param {number} idx 歌曲索引
 	getSongInfoAndPlay: (sid, idx) ->
@@ -232,6 +249,16 @@ class MusicList extends BaseComp
 		$sr.length > 0 && (
 			$('.song').removeClass 'playing'
 			$sr.addClass 'playing'
+		)
+
+	# 更新已下载的歌曲
+	# @param {string} sid 歌曲ID
+	updateDLedSong: (sid) ->
+		$sr = $('.song[data-sid="' + sid + '"]')
+
+		$sr.length > 0 && (
+			$sr.addClass 'hasDLed'
+			$sr.find('.dlBtn').attr 'title', '已下载'
 		)
 
 module.exports = MusicList
