@@ -2,22 +2,28 @@ EventEmitter = require 'eventemitter3'
 SearchBox = require './components/SearchBox'
 MusicList = require './components/MusicList'
 MoePlayer = require './components/MoePlayer'
+DetailPanel = require './components/DetailPanel'
 Util = require './components/Util'
+config = require '../../config'
 
 eventBus = null
 searchBox = null
 musicList = null
 moePlayer = null
+detailPanel = null
 
 initComp = ->
 	eventBus = new EventEmitter()
 	searchBox = new SearchBox '.searchBox-c', eventBus
 	musicList = new MusicList '.musicList-c', eventBus
 	moePlayer = new MoePlayer '.moePlayer-c', eventBus
+	detailPanel = new DetailPanel '.detailPanel-c', eventBus
 
 	searchBox.render()
 	musicList.render()
 	moePlayer.render()
+	detailPanel.render()
+	$('.app-ver').text config.version
 
 	setTimeout ->
 		$('.loading-mask').fadeOut 500
@@ -30,14 +36,17 @@ eventBinding = ->
 	$('body').on 'keydown', (evt) ->
 		kc = evt.keyCode
 		moePlayer && moePlayer.hotKeyResponse kc
+		detailPanel && detailPanel.hotKeyResponse kc
 
 	# 搜索逻辑
 	eventBus.on 'SearchBox::GetSearchResult', (data) ->
 		musicList && musicList.show data.data, data.refresh
 		moePlayer && moePlayer.updateList data.data.data
+		detailPanel && detailPanel.shrink()
 	eventBus.on 'SearchBox::ClearSearchResult', ->
 		musicList && musicList.clear()
 		moePlayer && moePlayer.clearList()
+		detailPanel && detailPanel.shrink()
 	eventBus.on 'SearchBox::NetworkError', (err) ->
 		musicList && musicList.showTips()
 
@@ -47,7 +56,8 @@ eventBinding = ->
 
 	# 选中播放
 	eventBus.on 'MusicList::PlaySong', (song) ->
-		moePlayer.play song
+		moePlayer && moePlayer.play song
+		detailPanel && detailPanel.show song
 
 	# 切换歌曲
 	eventBus.on 'MoePlayer::PlayPrevSong', (data) ->
@@ -58,5 +68,9 @@ eventBinding = ->
 		musicList && (
 			musicList.getSongInfoAndPlay data.song_id, data.idx
 		)
+
+	# 歌曲详情
+	eventBus.on 'MoePlayer::ExpandDetailPanel', ->
+		detailPanel && detailPanel.expand() 
 
 $(document).ready initComp

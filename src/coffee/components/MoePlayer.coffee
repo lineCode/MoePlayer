@@ -17,6 +17,7 @@ class MoePlayer extends BaseComp
 		@TIMER = null
 		@DRAGGER = null
 		@CUR_TIME = 0
+		@CUR_SONG = null
 		@PLAY_MODE = 0
 
 		@ICONS = {
@@ -123,6 +124,9 @@ class MoePlayer extends BaseComp
 		@volumeControl()
 		@playModeControl()
 		@playControl()
+
+		$(@cover).unbind().on 'click', =>
+			@CUR_SONG && @eventBus.emit 'MoePlayer::ExpandDetailPanel'
 
 	# 音量控制
 	volumeControl: ->
@@ -278,6 +282,7 @@ class MoePlayer extends BaseComp
 		# 载入歌曲URL
 		$(@player).attr 'src', song.song_info.song_url
 		@player.load()
+		@CUR_SONG = song
 
 		# 加载数据并播放
 		$(@player).unbind().on 'loadedmetadata', =>
@@ -332,6 +337,7 @@ class MoePlayer extends BaseComp
 		@LIST = []
 
 	# 快捷键响应
+	# @param {number} kc 键码
 	hotKeyResponse: (kc) ->
 		switch kc
 			# 空格键

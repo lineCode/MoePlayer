@@ -1,8 +1,10 @@
 ##
 # 工具函数
 # @Author VenDream
-# @Update 2016-8-3 18:06:57
+# @Update 2016-8-8 18:05:07
 ##
+
+fs = window.require 'fs'
 
 module.exports = {
 	# 根据总数进行补零操作
@@ -47,6 +49,25 @@ module.exports = {
 	clearSelection: ->
 		document.selection && document.selection.empty && document.selection.empty()
 		window.getSelection && window.getSelection().removeAllRanges()
+
+	# 检查本地磁盘中是否存在某文件
+	# @param {string} filepath 文件路径 
+	checkDLed: (filepath) ->
+		try
+			stat = fs.statSync filepath
+			if stat
+				rlt = true
+		catch
+			rlt = false
+
+		return rlt
+
+	# 过滤文件名的非法字符集
+	# @param {string} filename 文件名
+	filterFileName: (filename) ->
+		r = filename.replace /[\/\\\:\?\*\<\>\|]/gi, '-'
+
+		return r
 
 	# 展示消息提示
 	# @param {string} msg      提示文本（可含HTML标签）

@@ -3,6 +3,8 @@ const config = {
 	host: 'http://localhost',
 	// 端口
 	port: 5000,
+	// 版本
+	version: '0.1.0',
 	// 是否开启调试面板
 	debug: true,
 	// 是否可以调整窗口大小

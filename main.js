@@ -55,6 +55,25 @@ function createWin() {
  */
 function dlSetting(event, item, webContents) {
 	let song = _.assign({}, songInfo);
+	let suffix = song.savePath.slice(-4);
+	// sen -> download success event name
+	// fen -> download failed  event name
+	let type, sen, fen; 
+
+	switch (suffix) {
+		case '.mp3':
+			type = 'Song';
+			break;
+		case '.jpg':
+			type = 'Cover';
+			break;
+		case '.lrc':
+			type = 'Lyric';
+			break;
+	}
+
+	sen = `ipcMain::Download${type}Success`;
+	fen = `ipcMain::Download${type}Failed`;
 
 	// Set Savepath
 	item.setSavePath(song.savePath);
@@ -62,18 +81,38 @@ function dlSetting(event, item, webContents) {
 	// Sync Download Status
 	item.once('done', (event, state) => {
 		if (state =='completed') {
-			webController.send('ipcMain::DownloadSongSuccess', {
+			webController.send(sen, {
 				song_id: song.song_id,
 				song_name: song.song_name
 			});
 		} else {
-			webController.send('ipcMain::DownloadSongFailed', state);
+			webController.send(fen, state);
 		}
 	});
 }
 
 /**
- * Trigger To Download
+ * Trigger To Download Cover
+ * @param  {object} event event
+ * @param  {object} song  songInfo
+ */
+function dlCover(event, song) {
+	songInfo = song;
+	songInfo.savePath = `${config.save_path}/专辑封面/《${song.song_album}》.jpg`;
+
+	fs.stat(songInfo.savePath, (err, stats) => {
+		// If Already Exists
+		if (err === null) {
+			webController.send('ipcMain::DownloadCoverSuccess', {});
+		// If Not Exists
+		} else {
+			webController.downloadURL(songInfo.song_cover);
+		}
+	});
+}
+
+/**
+ * Trigger To Download Song
  * @param  {object} event event
  * @param  {object} song  songInfo
  */
@@ -109,3 +148,4 @@ app.on('activate', () => {
 });
 
 ipcMain.on('ipcRenderer::DownloadSong', dlSong);
+ipcMain.on('ipcRenderer::DownloadCover', dlCover);

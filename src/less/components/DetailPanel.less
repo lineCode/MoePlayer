@@ -1,0 +1,153 @@
+@import url(variables.less);
+@import url(animation.less);
+
+.detailPanel {
+	width: 100%;
+	height: 100%;
+	font-size: 0;
+	padding: 1rem;
+	position: relative;
+	background-color: @bg;
+
+	.shrinkBtn {
+		&:hover {
+			opacity: 1;
+		}
+		position: absolute;
+		top: 2rem;
+		right: 1rem;
+		width: 2.5rem;
+		height: 2.5rem;
+		opacity: 0.4;
+		cursor: pointer;
+		background-color: rgba(255, 255, 255, 0.2);
+		background-image: url(../../assets/shrink.png);
+		background-size: 100%;
+		background-position: center;
+		background-repeat: no-repeat;
+		border: 1px solid @table-border;
+		border-radius: 0.4rem;
+	}
+	.panel-left, .panel-right {
+		display: inline-block;
+		vertical-align: top;
+		width: 50%;
+		height: 100%;
+		color: @table-font;
+		font-size: 1.2rem;
+		line-height: 1.2rem;
+
+		.panel-c {
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	/***********************************************************
+	 *                       面板左边样式
+	 ***********************************************************/
+	.panel-left {
+		.panel-c {
+			display: -webkit-flex;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-around;
+			align-items: center;
+		}
+		.cover {
+			width: 30rem;
+			height: 30rem;
+			border: 3rem solid @black;
+			box-shadow: 0 0 0 1rem rgba(255, 255, 255, 0.04);
+			border-radius: 50%;
+
+			img {
+				width: 100%;
+				height: 100%;
+				border: 0.2rem solid @white;
+				border-radius: 50%;
+			}
+		}
+		.rotate {
+			animation: rotate 20s infinite linear;
+		}
+		.button {
+			&:hover {
+				color: @white;
+				border-color: @white;
+			}
+			width: 8.2rem;
+			color: @table-font;
+			text-align: center;
+			cursor: pointer;
+			display: inline-block;
+			vertical-align: top;
+			margin: 0.5rem;
+			padding: 0.4rem 1rem;
+			border: 1px solid @table-border;
+		}
+		.DLed {
+			&:hover {
+				color: @table-font;
+				border-color: @table-border;
+			}
+			cursor: default;
+		}
+	}
+
+	/***********************************************************
+	 *                       面板右边样式
+	 ***********************************************************/
+	.panel-right {
+		.info {
+			padding: 1rem;
+			width: 100%;
+
+			.name {
+				display: inline-block;
+				vertical-align: bottom;
+				color: @white;
+				max-width: 38rem;
+				line-height: 2.5rem;
+				font-size: 2.5rem;
+				margin: 0 1rem 1rem 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.quality {
+				position: relative;
+				bottom: 0.2rem;
+				display: inline-block;
+				vertical-align: bottom;
+				color: @white;
+				text-align: center;
+				width: 3.5rem;
+				padding: 0.2rem 0.4rem;
+				border: 0.1rem solid @white;
+				margin-bottom: 1rem;
+			}
+			.quality.high {
+				color: @green;
+				border-color: @green;
+			}
+			.quality.medium {
+				color: @yellow;
+				border-color: @yellow;
+			}
+			.quality.low {
+				color: @red;
+				border-color: @red;
+			}
+			.album, .artist, .source {
+				display: inline-block;
+				vertical-align: bottom;
+				margin: 0 3rem 0 0;
+				max-width: 33%;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+		}
+	}
+}

@@ -1,7 +1,7 @@
 ##
 # 组件基类，采用PubSub模式(引用第三方库-EventEmitter3)
 # @Author VenDream
-# @Update 2016-7-18 15:33:52
+# @Update 2016-8-8 18:06:11
 ##
 
 EventEmitter = require('eventemitter3')
@@ -37,5 +37,10 @@ class BaseComp extends EventEmitter
 		# render logic...
 		##
 		@emit 'renderFinished'
+
+	# 快捷键响应
+	# @param {number} kc 键码
+	hotKeyResponse: (kc) ->
+		console.log kc
 
 module.exports = BaseComp

@@ -2,6 +2,7 @@
 @import url(SearchBox.less);
 @import url(MusicList.less);
 @import url(MoePlayer.less);
+@import url(DetailPanel.less);
 @import url(animation.less);
 @import url(MsgBox.less);
 
@@ -26,7 +27,6 @@
 		animation: rotate 2s linear infinite;
 	}
 }
-
 .mp-container {
 	height: 100%;
 	width: 100%;
@@ -51,6 +51,7 @@
 
 				.app-name {
 					display: inline-block;
+
 					&:hover {
 						text-shadow: 0 0 8px @white;
 					}
@@ -69,5 +70,26 @@
 	.moePlayer-c {
 		border-top: 0.1rem solid @table-border;
 		height: 4.5rem;
+	}
+	.detailPanel-c {
+		position: absolute;
+		top: 5.96rem;
+		left: 0;
+		width: 100%;
+		height: 53.64rem;
+		opacity: 0;
+		-webkit-transform: scale(0);
+		-ms-transform: scale(0);
+		transform: scale(0);
+		-webkit-transform-origin: 0% 100% 0;
+		-ms-transform-origin: 0% 100% 0;
+		transform-origin: 0% 100% 0;
+		transition-duration: 0.3s;
+	}
+	.expand {
+		opacity: 1;
+		-webkit-transform: scale(1);
+		-ms-transform: scale(1);
+		transform: scale(1);
 	}
 }

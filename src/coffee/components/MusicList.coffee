@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-5 17:44:54
+# @Update 2016-8-8 18:05:00
 ##
 
 BaseComp = require './BaseComp'
@@ -92,7 +92,7 @@ class MusicList extends BaseComp
 			sn = $song.find('.title-col').text()
 			sid = $song.attr 'data-sid'
 
-			Util.showMsg "#{@TIPS.DOWNLOAD_START}: 《#{sn}》"
+			# Util.showMsg "#{@TIPS.DOWNLOAD_START}: 《#{sn}》"
 			sid && @getSongInfoAndDownload sid
 
 	# 渲染数据
@@ -133,7 +133,8 @@ class MusicList extends BaseComp
 
 		# 渲染新的数据
 		songs.map (s, i) =>
-			hasDLed = @checkDLed s
+			filepath = "#{config.save_path}/#{s.artist_name}/#{s.artist_name} - #{s.song_name}.mp3"
+			hasDLed = Util.checkDLed filepath
 			idx = Util.fixZero base + i + 1, @totalCount
 			trHtml = 
 				"""
@@ -163,20 +164,6 @@ class MusicList extends BaseComp
 			$(@table).append $tr
 
 		@eventBinding()
-
-	# 检查该歌曲是否已下载
-	# @param {object} s 歌曲对象
-	checkDLed: (s) ->
-		filepath = "#{config.save_path}/#{s.artist_name}/#{s.artist_name} - #{s.song_name}.mp3"
-
-		try
-			stat = fs.statSync filepath
-			if stat
-				rlt = true
-		catch
-			rlt = false
-
-		return rlt
 
 	# 更新分页
 	# @param {number} maxEntries 数据项总数

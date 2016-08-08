@@ -23,6 +23,30 @@
 		width: 4.9rem;
 
 		.cover-c {
+			&:before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				opacity: 0;
+				width: 100%;
+				height: 100%;
+				cursor: pointer;
+				background-color: rgba(0, 0, 0, 0.8);
+				background-image: url(../../assets/expand.png);
+				background-size: 65%;
+				background-position: 50%;
+				background-repeat: no-repeat;
+				transition: opacity 0.2s ease-in-out;
+			}
+
+			&:hover {
+				&:before {
+					opacity: 1;
+				}
+			}
+
+			position: relative;
 			width: 100%;
 			height: 100%;
 			display: flex;

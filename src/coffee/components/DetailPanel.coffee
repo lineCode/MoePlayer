@@ -1,0 +1,199 @@
+##
+# 歌曲详情面板组件
+# @Author VenDream
+# @Update 2016-8-8 18:27:49
+##
+
+BaseComp = require './BaseComp'
+Util = require './Util'
+ipcRenderer = window.require('electron').ipcRenderer
+config = require '../../../config'
+
+class DetailPanel extends BaseComp
+	constructor: (selector, eventBus) ->
+		super selector, eventBus
+
+		@CUR_SONG = null
+		@IS_EXPAND = false
+
+	init: ->
+		@panel = @html.querySelector '.detailPanel'
+
+		@shrinkBtn = @html.querySelector '.shrinkBtn'
+
+		@cover = @html.querySelector '.cover'
+		@dlSongBtn = @html.querySelector '.dlSongBtn'
+		@dlCoverBtn = @html.querySelector '.dlCoverBtn'
+		
+		@name = @html.querySelector '.name'
+		@quality = @html.querySelector '.quality'
+		@album = @html.querySelector '.album'
+		@artist = @html.querySelector '.artist'
+		@source = @html.querySelector '.source'
+
+		@lyrics = @html.querySelector 'lyrics'
+
+		# 下载响应
+		ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, s) =>
+			$(@dlSongBtn).removeClass 'DLing'
+				.addClass 'DLed'
+				.text '歌曲已下载'
+
+		ipcRenderer.on 'ipcMain::DownloadCoverSuccess', (event, s) =>
+			$(@dlCoverBtn).removeClass 'DLing'
+				.addClass 'DLed'
+				.text '封面已下载'				
+
+		@eventBinding()
+
+	render: ->
+		htmls = 
+			"""
+			<div class="detailPanel">
+				<div class="shrinkBtn"></div>
+				<div class="panel-left">
+					<div class="panel-c">
+						<div class="cover">
+							<img src="" alt="COVER">
+						</div>
+						<div class="operation">
+							<div class="button not-select dlSongBtn">
+								下载歌曲
+							</div>
+							<div class="button not-select dlCoverBtn">
+								下载封面
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="panel-right">
+					<div class="panel-c">
+						<div class="info">
+							<div>
+								<div class="name"></div>
+								<div class="quality"></div>
+							</div>
+							<div>
+								<div class="album"></div>
+								<div class="artist"></div>
+								<div class="source"></div>
+							</div>
+						</div>
+						<div class="lyrics"></div>
+					</div>
+				</div>
+			</div>
+			"""
+
+		@html.innerHTML = htmls
+		@emit 'renderFinished'
+
+	eventBinding: ->
+		# 点击缩小按钮
+		$(@shrinkBtn).unbind().on 'click', (evt) =>
+			@shrink()
+
+		# 点击下载歌曲
+		$(@dlSongBtn).unbind().on 'click', (evt) =>
+			hasDLed = $(@dlSongBtn).hasClass 'DLed'
+			isDLing = $(@dlSongBtn).hasClass 'DLing'
+
+			@CUR_SONG && !hasDLed && !isDLing && (
+				$(@dlSongBtn).addClass 'DLing'
+					.text '下载中...'
+				ipcRenderer.send 'ipcRenderer::DownloadSong', @CUR_SONG
+			)
+
+		# 点击下载封面
+		$(@dlCoverBtn).unbind().on 'click', (evt) =>
+			hasDLed = $(@dlCoverBtn).hasClass 'DLed'
+			isDLing = $(@dlCoverBtn).hasClass 'DLing'
+
+			@CUR_SONG && !hasDLed && !isDLing && (
+				@CUR_SONG.song_album = Util.filterFileName @CUR_SONG.song_album
+				$(@dlCoverBtn).addClass 'DLing'
+					.text '下载中...'
+				ipcRenderer.send 'ipcRenderer::DownloadCover', @CUR_SONG
+			)
+
+	#---------------------------------------------------
+	#                     对外接口
+	#---------------------------------------------------
+	
+	# 缩小详情面板
+	shrink: ->
+		@IS_EXPAND = false
+		$(@panel).parent('.detailPanel-c').removeClass 'expand'
+
+	# 放大详情面板
+	expand: ->
+		@IS_EXPAND = true
+		@CUR_SONG && $(@panel).parent('.detailPanel-c').addClass 'expand'
+
+	# 显示歌曲详情
+	# @param {object} song 歌曲对象
+	show: (song) ->
+		@CUR_SONG = song.song_info
+		s = song.song_info
+
+		# 显示封面
+		$img = $(@cover).find('img')
+		$img.attr 'src', song.song_info.song_cover
+		$img[0].onload = =>
+			$(@cover).removeClass 'rotate'
+
+			setTimeout =>
+				$(@cover).addClass 'rotate'
+			, 50
+
+		# 功能按钮
+		songPath = "#{config.save_path}/#{s.song_artist}/#{s.song_artist} - #{s.song_name}.mp3"
+		coverPath = "#{config.save_path}/专辑封面/《#{s.song_album}》.jpg"
+		hasSongDLed = Util.checkDLed songPath
+		hasCoverDLed = Util.checkDLed coverPath
+
+		if hasSongDLed is true
+			$(@dlSongBtn).addClass 'DLed'
+				.text '歌曲已下载'
+		else
+			$(@dlSongBtn).removeClass 'DLed'
+				.text '下载歌曲'
+
+		if hasCoverDLed is true
+			$(@dlCoverBtn).addClass 'DLed'
+				.text '封面已下载'
+		else
+			$(@dlCoverBtn).removeClass 'DLed'
+				.text '下载封面'
+
+		# 信息面板
+		$(@name).text s.song_name
+		$(@quality).text "#{s.song_quality}K"
+		$(@album).text "专辑: 《#{s.song_album}》"
+			.attr 'title', "《#{s.song_album}》"
+		$(@artist).text "歌手: #{s.song_artist}"
+			.attr 'title', s.song_artist
+		$(@source).text "来源: #{song.source}"
+			.attr 'title', song.source
+
+		switch s.song_quality
+			when 320
+				c = 'high'
+			when 128
+				c = 'medium'
+			when 96
+				c = 'low'
+		$(@quality).attr 'class',  "quality #{c}"
+
+	# 快捷键响应
+	# @param {number} kc 键码
+	hotKeyResponse: (kc) ->
+		switch kc
+			# Esc键切换面板状态
+			when 27
+				if @IS_EXPAND is true
+					@shrink()
+				else
+					@expand()
+
+module.exports = DetailPanel
