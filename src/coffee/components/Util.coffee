@@ -69,6 +69,32 @@ module.exports = {
 
 		return r
 
+	# 从数组中删除某元素
+	# @param {array}         arr 数组
+	# @param {string|number} ele 要删除的元素
+	removeFromArr: (arr, ele) ->
+		rlt = false
+		if arr.length > 0
+			arr.map (e, i) ->
+				if e is ele
+					arr.splice i, 1
+					rlt = true
+
+		return rlt
+
+	# 检查元素是否在数组中
+	# @param {array}         arr 数组
+	# @param {string|number} ele 要检查的元素
+	checkInArr: (arr, ele) ->
+		rlt = false
+
+		if arr.length > 0
+			arr.map (e, i) ->
+				if e is ele
+					rlt = true
+
+		return rlt
+
 	# 展示消息提示
 	# @param {string} msg      提示文本（可含HTML标签）
 	# @param {number} duration 消息持续时间(负数表示一直存在直到用户点击)

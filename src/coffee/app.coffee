@@ -59,6 +59,12 @@ eventBinding = ->
 		moePlayer && moePlayer.play song
 		detailPanel && detailPanel.show song
 
+	# 下载歌曲
+	eventBus.on 'MusicList::DownloadSong', (sid) ->
+		detailPanel && detailPanel.updateDLingSong sid
+	eventBus.on 'DetailPanel::DownloadSong', (sid) ->
+		musicList && musicList.updateDLingSong sid
+
 	# 切换歌曲
 	eventBus.on 'MoePlayer::PlayPrevSong', (data) ->
 		musicList && (

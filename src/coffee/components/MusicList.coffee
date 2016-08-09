@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-8 18:05:00
+# @Update 2016-8-9 14:04:21
 ##
 
 BaseComp = require './BaseComp'
@@ -26,6 +26,7 @@ class MusicList extends BaseComp
 		}
 
 		@PAGINATOR = null
+		@DLING_SONGS = []
 
 	init: ->
 		@api = "#{config.host}:#{config.port}/api/music/netease/song_info"
@@ -86,7 +87,7 @@ class MusicList extends BaseComp
 			evt.stopPropagation()
 			$song = $(evt.currentTarget).parents('.song')
 
-			if $song.hasClass('hasDLed') is true
+			if $song.hasClass('hasDLed') is true or $song.hasClass('DLing') is true
 				return false
 
 			sn = $song.find('.title-col').text()
@@ -134,24 +135,32 @@ class MusicList extends BaseComp
 		# 渲染新的数据
 		songs.map (s, i) =>
 			filepath = "#{config.save_path}/#{s.artist_name}/#{s.artist_name} - #{s.song_name}.mp3"
+			isDLing = Util.checkInArr @DLING_SONGS, s.song_id
 			hasDLed = Util.checkDLed filepath
 			idx = Util.fixZero base + i + 1, @totalCount
+
+			if isDLing is true
+				c = 'DLing'
+				t = '下载中'
+			else
+				if hasDLed is true
+					c = 'hasDLed'
+					t = '已下载'
+				else
+					t = '点击下载'
+
 			trHtml = 
 				"""
 				<tr class="song not-select #{
 					if String(s.song_id) is String(@curSongId) then 'playing' else ''
-				} #{
-					if hasDLed is true then 'hasDLed' else ''
-				}" data-sid="#{s.song_id}" data-idx="#{i}">
+				} #{c}" data-sid="#{s.song_id}" data-idx="#{i}">
 					<td class="index-col">#{idx}</td>
 					<td class="title-col">#{s.song_name}</td>
 					<td class="artist-col">#{s.artist_name}</td>
 					<td class="album-col">#{s.album_name}</td>
 					<td class="duration-col">#{Util.normalizeSeconds(s.duration)}</td>
 					<td class="operation-col">
-						<div class="btn dlBtn" title="#{
-							if hasDLed is true then '已下载' else '点击下载'
-						}"></div>
+						<div class="btn dlBtn" title="#{t}"></div>
 					</td>
 				</tr>
 				"""
@@ -219,6 +228,8 @@ class MusicList extends BaseComp
 			success: (data) =>
 				if data and data.status is 'success'
 					if $.isEmptyObject(data.data.song_info) is false
+						@updateDLingSong sid
+						@eventBus.emit 'MusicList::DownloadSong', sid
 						ipcRenderer.send 'ipcRenderer::DownloadSong', data.data.song_info
 					else
 						Util.showMsg @TIPS.SONG_INFO_ERROR, 3000, 3
@@ -238,13 +249,28 @@ class MusicList extends BaseComp
 			$sr.addClass 'playing'
 		)
 
-	# 更新已下载的歌曲
+	# 更新正在下载的歌曲
 	# @param {string} sid 歌曲ID
-	updateDLedSong: (sid) ->
+	updateDLingSong: (sid) ->
+		@DLING_SONGS.push sid
+
 		$sr = $('.song[data-sid="' + sid + '"]')
 
 		$sr.length > 0 && (
-			$sr.addClass 'hasDLed'
+			$sr.addClass 'DLing'
+			$sr.find('.dlBtn').attr 'title', '下载中'
+		)
+
+	# 更新已下载的歌曲
+	# @param {string} sid 歌曲ID
+	updateDLedSong: (sid) ->
+		Util.removeFromArr @DLING_SONGS, sid
+
+		$sr = $('.song[data-sid="' + sid + '"]')
+
+		$sr.length > 0 && (
+			$sr.removeClass 'DLing'
+				.addClass 'hasDLed'
 			$sr.find('.dlBtn').attr 'title', '已下载'
 		)
 

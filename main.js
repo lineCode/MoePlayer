@@ -12,7 +12,7 @@ const client = require('electron-connect').client;
 let win;
 let session;
 let webController;
-let songInfo = null;
+let dlQueue = [];
 
 /**************************************************
  *               Function Definition
@@ -54,8 +54,8 @@ function createWin() {
  * @param  {object} webContents webContents
  */
 function dlSetting(event, item, webContents) {
-	let song = _.assign({}, songInfo);
-	let suffix = song.savePath.slice(-4);
+	let dlItem = dlQueue.shift();
+	let suffix = dlItem.save_path.slice(-4);
 	// sen -> download success event name
 	// fen -> download failed  event name
 	let type, sen, fen; 
@@ -76,14 +76,14 @@ function dlSetting(event, item, webContents) {
 	fen = `ipcMain::Download${type}Failed`;
 
 	// Set Savepath
-	item.setSavePath(song.savePath);
+	item.setSavePath(dlItem.save_path);
 
 	// Sync Download Status
 	item.once('done', (event, state) => {
 		if (state =='completed') {
 			webController.send(sen, {
-				song_id: song.song_id,
-				song_name: song.song_name
+				song_id: dlItem.song_id,
+				song_name: dlItem.song_name
 			});
 		} else {
 			webController.send(fen, state);
@@ -97,18 +97,23 @@ function dlSetting(event, item, webContents) {
  * @param  {object} song  songInfo
  */
 function dlCover(event, song) {
-	songInfo = song;
-	songInfo.savePath = `${config.save_path}/专辑封面/《${song.song_album}》.jpg`;
+	let savePath = `${config.save_path}/专辑封面/《${song.song_album}》.jpg`;
+	let c = _.assign({
+		save_path: savePath
+	}, song);
 
-	fs.stat(songInfo.savePath, (err, stats) => {
+	dlQueue.push(c);
+
+	try {
+		let stat = fs.statSync(savePath);
 		// If Already Exists
-		if (err === null) {
+		if (stat)
 			webController.send('ipcMain::DownloadCoverSuccess', {});
+	}
+	catch (e) {
 		// If Not Exists
-		} else {
-			webController.downloadURL(songInfo.song_cover);
-		}
-	});
+		webController.downloadURL(song.song_cover);
+	}
 }
 
 /**
@@ -117,18 +122,26 @@ function dlCover(event, song) {
  * @param  {object} song  songInfo
  */
 function dlSong(event, song) {
-	songInfo = song;
-	songInfo.savePath = `${config.save_path}/${song.song_artist}/${song.song_artist} - ${song.song_name}.mp3`;
+	let savePath = `${config.save_path}/${song.song_artist}/${song.song_artist} - ${song.song_name}.mp3`;
+	let s = _.assign({
+		save_path: savePath
+	}, song);
 
-	fs.stat(songInfo.savePath, (err, stats) => {
+	dlQueue.push(s);
+
+	try {
+		let stat = fs.statSync(savePath);
 		// If Already Exists
-		if (err === null) {
-			webController.send('ipcMain::DownloadSongSuccess', song.song_name);
+		if (stat)
+			webController.send('ipcMain::DownloadSongSuccess', {
+				song_id: song.song_id
+				song_name: song.song_name
+			});
+	}
+	catch (e) {
 		// If Not Exists
-		} else {
-			webController.downloadURL(songInfo.song_url);
-		}
-	});
+		webController.downloadURL(song.song_url);
+	}
 }
 
 /**************************************************

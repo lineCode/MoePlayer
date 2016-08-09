@@ -1,7 +1,7 @@
 ##
 # 歌曲详情面板组件
 # @Author VenDream
-# @Update 2016-8-8 18:27:49
+# @Update 2016-8-9 14:04:28
 ##
 
 BaseComp = require './BaseComp'
@@ -15,6 +15,7 @@ class DetailPanel extends BaseComp
 
 		@CUR_SONG = null
 		@IS_EXPAND = false
+		@DLING_SONGS = []
 
 	init: ->
 		@panel = @html.querySelector '.detailPanel'
@@ -35,9 +36,10 @@ class DetailPanel extends BaseComp
 
 		# 下载响应
 		ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, s) =>
-			$(@dlSongBtn).removeClass 'DLing'
-				.addClass 'DLed'
-				.text '歌曲已下载'
+			if s.song_id is @CUR_SONG.song_id
+				@updateDLedSong s.song_id
+			else
+				Util.removeFromArr @DLING_SONGS, s.song_id
 
 		ipcRenderer.on 'ipcMain::DownloadCoverSuccess', (event, s) =>
 			$(@dlCoverBtn).removeClass 'DLing'
@@ -99,8 +101,8 @@ class DetailPanel extends BaseComp
 			isDLing = $(@dlSongBtn).hasClass 'DLing'
 
 			@CUR_SONG && !hasDLed && !isDLing && (
-				$(@dlSongBtn).addClass 'DLing'
-					.text '下载中...'
+				@updateDLingSong @CUR_SONG.song_id
+				@eventBus.emit 'DetailPanel::DownloadSong', @CUR_SONG.song_id
 				ipcRenderer.send 'ipcRenderer::DownloadSong', @CUR_SONG
 			)
 
@@ -149,16 +151,20 @@ class DetailPanel extends BaseComp
 		# 功能按钮
 		songPath = "#{config.save_path}/#{s.song_artist}/#{s.song_artist} - #{s.song_name}.mp3"
 		coverPath = "#{config.save_path}/专辑封面/《#{s.song_album}》.jpg"
+		isDLing = Util.checkInArr @DLING_SONGS, s.song_id
 		hasSongDLed = Util.checkDLed songPath
 		hasCoverDLed = Util.checkDLed coverPath
 
-		if hasSongDLed is true
-			$(@dlSongBtn).addClass 'DLed'
-				.text '歌曲已下载'
+		# 歌曲
+		if isDLing is true
+			@updateDLingSong s.song_id, false
 		else
-			$(@dlSongBtn).removeClass 'DLed'
-				.text '下载歌曲'
+			if hasSongDLed is true
+				@updateDLedSong s.song_id, false
+			else
+				@updateDefault()
 
+		# 封面
 		if hasCoverDLed is true
 			$(@dlCoverBtn).addClass 'DLed'
 				.text '封面已下载'
@@ -184,6 +190,30 @@ class DetailPanel extends BaseComp
 			when 96
 				c = 'low'
 		$(@quality).attr 'class',  "quality #{c}"
+
+	# 恢复默认
+	updateDefault: ->
+		$(@dlSongBtn).attr 'class', 'button not-select'
+			.text '下载歌曲'
+
+	# 更新正在下载的歌曲状态
+	# @param {string}  sid    歌曲ID
+	# @param {boolean} update 是否更新数组
+	updateDLingSong: (sid, update = true) ->
+		update && @DLING_SONGS.push sid
+
+		$(@dlSongBtn).addClass 'DLing'
+			.text '下载中...'
+
+	# 更新已下载的歌曲状态
+	# @param {string} sid 歌曲ID
+	# @param {boolean} update 是否更新数组
+	updateDLedSong: (sid, update = true) ->
+		update && Util.removeFromArr @DLING_SONGS, sid
+
+		$(@dlSongBtn).removeClass 'DLing'
+			.addClass 'DLed'
+			.text '歌曲已下载'
 
 	# 快捷键响应
 	# @param {number} kc 键码

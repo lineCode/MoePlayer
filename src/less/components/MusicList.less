@@ -76,14 +76,6 @@
 			tr:nth-child(even) {
 				background-color: @even-row-color;
 			}
-			.song.hasDLed {
-				.operation-col {
-					.dlBtn {
-						cursor: default;
-						background-image: url(../../assets/success.png);
-					}
-				}
-			}
 			.song.playing {
 				color: @theme-color;
 				background-color: @hover-color !important;
@@ -106,6 +98,22 @@
 						left: 0;
 						height: 100%;
 						width: 100%;
+					}
+				}
+			}
+			.song.hasDLed {
+				.operation-col {
+					.dlBtn {
+						cursor: default;
+						background-image: url(../../assets/success.png);
+					}
+				}
+			}
+			.song.DLing {
+				.operation-col {
+					.dlBtn {
+						cursor: default;
+						background-image: url(../../assets/doing.png);
 					}
 				}
 			}
