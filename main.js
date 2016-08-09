@@ -134,7 +134,7 @@ function dlSong(event, song) {
 		// If Already Exists
 		if (stat)
 			webController.send('ipcMain::DownloadSongSuccess', {
-				song_id: song.song_id
+				song_id: song.song_id,
 				song_name: song.song_name
 			});
 	}
