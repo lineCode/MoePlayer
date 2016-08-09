@@ -6,6 +6,7 @@
 
 BaseComp = require './BaseComp'
 Util = require './Util'
+LrcPanel = require './LrcPanel'
 ipcRenderer = window.require('electron').ipcRenderer
 config = require '../../../config'
 
@@ -16,6 +17,8 @@ class DetailPanel extends BaseComp
 		@CUR_SONG = null
 		@IS_EXPAND = false
 		@DLING_SONGS = []
+
+		@LRC_PANEL = null
 
 	init: ->
 		@panel = @html.querySelector '.detailPanel'
@@ -31,8 +34,6 @@ class DetailPanel extends BaseComp
 		@album = @html.querySelector '.album'
 		@artist = @html.querySelector '.artist'
 		@source = @html.querySelector '.source'
-
-		@lyrics = @html.querySelector 'lyrics'
 
 		# 下载响应
 		ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, s) =>
@@ -81,7 +82,7 @@ class DetailPanel extends BaseComp
 								<div class="source"></div>
 							</div>
 						</div>
-						<div class="lyrics"></div>
+						<div class="lyric-c"></div>
 					</div>
 				</div>
 			</div>
@@ -190,6 +191,14 @@ class DetailPanel extends BaseComp
 			when 96
 				c = 'low'
 		$(@quality).attr 'class',  "quality #{c}"
+
+		# 歌词面板
+		if not @LRC_PANEL?
+			@LRC_PANEL = new LrcPanel '.lyric-c', @eventBus
+			@LRC_PANEL.render()
+
+		@LRC_PANEL.loadLrc s.song_lyric
+		@LRC_PANEL.play()
 
 	# 恢复默认
 	updateDefault: ->
