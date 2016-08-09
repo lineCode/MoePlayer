@@ -147,6 +147,7 @@ class MusicList extends BaseComp
 					c = 'hasDLed'
 					t = '已下载'
 				else
+					c = ''
 					t = '点击下载'
 
 			trHtml = 
