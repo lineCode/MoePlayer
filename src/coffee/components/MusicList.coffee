@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-9 14:04:21
+# @Update 2016-8-11 18:09:56
 ##
 
 BaseComp = require './BaseComp'
@@ -95,6 +95,17 @@ class MusicList extends BaseComp
 
 			# Util.showMsg "#{@TIPS.DOWNLOAD_START}: 《#{sn}》"
 			sid && @getSongInfoAndDownload sid
+
+
+	# 歌曲名称获取不到时，使用备用歌曲名
+	# @param {object} songInfo 歌曲信息对象
+	fixSongName: (songInfo) ->
+		if not songInfo.song_name?
+			sid = songInfo.song_id
+			$sr = $('.song[data-sid="' + sid + '"]')
+			bn = $sr.find('.title-col').text()
+
+			songInfo.song_name = bn
 
 	# 渲染数据
 	# @param {object}  data    数据
@@ -207,6 +218,7 @@ class MusicList extends BaseComp
 				if data and data.status is 'success'
 					if $.isEmptyObject(data.data.song_info) is false
 						data.data.song_info.idx = idx
+						@fixSongName data.data.song_info
 						@updatePlayingSong sid
 						@eventBus.emit 'MusicList::PlaySong', data.data
 					else

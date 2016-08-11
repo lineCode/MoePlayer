@@ -1,7 +1,7 @@
 ##
 # 歌曲详情面板组件
 # @Author VenDream
-# @Update 2016-8-9 14:04:28
+# @Update 2016-8-11 18:10:01
 ##
 
 BaseComp = require './BaseComp'
@@ -34,6 +34,8 @@ class DetailPanel extends BaseComp
 		@album = @html.querySelector '.album'
 		@artist = @html.querySelector '.artist'
 		@source = @html.querySelector '.source'
+
+		@defaultCover = 'assets/default_cover.jpg'
 
 		# 下载响应
 		ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, s) =>
@@ -141,7 +143,7 @@ class DetailPanel extends BaseComp
 
 		# 显示封面
 		$img = $(@cover).find('img')
-		$img.attr 'src', song.song_info.song_cover
+		$img.attr 'src', song.song_info.song_cover or @defaultCover
 		$img[0].onload = =>
 			$(@cover).removeClass 'rotate'
 
@@ -174,14 +176,14 @@ class DetailPanel extends BaseComp
 				.text '下载封面'
 
 		# 信息面板
-		$(@name).text s.song_name
+		$(@name).text s.song_name or '暂无'
 		$(@quality).text "#{s.song_quality}K"
-		$(@album).text "专辑: 《#{s.song_album}》"
-			.attr 'title', "《#{s.song_album}》"
-		$(@artist).text "歌手: #{s.song_artist}"
-			.attr 'title', s.song_artist
-		$(@source).text "来源: #{song.source}"
-			.attr 'title', song.source
+		$(@album).text "专辑: 《#{s.song_album or '暂无'}》"
+			.attr 'title', "《#{s.song_album or '暂无'}》"
+		$(@artist).text "歌手: #{s.song_artist or '暂无'}"
+			.attr 'title', s.song_artist or '暂无'
+		$(@source).text "来源: #{song.source or '暂无'}"
+			.attr 'title', song.source or '暂无'
 
 		switch s.song_quality
 			when 320
