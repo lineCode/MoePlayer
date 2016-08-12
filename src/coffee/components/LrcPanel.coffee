@@ -61,6 +61,8 @@ class LrcPanel extends BaseComp
 
 	eventBinding: ->
 
+	# 渲染歌词数据
+	# @param {array} lrcArr 歌词数据
 	renderLrc: (lrcArr = @LRC_ARR) ->
 		$(@lrcPanel).removeClass 'empty'
 		$(@lrcUL).empty()
