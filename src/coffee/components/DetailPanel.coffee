@@ -1,7 +1,7 @@
 ##
 # 歌曲详情面板组件
 # @Author VenDream
-# @Update 2016-8-11 18:10:01
+# @Update 2016-8-12 18:53:01
 ##
 
 BaseComp = require './BaseComp'
@@ -200,7 +200,6 @@ class DetailPanel extends BaseComp
 			@LRC_PANEL.render()
 
 		@LRC_PANEL.loadLrc s.song_lyric
-		@LRC_PANEL.play()
 
 	# 恢复默认
 	updateDefault: ->
@@ -225,6 +224,19 @@ class DetailPanel extends BaseComp
 		$(@dlSongBtn).removeClass 'DLing'
 			.addClass 'DLed'
 			.text '歌曲已下载'
+
+	# 更新歌词滚动
+	# @param {number} curTime 正在播放的时间点
+	updateLrc: (curTime) ->
+		@LRC_PANEL.play curTime
+
+	# 暂停封面转动
+	pause: ->
+		$(@cover).addClass 'animation-paused'
+
+	# 恢复封面转动
+	resume: ->
+		$(@cover).removeClass 'animation-paused'
 
 	# 快捷键响应
 	# @param {number} kc 键码

@@ -65,6 +65,12 @@ eventBinding = ->
 	eventBus.on 'DetailPanel::DownloadSong', (sid) ->
 		musicList && musicList.updateDLingSong sid
 
+	# 暂停恢复
+	eventBus.on 'MoePlayer::Pause', ->
+		detailPanel && detailPanel.pause()
+	eventBus.on 'MoePlayer::Resume', ->
+		detailPanel && detailPanel.resume()	
+
 	# 切换歌曲
 	eventBus.on 'MoePlayer::PlayPrevSong', (data) ->
 		musicList && (
@@ -74,6 +80,10 @@ eventBinding = ->
 		musicList && (
 			musicList.getSongInfoAndPlay data.song_id, data.idx
 		)
+
+	# 播放进度更新
+	eventBus.on 'MoePlayer::UpdateTime', (curTime) ->
+		detailPanel && detailPanel.updateLrc curTime
 
 	# 歌曲详情
 	eventBus.on 'MoePlayer::ExpandDetailPanel', ->

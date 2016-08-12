@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-8-3 18:06:18
+# @Update 2016-8-12 18:53:09
 ##
 
 BaseComp = require './BaseComp'
@@ -126,7 +126,7 @@ class MoePlayer extends BaseComp
 		@playControl()
 
 		$(@cover).unbind().on 'click', =>
-			@CUR_SONG && @eventBus.emit 'MoePlayer::ExpandDetailPanel'
+			@CUR_SONG and @eventBus.emit 'MoePlayer::ExpandDetailPanel'
 
 	# 音量控制
 	volumeControl: ->
@@ -252,7 +252,7 @@ class MoePlayer extends BaseComp
 	# 播放
 	# param {object} song 歌曲对象
 	play: (song) ->
-		@pause()
+		@pause false
 
 		# 时间重置为 00:00
 		$(@playedTime).text '00:00'
@@ -296,22 +296,30 @@ class MoePlayer extends BaseComp
 		.on 'canplay', =>
 			@player.play()
 			@startProgress song.song_info.song_duration
+		.on 'timeupdate', =>
+			@eventBus.emit 'MoePlayer::UpdateTime', @player.currentTime
 
 	# 继续播放
-	resume: ->
+	# @param {boolean} isEmit 是否发送事件
+	resume: (isEmit = true) ->
 		@player.play()
 		$(@status).addClass 'playing'
 		$(@status).find('img').attr 'src', @ICONS.PAUSE
 
 		@TIMER.resume()
 
+		isEmit and @eventBus.emit 'MoePlayer::Resume'
+
 	# 暂停播放
-	pause: ->
+	# @param {boolean} isEmit 是否发送事件
+	pause: (isEmit = true) ->
 		@player.pause()
 		$(@status).removeClass 'playing'
 		$(@status).find('img').attr 'src', @ICONS.PLAY
 
 		@TIMER.pause()
+
+		isEmit and @eventBus.emit 'MoePlayer::Pause'
 
 	# 停止播放
 	stop: ->
