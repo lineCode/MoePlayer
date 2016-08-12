@@ -16,6 +16,7 @@ class LrcPanel extends BaseComp
 		@CUR_LINE = 0
 
 		@CENTER_TOP = 0
+		# 歌词行高(20px + 上下margin的6px，共32px)
 		@LINE_HEIGHT = 32
 
 		# 预定义标签正则集合
