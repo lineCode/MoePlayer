@@ -99,7 +99,7 @@ module.exports = {
 	# @param {string} msg      提示文本（可含HTML标签）
 	# @param {number} duration 消息持续时间(负数表示一直存在直到用户点击)
 	# @param {number} level    级别（默认为正常）
-	showMsg: (msg, duration = 2000, level = 0) ->
+	showMsg: (msg, duration = 3000, level = 0) ->
 		if msg is ''
 			return false
 

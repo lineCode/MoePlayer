@@ -86,6 +86,10 @@ class LrcPanel extends BaseComp
 		# 获取高亮行应该处在的位置
 		@CENTER_TOP = $(@panel).height() / 2 - @LINE_HEIGHT
 
+	# 解析LRC歌词行文本
+	# @param {string} line 歌词行文本
+	parseLrcLine: (line) ->
+
 	# 逐行解析LRC歌词数据
 	# @param {string} lrc 歌词数据
 	# 
@@ -128,16 +132,22 @@ class LrcPanel extends BaseComp
 					@CONTENT_REG_MAP.TIME.lastIndex = 0
 					@CONTENT_REG_MAP.TEXT.lastIndex = 0
 
-					lineObj = {
-						time: time and @getTime(time[1], time[2], time[3]) or 0
-						text: text and text[1] or '\n'
-						lineNo: i
-					}
+					# 无内容的歌词行不予显示
+					if text?
+						lineObj = {
+							time: time and @getTime(time[1], time[2], time[3]) or 0
+							text: text and text[1]
+						}
 
-					@LRC_ARR.push lineObj
+						@LRC_ARR.push lineObj
 
+			# 更新行数索引
+			@LRC_ARR.map (lo, i) =>
+				lo.lineNo = i
+
+			# 更新排序
 			@LRC_ARR.sort (a, b) ->
-				return a.time - b.time
+				return a.time - b.time			
 		)
 
 	# 根据时间点找到应该显示的行数

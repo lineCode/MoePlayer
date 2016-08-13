@@ -1,7 +1,7 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2016-7-29 18:12:28
+# @Update 2016-8-13 11:18:27
 ##
 
 BaseComp = require './BaseComp'
@@ -11,10 +11,13 @@ class SearchBox extends BaseComp
 	constructor: (selector, eventBus) ->
 		super selector, eventBus
 
-		@sstr = ''
-		@page = 1
+		@TIPS = {
+			RETRY_TIPS: '请求失败了，尝试重新请求...0v0'
+		}
 
 	init: ->
+		@sstr = ''
+		@page = 1
 		@api = "#{config.host}:#{config.port}/api/music/netease/search"
 
 		@input = @html.querySelector '.search-input'
@@ -95,7 +98,9 @@ class SearchBox extends BaseComp
 				}
 			,
 			error: (err) =>
-				@eventBus.emit 'SearchBox::NetworkError', err
+				# Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
+				# @eventBus.emit 'SearchBox::NetworkError', err
+				@doSearch sstr, page
 		}
 
 module.exports = SearchBox

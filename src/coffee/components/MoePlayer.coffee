@@ -67,7 +67,7 @@ class MoePlayer extends BaseComp
 		htmls = 
 			"""
 			<div class="moePlayer">
-				<audio class="mp-player hidden"></audio>
+				<audio preload="auto" class="mp-player hidden"></audio>
 				<div class="mp-part mp-cover not-select">
 					<div class="cover-c">
 						<img src="#{@ICONS.COVER}" alt="封面图片">
@@ -293,9 +293,11 @@ class MoePlayer extends BaseComp
 				$(@cover).find('img').attr 'src', @ICONS.COVER
 			# 载入总时长
 			$(@totalTime).text Util.normalizeSeconds(song.song_info.song_duration)
-		.on 'canplay', =>
+
+		.on 'canplaythrough', =>
 			@player.play()
 			@startProgress song.song_info.song_duration
+
 		.on 'timeupdate', =>
 			@eventBus.emit 'MoePlayer::UpdateTime', @player.currentTime
 

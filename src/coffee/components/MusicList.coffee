@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-11 18:09:56
+# @Update 2016-8-13 11:18:32
 ##
 
 BaseComp = require './BaseComp'
@@ -23,6 +23,7 @@ class MusicList extends BaseComp
 			NOT_FOUND_ERROR: '搜索不到相关的东西惹QAQ',
 			NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
 			SONG_INFO_ERROR: '获取歌曲信息失败：歌曲已失效或需要付费'
+			RETRY_TIPS: '请求失败了，尝试重新请求...0v0'
 		}
 
 		@PAGINATOR = null
@@ -226,7 +227,8 @@ class MusicList extends BaseComp
 						return false
 			, 
 			error: (err) =>
-				console.log err
+				# Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
+				@getSongInfoAndPlay sid, idx
 		}
 
 	# 获取歌曲信息并执行下载
@@ -249,7 +251,8 @@ class MusicList extends BaseComp
 						return false
 			, 
 			error: (err) =>
-				console.log err
+				# Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
+				@getSongInfoAndDownload sid
 		}
 
 	# 更新显示正在播放的歌曲
