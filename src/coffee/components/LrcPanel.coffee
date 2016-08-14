@@ -1,7 +1,7 @@
 ##
 # 歌词面板组件
 # @Author VenDream
-# @Update 2016-8-12 18:53:04
+# @Update 2016-8-14 23:55:35
 ##
 
 BaseComp = require './BaseComp'
@@ -39,6 +39,8 @@ class LrcPanel extends BaseComp
 			TIME: /\[(\d{2,}):(\d{2})\.(\d{2,3})\]/g
 			# 歌词内容
 			TEXT: /\[\d{2,}:\d{2}\.\d{2,3}\](.+)/g
+			# 是否为空内容
+			EMPTY: /[\s\r?\n]/g
 		}
 
 	init: ->
@@ -86,15 +88,10 @@ class LrcPanel extends BaseComp
 		# 获取高亮行应该处在的位置
 		@CENTER_TOP = $(@panel).height() / 2 - @LINE_HEIGHT
 
-	# 解析LRC歌词行文本
+	# 逐行解析LRC歌词行文本
 	# @param {string} line 歌词行文本
-	parseLrcLine: (line) ->
-
-	# 逐行解析LRC歌词数据
-	# @param {string} lrc 歌词数据
 	# 
 	# LRC歌词标准格式：
-	# 
 	# --------------------(预定义标签)
 	# [ar:艺人名]
 	# [ti:曲名]
@@ -106,6 +103,40 @@ class LrcPanel extends BaseComp
 	# [mm:ss.ff] 歌词文本 (分钟:秒数.毫秒数)
 	# 如：[00:32.390]月明かり昇る刻
 	# 
+	parseLrcLine: (line) ->
+		lo = null
+
+		# 获取所有时间信息
+		tArr = line.match @CONTENT_REG_MAP.TIME
+		# 获取所有文本信息
+		text = line.replace @CONTENT_REG_MAP.TIME, ''
+
+		# 如果一个文本对应多个时间，如：
+		# [03:35.01][02:41.25][01:47.47][01:20.45]雨下整夜 我的爱溢出就象雨水
+		# 则需要重组信息再进行处理
+		if tArr and tArr.length > 1
+			for t in tArr
+				l = "#{t}#{text}"
+				@parseLrcLine l
+
+			return
+
+		# 获取时间信息
+		time = @CONTENT_REG_MAP.TIME.exec line
+		# exec匹配完之后，如果要检索新的字符串，必须手动把lastIndex重置为0
+		@CONTENT_REG_MAP.TIME.lastIndex = 0
+
+		# 无内容的歌词行不予显示
+		if text.replace(@CONTENT_REG_MAP.EMPTY, '') isnt ''
+			lo = {
+				time: time and @getTime(time[1], time[2], time[3]) or 0
+				text: text
+			}
+
+			lo and @LRC_ARR.push lo
+
+	# 解析LRC歌词数据
+	# @param {string} lrc 歌词数据
 	parseLrc: (lrc) ->
 		@TAGS = {}
 		@LRC_ARR = []
@@ -125,29 +156,15 @@ class LrcPanel extends BaseComp
 				line = @trim line
 
 				if line isnt ''
-					time = @CONTENT_REG_MAP.TIME.exec line
-					text = @CONTENT_REG_MAP.TEXT.exec line
-
-					# exec匹配完之后，如果要检索新的字符串，必须手动把lastIndex重置为0
-					@CONTENT_REG_MAP.TIME.lastIndex = 0
-					@CONTENT_REG_MAP.TEXT.lastIndex = 0
-
-					# 无内容的歌词行不予显示
-					if text?
-						lineObj = {
-							time: time and @getTime(time[1], time[2], time[3]) or 0
-							text: text and text[1]
-						}
-
-						@LRC_ARR.push lineObj
-
-			# 更新行数索引
-			@LRC_ARR.map (lo, i) =>
-				lo.lineNo = i
+					@parseLrcLine line
 
 			# 更新排序
 			@LRC_ARR.sort (a, b) ->
-				return a.time - b.time			
+				return a.time - b.time
+
+			# 更新行数索引
+			@LRC_ARR.map (lo, i) =>
+				lo.lineNo = i		
 		)
 
 	# 根据时间点找到应该显示的行数
