@@ -1,7 +1,7 @@
 ##
 # 歌词面板组件
 # @Author VenDream
-# @Update 2016-8-14 23:55:35
+# @Update 2016-8-15 11:35:30
 ##
 
 BaseComp = require './BaseComp'
@@ -36,7 +36,7 @@ class LrcPanel extends BaseComp
 		# 时间标签正则集合
 		@CONTENT_REG_MAP = {
 			# 时间
-			TIME: /\[(\d{2,}):(\d{2})\.(\d{2,3})\]/g
+			TIME: /\[(\d{2,}):(\d{2})\.(\d{1,3})\]/g
 			# 歌词内容
 			TEXT: /\[\d{2,}:\d{2}\.\d{2,3}\](.+)/g
 			# 是否为空内容
@@ -67,26 +67,30 @@ class LrcPanel extends BaseComp
 	# 渲染歌词数据
 	# @param {array} lrcArr 歌词数据
 	renderLrc: (lrcArr = @LRC_ARR) ->
-		$(@lrcPanel).removeClass 'empty'
 		$(@lrcUL).empty()
 		$(@lrcUL).css 'margin-top', 0
 
-		@LRC_ARR.map (lo, i) =>
-			li = 
-				"""
-				<li data-line="#{lo.lineNo}"
-					data-offset="#{lo.lineNo * @LINE_HEIGHT}">
-					#{lo.text}
-				</li>
-				"""
+		if @LRC_ARR.length > 0
+			$(@lrcPanel).removeClass 'empty'
+			@LRC_ARR.map (lo, i) =>
+				li = 
+					"""
+					<li data-line="#{lo.lineNo}"
+						data-offset="#{lo.lineNo * @LINE_HEIGHT}">
+						#{lo.text}
+					</li>
+					"""
 
-			$(@lrcUL).append $(li)
+				$(@lrcUL).append $(li)
 
-		# 歌词数组逆序保存一次，方便后面的查找操作
-		@LRC_ARR.reverse()
+			# 歌词数组逆序保存一次，方便后面的查找操作
+			@LRC_ARR.reverse()
 
-		# 获取高亮行应该处在的位置
-		@CENTER_TOP = $(@panel).height() / 2 - @LINE_HEIGHT
+			# 获取高亮行应该处在的位置
+			@CENTER_TOP = $(@panel).height() / 2 - @LINE_HEIGHT
+		else
+			$(@lrcPanel).addClass 'empty'
+			return
 
 	# 逐行解析LRC歌词行文本
 	# @param {string} line 歌词行文本
@@ -126,7 +130,7 @@ class LrcPanel extends BaseComp
 		# exec匹配完之后，如果要检索新的字符串，必须手动把lastIndex重置为0
 		@CONTENT_REG_MAP.TIME.lastIndex = 0
 
-		# 无内容的歌词行不予显示
+		# 空内容歌词行不予显示
 		if text.replace(@CONTENT_REG_MAP.EMPTY, '') isnt ''
 			lo = {
 				time: time and @getTime(time[1], time[2], time[3]) or 0
@@ -229,7 +233,7 @@ class LrcPanel extends BaseComp
 	# 加载歌词数据
 	# @param {string} lrc 歌词数据
 	loadLrc: (lrc) ->
-		if lrc
+		if lrc and lrc.match(@CONTENT_REG_MAP.TIME)
 			@parseLrc @trim(lrc)
 			@renderLrc @LRC_ARR
 		else
@@ -241,8 +245,7 @@ class LrcPanel extends BaseComp
 	play: (curTime) ->
 		# 转换为毫秒
 		t = curTime * 1000
-
-		@updateShowingLine t
+		@LRC_ARR.length > 0 and @updateShowingLine t
 
 	# 暂停歌词滚动
 	pause: ->

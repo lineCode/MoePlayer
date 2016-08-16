@@ -98,15 +98,19 @@ class MusicList extends BaseComp
 			sid && @getSongInfoAndDownload sid
 
 
-	# 歌曲名称获取不到时，使用备用歌曲名
+	# 歌曲信息获取不到时，使用备用歌曲信息
 	# @param {object} songInfo 歌曲信息对象
-	fixSongName: (songInfo) ->
-		if not songInfo.song_name?
-			sid = songInfo.song_id
-			$sr = $('.song[data-sid="' + sid + '"]')
-			bn = $sr.find('.title-col').text()
+	fixSongInfo: (songInfo) ->
+		sid = songInfo.song_id
+		$sr = $('.song[data-sid="' + sid + '"]')
 
-			songInfo.song_name = bn
+		TI = $sr.find('.title-col').text().replace /[《》]/g, ''
+		AL = $sr.find('.album-col').text().replace /[《》]/g, ''
+		AR = $sr.find('.artist-col').text().replace /[《》]/g, ''
+
+		!songInfo.song_name && songInfo.song_name = TI
+		!songInfo.song_album && songInfo.song_album = AL
+		!songInfo.song_artist && songInfo.song_artist = AR
 
 	# 渲染数据
 	# @param {object}  data    数据
@@ -219,7 +223,7 @@ class MusicList extends BaseComp
 				if data and data.status is 'success'
 					if $.isEmptyObject(data.data.song_info) is false
 						data.data.song_info.idx = idx
-						@fixSongName data.data.song_info
+						@fixSongInfo data.data.song_info
 						@updatePlayingSong sid
 						@eventBus.emit 'MusicList::PlaySong', data.data
 					else

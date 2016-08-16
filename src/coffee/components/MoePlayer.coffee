@@ -57,7 +57,7 @@ class MoePlayer extends BaseComp
 		#-------------
 		@playMode = @addons.querySelector '.play-mode'
 
-
+		@defaultCover = 'assets/default_cover.jpg'
 		@TIMER = new Timer()
 		@DRAGGER = new Dragger()
 
@@ -287,10 +287,7 @@ class MoePlayer extends BaseComp
 		# 加载数据并播放
 		$(@player).unbind().on 'loadedmetadata', =>
 			# 载入封面
-			if song.song_info.song_cover
-				$(@cover).find('img').attr 'src', song.song_info.song_cover
-			else
-				$(@cover).find('img').attr 'src', @ICONS.COVER
+			$(@cover).find('img').attr 'src', song.song_info.song_cover or @defaultCover
 			# 载入总时长
 			$(@totalTime).text Util.normalizeSeconds(song.song_info.song_duration)
 
