@@ -30,7 +30,7 @@ class MusicList extends BaseComp
 		@DLING_SONGS = []
 
 	init: ->
-		@api = "#{config.host}:#{config.port}/api/music/netease/song_info"
+		@api = "#{config.host}:#{config.port}/api/music/kuwo/song_info"
 		@curSongId = ''
 
 		@table = @html.querySelector 'table'
@@ -107,10 +107,12 @@ class MusicList extends BaseComp
 		TI = $sr.find('.title-col').text().replace /[《》]/g, ''
 		AL = $sr.find('.album-col').text().replace /[《》]/g, ''
 		AR = $sr.find('.artist-col').text().replace /[《》]/g, ''
+		QA = $sr.find('.quality-col').attr 'data-quality'
 
 		!songInfo.song_name && songInfo.song_name = TI
 		!songInfo.song_album && songInfo.song_album = AL
 		!songInfo.song_artist && songInfo.song_artist = AR
+		!songInfo.song_quality && QA isnt '-1' && songInfo.song_quality = parseInt(QA)
 
 	# 渲染数据
 	# @param {object}  data    数据
@@ -179,6 +181,7 @@ class MusicList extends BaseComp
 					<td class="operation-col">
 						<div class="btn dlBtn" title="#{t}"></div>
 					</td>
+					<td class="quality-col hidden" data-quality="#{s.quality or -1}"></td>
 				</tr>
 				"""
 			$tr = $(trHtml)

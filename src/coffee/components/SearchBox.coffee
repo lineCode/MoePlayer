@@ -18,7 +18,7 @@ class SearchBox extends BaseComp
 	init: ->
 		@sstr = ''
 		@page = 1
-		@api = "#{config.host}:#{config.port}/api/music/netease/search"
+		@api = "#{config.host}:#{config.port}/api/music/kuwo/search"
 
 		@input = @html.querySelector '.search-input'
 		@goBtn = @html.querySelector '.go-btn'

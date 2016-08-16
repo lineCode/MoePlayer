@@ -139,13 +139,9 @@ class LrcPanel extends BaseComp
 
 			lo and @LRC_ARR.push lo
 
-	# 解析LRC歌词数据
-	# @param {string} lrc 歌词数据
-	parseLrc: (lrc) ->
-		@TAGS = {}
-		@LRC_ARR = []
-		@CUR_LINE = 0
-
+	# 解析字符串型LRC歌词数据
+	# @param {string} lrc  歌词数据
+	parseLrcString: (lrc) ->
 		# 获取Tag信息
 		for tag, reg of @TAG_REG_MAP
 			res = lrc.match reg
@@ -160,25 +156,61 @@ class LrcPanel extends BaseComp
 				line = @trim line
 
 				if line isnt ''
-					@parseLrcLine line
-
-			# 更新排序
-			@LRC_ARR.sort (a, b) ->
-				return a.time - b.time
-
-			# 更新行数索引
-			@LRC_ARR.map (lo, i) =>
-				lo.lineNo = i		
+					@parseLrcLine line		
 		)
+
+	# 解析数组型LRC歌词数据
+	# @param {string} lrc  歌词数据
+	paresLrcArray: (lrc) ->
+		for _lo in lrc
+			lo = {
+				time: parseFloat(_lo.time) * 1000,
+				text: _lo.lineLyric
+			}
+
+			lo and @LRC_ARR.push lo
+
+	# 解析LRC歌词数据
+	# @param {string} lrc  歌词数据
+	# @param {number} type 歌词数据类型(0 -> 字符串，1 -> 数组)
+	parseLrc: (lrc, type = 0) ->
+		@TAGS = {}
+		@LRC_ARR = []
+		@CUR_LINE = 0
+
+		switch type
+			when 0
+				@parseLrcString lrc
+			when 1
+				@paresLrcArray lrc
+			else
+				@parseLrcString lrc
+
+		# 更新排序
+		type is 0 and @LRC_ARR.sort (a, b) ->
+			return a.time - b.time
+
+		# 更新行数索引
+		@LRC_ARR.map (lo, i) =>
+			lo.lineNo = i
 
 	# 根据时间点找到应该显示的行数
 	# @param {number} t 时间点
 	findLineByTime: (t) ->
-		targetLine = 0
+		targetLine = [0]
 
-		for lo in @LRC_ARR
+		for i, lo of @LRC_ARR
 			if lo.time <= t
-				targetLine = lo.lineNo
+				targetLine = [lo.lineNo]
+
+				# 检测是否为翻译文本
+				if i >= 2
+					if @LRC_ARR[i - 1].time is @LRC_ARR[i - 2].time
+						targetLine = [lo.lineNo, lo.lineNo + 1]
+				else 
+					if @LRC_ARR[i + 1].time is lo.time.time
+						targetLine = [lo.lineNo, lo.lineNo + 1]
+
 				break
 
 		return targetLine
@@ -186,7 +218,8 @@ class LrcPanel extends BaseComp
 	# 更新目前应该显示的歌词行
 	# @param {number} t 时间点
 	updateShowingLine: (t) ->
-		l = @findLineByTime t
+		la = @findLineByTime t
+		l = la[0]
 
 		if @CUR_LINE isnt l or l is 0
 			@CUR_LINE = l
@@ -198,15 +231,15 @@ class LrcPanel extends BaseComp
 				$(@lrcUL).find('li').removeClass 'showing'
 			if $line.hasClass('showing') is false
 				$line.addClass 'showing'
+				if la.length > 1
+					$nLine = $(@lrcUL).find("li[data-line=\"#{@CUR_LINE + 1}\"]")
+					$nLine.addClass 'showing'
 
 			# 歌词滚动
 			top = parseInt $line.attr('data-offset')
 			if top > @CENTER_TOP # 歌词在中央部位以下，需要滚动
 				offset = "#{-Math.abs(top - @CENTER_TOP)}px"
 				$(@lrcUL).css 'margin-top', offset
-
-		else
-			return false
 
 	# 过滤歌词中的空格
 	# # @param {string} lrc 歌词数据
@@ -233,8 +266,11 @@ class LrcPanel extends BaseComp
 	# 加载歌词数据
 	# @param {string} lrc 歌词数据
 	loadLrc: (lrc) ->
-		if lrc and lrc.match(@CONTENT_REG_MAP.TIME)
-			@parseLrc @trim(lrc)
+		if typeof lrc is 'string' and lrc.match(@CONTENT_REG_MAP.TIME)
+			@parseLrc @trim(lrc), 0
+			@renderLrc @LRC_ARR
+		else if lrc instanceof Array is true
+			@parseLrc lrc, 1
 			@renderLrc @LRC_ARR
 		else
 			$(@lrcPanel).addClass 'empty'

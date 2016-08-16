@@ -203,7 +203,7 @@ class DetailPanel extends BaseComp
 
 	# 恢复默认
 	updateDefault: ->
-		$(@dlSongBtn).attr 'class', 'button not-select'
+		$(@dlSongBtn).attr 'class', 'button not-select dlSongBtn'
 			.text '下载歌曲'
 
 	# 更新正在下载的歌曲状态
