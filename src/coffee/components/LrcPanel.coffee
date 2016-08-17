@@ -207,7 +207,7 @@ class LrcPanel extends BaseComp
 				if i >= 2
 					if @LRC_ARR[i - 1].time is @LRC_ARR[i - 2].time
 						targetLine = [lo.lineNo, lo.lineNo + 1]
-				else 
+				else if i is 1
 					if @LRC_ARR[i + 1].time is lo.time.time
 						targetLine = [lo.lineNo, lo.lineNo + 1]
 
