@@ -52,7 +52,7 @@ eventBinding = ->
 
 	# 选择分页
 	eventBus.on 'MusicList::SelectPage', (pageIndex) ->
-		searchBox && searchBox.doSearch null, pageIndex
+		searchBox && searchBox.doSearch null, null, pageIndex
 
 	# 选中播放
 	eventBus.on 'MusicList::PlaySong', (song) ->

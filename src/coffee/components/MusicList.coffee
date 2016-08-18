@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-13 11:18:32
+# @Update 2016-8-18 11:00:16
 ##
 
 BaseComp = require './BaseComp'
@@ -30,7 +30,8 @@ class MusicList extends BaseComp
 		@DLING_SONGS = []
 
 	init: ->
-		@api = "#{config.host}:#{config.port}/api/music/kuwo/song_info"
+		@src = ''
+		@api = "#{config.host}:#{config.port}/api/music/info"
 		@curSongId = ''
 
 		@table = @html.querySelector 'table'
@@ -119,6 +120,7 @@ class MusicList extends BaseComp
 		$(@tipsRow).fadeOut 0
 
 		if data and data.status is 'success'
+			@src = data.data.src
 			if data.data.songs
 				base = (data.data.page - 1) * config.num_per_page
 				@totalCount = data.data.count
@@ -217,7 +219,8 @@ class MusicList extends BaseComp
 			type: 'POST',
 			url: @api,
 			data: {
-				song_id: sid
+				song_id: sid,
+				src: @src
 			},
 			success: (data) =>
 				if data and data.status is 'success'
@@ -231,8 +234,7 @@ class MusicList extends BaseComp
 						return false
 			, 
 			error: (err) =>
-				# Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
-				@getSongInfoAndPlay sid, idx
+				Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
 		}
 
 	# 获取歌曲信息并执行下载
@@ -242,7 +244,8 @@ class MusicList extends BaseComp
 			type: 'POST',
 			url: @api,
 			data: {
-				song_id: sid
+				song_id: sid,
+				src: @src
 			},
 			success: (data) =>
 				if data and data.status is 'success'
@@ -255,8 +258,7 @@ class MusicList extends BaseComp
 						return false
 			, 
 			error: (err) =>
-				# Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
-				@getSongInfoAndDownload sid
+				Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
 		}
 
 	# 更新显示正在播放的歌曲

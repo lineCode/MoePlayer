@@ -1,10 +1,11 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2016-8-13 11:18:27
+# @Update 2016-8-18 11:00:10
 ##
 
 BaseComp = require './BaseComp'
+Util = require './Util'
 config = require '../../../config.js'
 
 class SearchBox extends BaseComp
@@ -18,8 +19,9 @@ class SearchBox extends BaseComp
 	init: ->
 		@sstr = ''
 		@page = 1
-		@api = "#{config.host}:#{config.port}/api/music/kuwo/search"
+		@api = "#{config.host}:#{config.port}/api/music/search"
 
+		@source = @html.querySelector '.source'
 		@input = @html.querySelector '.search-input'
 		@goBtn = @html.querySelector '.go-btn'
 		@clearBtn = @html.querySelector '.clear-btn'
@@ -32,6 +34,10 @@ class SearchBox extends BaseComp
 		htmls = 
 			"""
 			<div class="searchBox">
+				<select class="source">
+					<option data-src="netease">网易云音乐</option>
+					<option data-src="kuwo">酷我音乐</option>
+				</select>
 				<input name="music-info" type="text" class="search-input" 
 					placeholder="输入歌曲信息（名称、歌手）" />
 				<div class="go-btn not-select">搜索</div>
@@ -48,9 +54,11 @@ class SearchBox extends BaseComp
 
 		# 搜索
 		$(@goBtn).on 'click', (evt) =>
-			val = $(@input).val()
-			if val isnt '' and $(@goBtn).attr('data-searching') is '0'
-				@doSearch val, 1
+			sstr = $(@input).val()
+			src = $(@source).find('option:selected').attr 'data-src'
+
+			if sstr isnt '' and $(@goBtn).attr('data-searching') is '0'
+				@doSearch sstr, src, 1
 
 		# 清空
 		$(@clearBtn).on 'click', (evt) =>
@@ -68,9 +76,14 @@ class SearchBox extends BaseComp
 
 	# 执行搜索
 	# @param {string} sstr 关键词
+	# @param {string} src  音乐来源
 	# @param {number} page 页码
-	doSearch: (sstr = @sstr, page = @page) ->
-		refresh = if sstr is @sstr then false else true
+	doSearch: (sstr = @sstr, src = @src, page = @page) ->
+		if sstr is @sstr and src is @src
+			refresh = false
+		else
+			refresh = true
+
 		if sstr is ''
 			return false
 
@@ -78,8 +91,9 @@ class SearchBox extends BaseComp
 			type: 'POST',
 			url: @api,
 			data: {
+				sstr: sstr,
+				src: src
 				page: page,
-				sstr: sstr
 			},
 			beforeSend: =>
 				$(@goBtn).attr 'data-searching', '1'
@@ -90,17 +104,19 @@ class SearchBox extends BaseComp
 				$(@loader).fadeOut 200	
 			success: (data) =>
 				@sstr = sstr
+				@src = src
 				@page = page
 				data.data.page = @page
+				data.data.src = @src
 				@eventBus.emit 'SearchBox::GetSearchResult', {
 					data: data
 					refresh: refresh
 				}
 			,
 			error: (err) =>
-				# Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
-				# @eventBus.emit 'SearchBox::NetworkError', err
-				@doSearch sstr, page
+				Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
+				@eventBus.emit 'SearchBox::NetworkError', err
+				# @doSearch sstr, src, page
 		}
 
 module.exports = SearchBox
