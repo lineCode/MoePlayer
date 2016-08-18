@@ -48,6 +48,7 @@ class Paginator extends BaseComp
 		@render()
 
 	init: ->
+		@total = @html.querySelector '.total-num'
 		@paginator = @html.querySelector '.paginator'
 		@targetPageInput = @html.querySelector '.target-page-input'
 		@jumpBtn = @html.querySelector '.jump-btn'
@@ -59,6 +60,9 @@ class Paginator extends BaseComp
 		htmls = 
 			"""
 			<div class='p-container'>
+				<div class='p-total'>
+					共<span class="total-num">0</span>条记录
+				</div>
 				<div class='p-list'>
 					<ul class='paginator pagination pagination-sm'></ul>
 				</div>
@@ -92,12 +96,13 @@ class Paginator extends BaseComp
 	# @param {object} config     用户配置
 	doPagination: (maxEntries = @maxEntries, config = @userConfig) ->
 		@curPage = 0
-		
 		@calMaxPage maxEntries
-		$(@targetPageInput).attr 'max', @maxPages
-		$(@paginator).pagination maxEntries, config
 
-		$(@targetPageInput).val @curPage + 1
+		$(@targetPageInput).attr 'max', @maxPages
+			.val @curPage + 1
+		$(@total).text maxEntries
+
+		$(@paginator).pagination maxEntries, config
 
 	# 事件绑定
 	eventBinding: ->
