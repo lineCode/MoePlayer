@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-18 11:00:16
+# @Update 2016-8-19 17:36:09
 ##
 
 BaseComp = require './BaseComp'
@@ -22,8 +22,8 @@ class MusicList extends BaseComp
 			DOWNLOAD_SUCCESS: '歌曲下载完成',
 			NOT_FOUND_ERROR: '搜索不到相关的东西惹QAQ',
 			NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
-			SONG_INFO_ERROR: '获取歌曲信息失败：歌曲已失效或需要付费'
-			RETRY_TIPS: '请求失败了，尝试重新请求...0v0'
+			SONG_INFO_ERROR: '歌曲已失效或需要付费，请尝试重新请求...0v0'
+			RETRY_TIPS: '请求失败了，请尝试重新请求...0v0'
 		}
 
 		@PAGINATOR = null
@@ -81,8 +81,16 @@ class MusicList extends BaseComp
 			$target = $(evt.currentTarget)
 			idx = $target.attr 'data-idx'
 			sid = $target.attr 'data-sid'
+			isDLed = $target.hasClass 'hasDLed'
+			url = null
 
-			sid && @getSongInfoAndPlay sid, idx
+			# 如果歌曲已下载，则优先使用本地文件进行播放
+			if isDLed
+				ar = $target.find('.artist-col').text()
+				ti = $target.find('.title-col').text()
+				url = "#{config.save_path}/#{ar}/[#{sid}] #{ar} - #{ti}.mp3"
+
+			sid && @getSongInfoAndPlay sid, idx, url
 
 		# 下载歌曲
 		$(@table).find('.dlBtn').unbind().on 'click', (evt) =>
@@ -152,7 +160,7 @@ class MusicList extends BaseComp
 
 		# 渲染新的数据
 		songs.map (s, i) =>
-			filepath = "#{config.save_path}/#{s.artist_name}/#{s.artist_name} - #{s.song_name}.mp3"
+			filepath = "#{config.save_path}/#{s.artist_name}/[#{s.song_id}] #{s.artist_name} - #{s.song_name}.mp3"
 			isDLing = Util.checkInArr @DLING_SONGS, s.song_id
 			hasDLed = Util.checkDLed filepath
 			idx = Util.fixZero base + i + 1, @totalCount
@@ -214,7 +222,8 @@ class MusicList extends BaseComp
 	# 获取歌曲信息并播放
 	# @param {string} sid 歌曲ID
 	# @param {number} idx 歌曲索引
-	getSongInfoAndPlay: (sid, idx) ->
+	# @param {string} url 本地URL(optional)
+	getSongInfoAndPlay: (sid, idx, url) ->
 		$.ajax {
 			type: 'POST',
 			url: @api,
@@ -226,6 +235,8 @@ class MusicList extends BaseComp
 				if data and data.status is 'success'
 					if $.isEmptyObject(data.data.song_info) is false
 						data.data.song_info.idx = idx
+						url and data.data.song_info.song_url = url
+
 						@fixSongInfo data.data.song_info
 						@updatePlayingSong sid
 						@eventBus.emit 'MusicList::PlaySong', data.data

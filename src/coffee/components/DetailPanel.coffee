@@ -1,7 +1,7 @@
 ##
 # 歌曲详情面板组件
 # @Author VenDream
-# @Update 2016-8-12 18:53:01
+# @Update 2016-8-19 17:36:18
 ##
 
 BaseComp = require './BaseComp'
@@ -152,7 +152,7 @@ class DetailPanel extends BaseComp
 			, 50
 
 		# 功能按钮
-		songPath = "#{config.save_path}/#{s.song_artist}/#{s.song_artist} - #{s.song_name}.mp3"
+		songPath = "#{config.save_path}/#{s.song_artist}/[#{s.song_id}] #{s.song_artist} - #{s.song_name}.mp3"
 		coverPath = "#{config.save_path}/专辑封面/《#{s.song_album}》.jpg"
 		isDLing = Util.checkInArr @DLING_SONGS, s.song_id
 		hasSongDLed = Util.checkDLed songPath

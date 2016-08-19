@@ -122,7 +122,7 @@ function dlCover(event, song) {
  * @param  {object} song  songInfo
  */
 function dlSong(event, song) {
-	let savePath = `${config.save_path}/${song.song_artist}/${song.song_artist} - ${song.song_name}.mp3`;
+	let savePath = `${config.save_path}/${song.song_artist}/[${song.song_id}] ${song.song_artist} - ${song.song_name}.mp3`;
 	let s = _.assign({
 		save_path: savePath
 	}, song);
