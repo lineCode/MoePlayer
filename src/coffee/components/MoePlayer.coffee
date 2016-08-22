@@ -30,6 +30,10 @@ class MoePlayer extends BaseComp
             MUTE: 'assets/mute.png'
         }
 
+        @TIPS = {
+            URL_ERROR: '播放地址无效QAQ'
+        }
+
     init: ->
         # common child
         @player = @html.querySelector '.mp-player'
@@ -297,6 +301,9 @@ class MoePlayer extends BaseComp
 
         .on 'timeupdate', =>
             @eventBus.emit 'MoePlayer::UpdateTime', @player.currentTime
+
+        .on 'error', =>
+            Util.showMsg @TIPS.URL_ERROR, 3000, 3
 
     # 继续播放
     # @param {boolean} isEmit 是否发送事件
