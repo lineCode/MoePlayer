@@ -5,263 +5,263 @@
 @volume-size: 1.2rem;
 
 .moePlayer {
-	width: 100%;
-	height: 100%;
-	background-color: @bg;
+    width: 100%;
+    height: 100%;
+    background-color: @bg;
 
-	.mp-part {
-		display: inline-block;
-		vertical-align: top;
-		height: 100%;
-		font-size: 1.3rem;
-	}
+    .mp-part {
+        display: inline-block;
+        vertical-align: top;
+        height: 100%;
+        font-size: 1.3rem;
+    }
 
-	/***********************************************************
-	 *                       歌曲封面样式
-	 ***********************************************************/
-	.mp-cover {
-		width: 4.9rem;
+    /***********************************************************
+     *                       歌曲封面样式
+     ***********************************************************/
+    .mp-cover {
+        width: 4.9rem;
 
-		.cover-c {
-			&:before {
-				content: '';
-				position: absolute;
-				top: 0;
-				left: 0;
-				opacity: 0;
-				width: 100%;
-				height: 100%;
-				cursor: pointer;
-				background-color: rgba(0, 0, 0, 0.8);
-				background-image: url(../../assets/expand.png);
-				background-size: 65%;
-				background-position: 50%;
-				background-repeat: no-repeat;
-				transition: opacity 0.2s ease-in-out;
-			}
+        .cover-c {
+            &:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                opacity: 0;
+                width: 100%;
+                height: 100%;
+                cursor: pointer;
+                background-color: rgba(0, 0, 0, 0.8);
+                background-image: url(../../assets/expand.png);
+                background-size: 65%;
+                background-position: 50%;
+                background-repeat: no-repeat;
+                transition: opacity 0.2s ease-in-out;
+            }
 
-			&:hover {
-				&:before {
-					opacity: 1;
-				}
-			}
+            &:hover {
+                &:before {
+                    opacity: 1;
+                }
+            }
 
-			position: relative;
-			width: 100%;
-			height: 100%;
-			display: flex;
-			display: -webkit-flex;
-			justify-content: space-around;
-			align-items: center;
-			border-right: 0.1rem solid @table-border;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            justify-content: space-around;
+            align-items: center;
+            border-right: 0.1rem solid @table-border;
 
-			img {
-				max-width: @cover-size;
-				max-height: @cover-size;
-			}
-		}
-	}
+            img {
+                max-width: @cover-size;
+                max-height: @cover-size;
+            }
+        }
+    }
 
-	/***********************************************************
-	 *                    播放器控制组件样式
-	 ***********************************************************/
-	.mp-control {
-		width: 15%;
+    /***********************************************************
+     *                    播放器控制组件样式
+     ***********************************************************/
+    .mp-control {
+        width: 15%;
 
-		.control-c {
-			width: 100%;
-			height: 100%;
-			display: flex;
-			display: -webkit-flex;
-			justify-content: space-around;
-			align-items: center;
-			border-right: 0.1rem solid @table-border;
+        .control-c {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            justify-content: space-around;
+            align-items: center;
+            border-right: 0.1rem solid @table-border;
 
-			img {
-				&:hover {
-					opacity: 1;
-				}
-				opacity: 0.8;
-				max-width: 100%;
-				max-height: 100%;
-				transition: none;
-			}
-		}
-		.prev-song, .play-status, .next-song {
-			cursor: pointer;
-			max-width: @control-size;
-			max-height: @control-size;
-		}
-	}
+            img {
+                &:hover {
+                    opacity: 1;
+                }
+                opacity: 0.8;
+                max-width: 100%;
+                max-height: 100%;
+                transition: none;
+            }
+        }
+        .prev-song, .play-status, .next-song {
+            cursor: pointer;
+            max-width: @control-size;
+            max-height: @control-size;
+        }
+    }
 
-	/***********************************************************
-	 *                       进度条样式
-	 ***********************************************************/
-	.mp-time {
-		width: 55%;
-		color: @white;
+    /***********************************************************
+     *                       进度条样式
+     ***********************************************************/
+    .mp-time {
+        width: 55%;
+        color: @white;
 
-		.time-c {
-			width: 100%;
-			height: 100%;
-			display: flex;
-			display: -webkit-flex;
-			justify-content: space-around;
-			align-items: center;
-			border-right: 0.1rem solid @table-border;
+        .time-c {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            justify-content: space-around;
+            align-items: center;
+            border-right: 0.1rem solid @table-border;
 
-			.played-time, .total-time {
-				min-width: 3.5rem;
-				line-height: 1.3rem;
-			}
-			.progress-bar {
-				position: relative;
-				height: 0.3rem;
-				width: 65%;
-				background-color: @progress-bar;
+            .played-time, .total-time {
+                min-width: 3.5rem;
+                line-height: 1.3rem;
+            }
+            .progress-bar {
+                position: relative;
+                height: 0.3rem;
+                width: 65%;
+                background-color: @progress-bar;
 
-				.progress-drag-bar {
-					&:hover {
-						border-color: @red;
-					}
-					&:before {
-						content: '';
-						position: absolute;
-						background-color: @red;
-						top: 0.4rem;
-						left: 0.4rem;
-						width: 0.3rem;
-						height: 0.3rem;
-						border: 0.1rem solid @red;
-						border-radius: @drag-bar-radius;
-					}
-					position: absolute;
-					cursor: pointer;
-					background-color: @white;
-					top: -0.6rem;
-					left: -0.75rem;
-					width: 1.5rem;
-					height: 1.5rem;
-					border: 0.1rem solid @bg;
-					border-radius: @drag-bar-radius;
-				}
-			}
-			.song-quality {
-				color: @white;
-				width: 4.6rem;
-				text-align: center;
-				font-size: 1.2rem;
-				padding: 0.2rem 0.4rem;
-				border: 0.1rem solid @white;
-			}
-			.song-quality.high {
-				color: @green;
-				border-color: @green;
-			}
-			.song-quality.medium {
-				color: @yellow;
-				border-color: @yellow;
-			}
-			.song-quality.low {
-				color: @red;
-				border-color: @red;
-			}
-		}
-	}
+                .progress-drag-bar {
+                    &:hover {
+                        border-color: @red;
+                    }
+                    &:before {
+                        content: '';
+                        position: absolute;
+                        background-color: @red;
+                        top: 0.4rem;
+                        left: 0.4rem;
+                        width: 0.3rem;
+                        height: 0.3rem;
+                        border: 0.1rem solid @red;
+                        border-radius: @drag-bar-radius;
+                    }
+                    position: absolute;
+                    cursor: pointer;
+                    background-color: @white;
+                    top: -0.6rem;
+                    left: -0.75rem;
+                    width: 1.5rem;
+                    height: 1.5rem;
+                    border: 0.1rem solid @bg;
+                    border-radius: @drag-bar-radius;
+                }
+            }
+            .song-quality {
+                color: @white;
+                width: 4.6rem;
+                text-align: center;
+                font-size: 1.2rem;
+                padding: 0.2rem 0.4rem;
+                border: 0.1rem solid @white;
+            }
+            .song-quality.high {
+                color: @green;
+                border-color: @green;
+            }
+            .song-quality.medium {
+                color: @yellow;
+                border-color: @yellow;
+            }
+            .song-quality.low {
+                color: @red;
+                border-color: @red;
+            }
+        }
+    }
 
-	/***********************************************************
-	 *                       音量组件样式
-	 ***********************************************************/
-	.mp-volume {
-		width: 15%;
+    /***********************************************************
+     *                       音量组件样式
+     ***********************************************************/
+    .mp-volume {
+        width: 15%;
 
-		.volume-c {
-			width: 100%;
-			height: 100%;
-			display: flex;
-			display: -webkit-flex;
-			justify-content: center;
-			align-items: center;
-			border-right: 0.1rem solid @table-border;
+        .volume-c {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            justify-content: center;
+            align-items: center;
+            border-right: 0.1rem solid @table-border;
 
-			.volume-icon {
-				max-width: @volume-size;
-				max-height: @volume-size;
+            .volume-icon {
+                max-width: @volume-size;
+                max-height: @volume-size;
 
-				img {
-					&:hover {
-						opacity: 1;
-					}
-					opacity: 0.8;
-					max-width: @volume-size;
-					max-height: @volume-size;
-					transition: none;
-				}
-			}
-			.volume-bar {
-				position: relative;
-				width: 65%;
-				height: 0.3rem;
-				background-color: @progress-bar;
-				margin-left: 0.5rem;
+                img {
+                    &:hover {
+                        opacity: 1;
+                    }
+                    opacity: 0.8;
+                    max-width: @volume-size;
+                    max-height: @volume-size;
+                    transition: none;
+                }
+            }
+            .volume-bar {
+                position: relative;
+                width: 65%;
+                height: 0.3rem;
+                background-color: @progress-bar;
+                margin-left: 0.5rem;
 
-				.volume-drag-bar {
-					&:hover {
-						border-color: @red;
-					}
-					&:before {
-						content: '';
-						position: absolute;
-						background-color: @red;
-						top: 0.4rem;
-						left: 0.4rem;
-						width: 0.3rem;
-						height: 0.3rem;
-						border: 0.1rem solid @red;
-						border-radius: @drag-bar-radius;
-					}
-					position: absolute;
-					cursor: pointer;
-					background-color: @white;
-					top: -0.6rem;
-					right: -0.75rem;
-					width: 1.5rem;
-					height: 1.5rem;
-					border: 0.1rem solid @bg;
-					border-radius: @drag-bar-radius;
-					transition: none;
-				}
-			}
-		}
-	}
+                .volume-drag-bar {
+                    &:hover {
+                        border-color: @red;
+                    }
+                    &:before {
+                        content: '';
+                        position: absolute;
+                        background-color: @red;
+                        top: 0.4rem;
+                        left: 0.4rem;
+                        width: 0.3rem;
+                        height: 0.3rem;
+                        border: 0.1rem solid @red;
+                        border-radius: @drag-bar-radius;
+                    }
+                    position: absolute;
+                    cursor: pointer;
+                    background-color: @white;
+                    top: -0.6rem;
+                    right: -0.75rem;
+                    width: 1.5rem;
+                    height: 1.5rem;
+                    border: 0.1rem solid @bg;
+                    border-radius: @drag-bar-radius;
+                    transition: none;
+                }
+            }
+        }
+    }
 
-	/***********************************************************
-	 *                       附件组件样式
-	 ***********************************************************/
-	.mp-addons {
-		width: 8.5%;
+    /***********************************************************
+     *                       附件组件样式
+     ***********************************************************/
+    .mp-addons {
+        width: 8.5%;
 
-		.addons-c {
-			width: 100%;
-			height: 100%;
-			display: flex;
-			display: -webkit-flex;
-			justify-content: space-around;
-			align-items: center;
+        .addons-c {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            justify-content: space-around;
+            align-items: center;
 
-			.play-mode {
-				&:hover {
-					opacity: 1;
-					color: @theme-color;
-					border-color: @theme-color;
-				}
-				opacity: 0.8;
-				font-size: 1.2rem;
-				cursor: pointer;
-				padding: 0.2rem 0.4rem;
-				color: @white;
-				border: 0.1rem solid @white;
-			}
-		}
-	}
+            .play-mode {
+                &:hover {
+                    opacity: 1;
+                    color: @theme-color;
+                    border-color: @theme-color;
+                }
+                opacity: 0.8;
+                font-size: 1.2rem;
+                cursor: pointer;
+                padding: 0.2rem 0.4rem;
+                color: @white;
+                border: 0.1rem solid @white;
+            }
+        }
+    }
 }

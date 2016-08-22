@@ -1,310 +1,378 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-19 17:36:09
+# @Update 2016-8-22 16:58:59
 ##
 
 BaseComp = require './BaseComp'
 Util = require './Util'
 Paginator = require './Paginator'
 config = require '../../../config'
-ipcRenderer = window.require('electron').ipcRenderer
+
 fs = window.require 'fs'
+electron = window.require 'electron'
+ipcRenderer = electron.ipcRenderer
+remote = electron.remote
+Menu = remote.Menu
+MenuItem = remote.MenuItem
 
 class MusicList extends BaseComp
-	constructor: (selector, eventBus) ->
-		super selector, eventBus
+    constructor: (selector, eventBus) ->
+        super selector, eventBus
 
-		@TIPS = {
-			SUGGEST: '搜索点什么听听吧ww',
-			DOWNLOAD_START: '加入下载列表',
-			DOWNLOAD_FAILED: '歌曲下载失败',
-			DOWNLOAD_SUCCESS: '歌曲下载完成',
-			NOT_FOUND_ERROR: '搜索不到相关的东西惹QAQ',
-			NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
-			SONG_INFO_ERROR: '歌曲已失效或需要付费，请尝试重新请求...0v0'
-			RETRY_TIPS: '请求失败了，请尝试重新请求...0v0'
-		}
+        @TIPS = {
+            NO_SONG: '噫，都没有歌曲可以下载0v0',
+            SUGGEST: '搜索点什么听听吧ww',
+            DOWNLOAD_START: '加入下载列表',
+            DOWNLOAD_FAILED: '歌曲下载失败',
+            DOWNLOAD_SUCCESS: '歌曲下载完成',
+            NOT_FOUND_ERROR: '搜索不到相关的东西惹QAQ',
+            NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
+            SONG_INFO_ERROR: '歌曲已失效或需要付费，请重试QAQ'
+            RETRY_TIPS: '请求失败了，请重试QAQ'
+        }
 
-		@PAGINATOR = null
-		@DLING_SONGS = []
+        @CONTEXT = {
+            AR: '',
+            AL: ''
+        }
 
-	init: ->
-		@src = ''
-		@api = "#{config.host}:#{config.port}/api/music/info"
-		@curSongId = ''
+        @API = {
+            INFO: "#{config.host}:#{config.port}/api/music/info"
+        }
 
-		@table = @html.querySelector 'table'
-		@tipsRow = @html.querySelector '.tips-row'
+        @PAGINATOR = null
+        @DLING_SONGS = []
 
-		# 下载响应
-		ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, s) =>
-			@updateDLedSong s.song_id
-			Util.showMsg "#{@TIPS.DOWNLOAD_SUCCESS}: 《#{s.song_name}》", null, 2
-		ipcRenderer.on 'ipcMain::DownloadSongFailed', (event, err) =>
-			Util.showMsg "#{@TIPS.DOWNLOAD_FAILED}: #{err}", null, 3
+    init: ->
+        @src = ''
+        @curSongId = ''
+        @menu = null
 
-		@updatePagination 0
+        @table = @html.querySelector 'table'
+        @tipsRow = @html.querySelector '.tips-row'
 
-	render: ->
-		htmls =
-			"""
-			<div class="musicList">
-				<div class="table-c">
-					<table>
-						<tr>
-							<th class="list-index"></th>
-							<th class="list-title">标题</th>
-							<th class="list-artist">歌手</th>
-							<th class="list-album">专辑</th>
-							<th class="list-duration">时长</th>
-							<th class="list-operation">操作</th>
-						</tr>
-						<tr class="tips-row">
-							<td colspan=6>#{@TIPS.SUGGEST}</td>
-						</tr>
-					</table>
-				</div>
-				<div class="mpc"></div>
-			</div>
-			"""
+        # 下载响应
+        ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, s) =>
+            @updateDLedSong s.song_id
+            Util.showMsg "#{@TIPS.DOWNLOAD_SUCCESS}: 《#{s.song_name}》", null, 2
+        ipcRenderer.on 'ipcMain::DownloadSongFailed', (event, err) =>
+            Util.showMsg "#{@TIPS.DOWNLOAD_FAILED}: #{err}", null, 3
 
-		@html.innerHTML = htmls
+        @buildCtcMenu()
+        @updatePagination 0
 
-		@emit 'renderFinished'
+    render: ->
+        htmls =
+            """
+            <div class="musicList">
+                <div class="table-c">
+                    <table>
+                        <tr>
+                            <th class="list-index"></th>
+                            <th class="list-title">标题</th>
+                            <th class="list-artist">歌手</th>
+                            <th class="list-album">专辑</th>
+                            <th class="list-duration">时长</th>
+                            <th class="list-operation">操作</th>
+                        </tr>
+                        <tr class="tips-row">
+                            <td colspan=6>#{@TIPS.SUGGEST}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="mpc"></div>
+            </div>
+            """
 
-	# 事件绑定
-	eventBinding: ->
-		# 双击播放
-		$(@table).find('.song').unbind().on 'dblclick', (evt) =>
-			evt.stopPropagation()
-			$target = $(evt.currentTarget)
-			idx = $target.attr 'data-idx'
-			sid = $target.attr 'data-sid'
-			isDLed = $target.hasClass 'hasDLed'
-			url = null
+        @html.innerHTML = htmls
 
-			# 如果歌曲已下载，则优先使用本地文件进行播放
-			if isDLed
-				ar = $target.find('.artist-col').text()
-				ti = $target.find('.title-col').text()
-				url = "#{config.save_path}/#{ar}/[#{sid}] #{ar} - #{ti}.mp3"
+        @emit 'renderFinished'
 
-			sid && @getSongInfoAndPlay sid, idx, url
+    # 事件绑定
+    eventBinding: ->
+        # 双击播放 && 右键选中
+        $(@table).find('.song').unbind().on 'dblclick', (evt) =>
+            evt.stopPropagation()
+            $target = $(evt.currentTarget)
+            idx = $target.attr 'data-idx'
+            sid = $target.attr 'data-sid'
+            isDLed = $target.hasClass 'hasDLed'
+            url = null
 
-		# 下载歌曲
-		$(@table).find('.dlBtn').unbind().on 'click', (evt) =>
-			evt.stopPropagation()
-			$song = $(evt.currentTarget).parents('.song')
+            # 如果歌曲已下载，则优先使用本地文件进行播放
+            if isDLed
+                ar = $target.find('.artist-col').text()
+                ti = $target.find('.title-col').text()
+                url = "#{config.save_path}/#{ar}/[#{sid}] #{ar} - #{ti}.mp3"
 
-			if $song.hasClass('hasDLed') is true or $song.hasClass('DLing') is true
-				return false
+            sid && @getSongInfoAndPlay sid, idx, url
+        .on 'mousedown', (e) =>
+            if e.button is 2
+                $target = $(e.currentTarget)
+                alid = $target.attr 'data-alid'
+                @CONTEXT.AR = $target.find('.artist-col').text()
+                @CONTEXT.AL = $target.find('.album-col').text() + '#' + alid
 
-			sn = $song.find('.title-col').text()
-			sid = $song.attr 'data-sid'
+        # 下载歌曲
+        $(@table).find('.dlBtn').unbind().on 'click', (evt) =>
+            evt.stopPropagation()
+            $song = $(evt.currentTarget).parents('.song')
 
-			# Util.showMsg "#{@TIPS.DOWNLOAD_START}: 《#{sn}》"
-			sid && @getSongInfoAndDownload sid
+            if $song.hasClass('hasDLed') is true or $song.hasClass('DLing') is true
+                return false
 
+            sn = $song.find('.title-col').text()
+            sid = $song.attr 'data-sid'
 
-	# 歌曲信息获取不到时，使用备用歌曲信息
-	# @param {object} songInfo 歌曲信息对象
-	fixSongInfo: (songInfo) ->
-		sid = songInfo.song_id
-		$sr = $('.song[data-sid="' + sid + '"]')
+            sid && @getSongInfoAndDownload sid
 
-		TI = $sr.find('.title-col').text().replace /[《》]/g, ''
-		AL = $sr.find('.album-col').text().replace /[《》]/g, ''
-		AR = $sr.find('.artist-col').text().replace /[《》]/g, ''
+    # 创建右键菜单
+    buildCtcMenu: ->
+        @menu = new Menu()
+        @menu.append(new MenuItem({
+            label: '搜索这位歌手',
+            click: =>
+                @CONTEXT.AR and @eventBus.emit 'MusicList::SearchArtist', @CONTEXT.AR
+        }))
+        @menu.append(new MenuItem({
+            label: '搜索这张专辑',
+            click: =>
+                @CONTEXT.AL and @eventBus.emit 'MusicList::SearchAlbum', @CONTEXT.AL
+        }))
+        @menu.append(new MenuItem({
+            label: '下载全部歌曲',
+            click: =>
+                @downloadAllSongs()
+        }))
 
-		!songInfo.song_name && songInfo.song_name = TI
-		!songInfo.song_album && songInfo.song_album = AL
-		!songInfo.song_artist && songInfo.song_artist = AR
+        $(@table).on 'contextmenu', (e) =>
+            e.preventDefault()
+            $(@table).find('.song').length > 0 and \
+            @menu.popup remote.getCurrentWindow(), false
 
-	# 渲染数据
-	# @param {object}  data    数据
-	# @param {boolean} refresh 是否为新的请求
-	show: (data, refresh = true) ->
-		$(@tipsRow).fadeOut 0
+    # 歌曲信息获取不到时，使用备用歌曲信息
+    # @param {object} songInfo 歌曲信息对象
+    fixSongInfo: (songInfo) ->
+        sid = songInfo.song_id
+        $sr = $('.song[data-sid="' + sid + '"]')
 
-		if data and data.status is 'success'
-			@src = data.data.src
-			if data.data.songs
-				base = (data.data.page - 1) * config.num_per_page
-				@totalCount = data.data.count
-				@showResult data.data.songs, base
-				# 是否为新的搜索
-				refresh && @updatePagination()
+        TI = $sr.find('.title-col').text().replace /[《》]/g, ''
+        AL = $sr.find('.album-col').text().replace /[《》]/g, ''
+        AR = $sr.find('.artist-col').text().replace /[《》]/g, ''
 
-			if @totalCount is 0
-				@showTips @TIPS.NOT_FOUND_ERROR
-		else
-			@showTips @TIPS.NETWORK_ERROR
+        !songInfo.song_name && songInfo.song_name = TI
+        !songInfo.song_album && songInfo.song_album = AL
+        !songInfo.song_artist && songInfo.song_artist = AR
 
-	# 显示错误提示信息
-	# @param {string} msg 错误提示
-	showTips: (msg = @TIPS.NETWORK_ERROR) ->
-		# 清空原来的数据
-		$(@table).find('.song').remove()
+    # 更新显示正在播放的歌曲
+    # @param {string} sid 歌曲ID
+    updatePlayingSong: (sid) ->
+        @curSongId = sid
+        $sr = $('.song[data-sid="' + sid + '"]')
+        $sr.length > 0 && (
+            $('.song').removeClass 'playing'
+            $sr.addClass 'playing'
+        )
 
-		# 显示错误信息
-		$(@tipsRow).find('td').text msg
-		$(@tipsRow).fadeIn 200
+    # 更新正在下载的歌曲
+    # @param {string} sid 歌曲ID
+    updateDLingSong: (sid) ->
+        @DLING_SONGS.push sid
 
-	# 显示搜索结果
-	# @param {array}  songs 歌曲数组
-	# @param {number} base  歌曲偏移基数
-	showResult: (songs, base) ->
-		# 清空原来的数据
-		$(@table).find('.song').remove()
+        $sr = $('.song[data-sid="' + sid + '"]')
 
-		# 渲染新的数据
-		songs.map (s, i) =>
-			filepath = "#{config.save_path}/#{s.artist_name}/[#{s.song_id}] #{s.artist_name} - #{s.song_name}.mp3"
-			isDLing = Util.checkInArr @DLING_SONGS, s.song_id
-			hasDLed = Util.checkDLed filepath
-			idx = Util.fixZero base + i + 1, @totalCount
+        $sr.length > 0 && (
+            $sr.addClass 'DLing'
+            $sr.find('.dlBtn').attr 'title', '下载中'
+        )
 
-			if isDLing is true
-				c = 'DLing'
-				t = '下载中'
-			else
-				if hasDLed is true
-					c = 'hasDLed'
-					t = '已下载'
-				else
-					c = ''
-					t = '点击下载'
+    # 更新已下载的歌曲
+    # @param {string} sid 歌曲ID
+    updateDLedSong: (sid) ->
+        Util.removeFromArr @DLING_SONGS, sid
 
-			trHtml = 
-				"""
-				<tr class="song not-select #{
-					if String(s.song_id) is String(@curSongId) then 'playing' else ''
-				} #{c}" data-sid="#{s.song_id}" data-idx="#{i}">
-					<td class="index-col">#{idx}</td>
-					<td class="title-col">#{s.song_name}</td>
-					<td class="artist-col">#{s.artist_name}</td>
-					<td class="album-col">#{s.album_name}</td>
-					<td class="duration-col">#{Util.normalizeSeconds(s.duration)}</td>
-					<td class="operation-col">
-						<div class="btn dlBtn" title="#{t}"></div>
-					</td>
-				</tr>
-				"""
-			$tr = $(trHtml)
+        $sr = $('.song[data-sid="' + sid + '"]')
 
-			# 设置title属性
-			$tr.find('.album-col').map (i, t) ->
-				$(t).attr 'title', $(@).text()
+        $sr.length > 0 && (
+            $sr.removeClass 'DLing'
+                .addClass 'hasDLed'
+            $sr.find('.dlBtn').attr 'title', '已下载'
+        )
 
-			$(@table).append $tr
+    # 显示错误提示信息
+    # @param {string} msg 错误提示
+    showTips: (msg = @TIPS.NETWORK_ERROR) ->
+        # 清空原来的数据
+        $(@table).find('.song').remove()
 
-		@eventBinding()
+        # 显示错误信息
+        $(@tipsRow).find('td').text msg
+        $(@tipsRow).fadeIn 200
 
-	# 更新分页
-	# @param {number} maxEntries 数据项总数
-	updatePagination: (maxEntries = @totalCount) ->
-		if not @PAGINATOR?
-			@PAGINATOR = new Paginator '.mpc', @eventBus, maxEntries, {
-				callback: (pageIndex, container) =>
-					@eventBus.emit 'MusicList::SelectPage', pageIndex + 1
-			}
-		else
-			@PAGINATOR.doPagination maxEntries
+    # 显示搜索结果
+    # @param {array}  songs 歌曲数组
+    # @param {number} base  歌曲偏移基数
+    showResult: (songs, base) ->
+        # 清空原来的数据
+        $(@table).find('.song').remove()
 
-	# 清空搜索结果
-	clear: ->
-		$(@table).find('.song').remove()
+        # 渲染新的数据
+        songs.map (s, i) =>
+            filepath = "#{config.save_path}/#{s.artist_name}/[#{s.song_id}] #{s.artist_name} - #{s.song_name}.mp3"
+            isDLing = Util.checkInArr @DLING_SONGS, s.song_id
+            hasDLed = Util.checkDLed filepath
+            idx = Util.fixZero base + i + 1, @totalCount
 
-		@updatePagination 0
-		@showTips @TIPS.SUGGEST
+            if isDLing is true
+                c = 'DLing'
+                t = '下载中'
+            else if hasDLed is true
+                c = 'hasDLed'
+                t = '已下载'
+            else
+                c = ''
+                t = '点击下载'
 
-	# 获取歌曲信息并播放
-	# @param {string} sid 歌曲ID
-	# @param {number} idx 歌曲索引
-	# @param {string} url 本地URL(optional)
-	getSongInfoAndPlay: (sid, idx, url) ->
-		$.ajax {
-			type: 'POST',
-			url: @api,
-			data: {
-				song_id: sid,
-				src: @src
-			},
-			success: (data) =>
-				if data and data.status is 'success'
-					if $.isEmptyObject(data.data.song_info) is false
-						data.data.song_info.idx = idx
-						url and data.data.song_info.song_url = url
+            trHtml = 
+                """
+                <tr class="song not-select #{
+                    if String(s.song_id) is String(@curSongId) then 'playing' else ''
+                } #{c}" data-sid="#{s.song_id}" data-alid="#{s.album_id}" data-idx="#{i}">
+                    <td class="index-col">#{idx}</td>
+                    <td class="title-col">#{s.song_name}</td>
+                    <td class="artist-col">#{s.artist_name}</td>
+                    <td class="album-col">#{s.album_name}</td>
+                    <td class="duration-col">#{Util.normalizeSeconds(s.duration)}</td>
+                    <td class="operation-col">
+                        <div class="btn dlBtn" title="#{t}"></div>
+                    </td>
+                </tr>
+                """
+            $tr = $(trHtml)
 
-						@fixSongInfo data.data.song_info
-						@updatePlayingSong sid
-						@eventBus.emit 'MusicList::PlaySong', data.data
-					else
-						Util.showMsg @TIPS.SONG_INFO_ERROR, 3000, 3
-						return false
-			, 
-			error: (err) =>
-				Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
-		}
+            # 设置title属性
+            $tr.find('.album-col').map (i, t) ->
+                $(t).attr 'title', $(@).text()
 
-	# 获取歌曲信息并执行下载
-	# @param {string} sid 歌曲ID
-	getSongInfoAndDownload: (sid) ->
-		$.ajax {
-			type: 'POST',
-			url: @api,
-			data: {
-				song_id: sid,
-				src: @src
-			},
-			success: (data) =>
-				if data and data.status is 'success'
-					if $.isEmptyObject(data.data.song_info) is false
-						@updateDLingSong sid
-						@eventBus.emit 'MusicList::DownloadSong', sid
-						ipcRenderer.send 'ipcRenderer::DownloadSong', data.data.song_info
-					else
-						Util.showMsg @TIPS.SONG_INFO_ERROR, 3000, 3
-						return false
-			, 
-			error: (err) =>
-				Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
-		}
+            $(@table).append $tr
 
-	# 更新显示正在播放的歌曲
-	# @param {string} sid 歌曲ID
-	updatePlayingSong: (sid) ->
-		@curSongId = sid
-		$sr = $('.song[data-sid="' + sid + '"]')
-		$sr.length > 0 && (
-			$('.song').removeClass 'playing'
-			$sr.addClass 'playing'
-		)
+        @eventBinding()
 
-	# 更新正在下载的歌曲
-	# @param {string} sid 歌曲ID
-	updateDLingSong: (sid) ->
-		@DLING_SONGS.push sid
+    #---------------------------------------------------
+    #                     对外接口
+    #---------------------------------------------------
 
-		$sr = $('.song[data-sid="' + sid + '"]')
+    # 渲染数据
+    # @param {object}  data    数据
+    # @param {boolean} refresh 是否为新的请求
+    show: (data, refresh = true) ->
+        $(@tipsRow).fadeOut 0
 
-		$sr.length > 0 && (
-			$sr.addClass 'DLing'
-			$sr.find('.dlBtn').attr 'title', '下载中'
-		)
+        if data and data.status is 'success'
+            @src = data.data.src
+            if data.data.songs
+                base = (data.data.page - 1) * config.num_per_page
+                @totalCount = data.data.count
+                @showResult data.data.songs, base
+                # 是否为新的搜索
+                refresh && @updatePagination()
 
-	# 更新已下载的歌曲
-	# @param {string} sid 歌曲ID
-	updateDLedSong: (sid) ->
-		Util.removeFromArr @DLING_SONGS, sid
+            if @totalCount is 0
+                @showTips @TIPS.NOT_FOUND_ERROR
+        else
+            @showTips @TIPS.NETWORK_ERROR
 
-		$sr = $('.song[data-sid="' + sid + '"]')
+    # 更新分页
+    # @param {number} maxEntries 数据项总数
+    updatePagination: (maxEntries = @totalCount) ->
+        if not @PAGINATOR?
+            @PAGINATOR = new Paginator '.mpc', @eventBus, maxEntries, {
+                callback: (pageIndex, container) =>
+                    @eventBus.emit 'MusicList::SelectPage', pageIndex + 1
+            }
+        else
+            @PAGINATOR.doPagination maxEntries
 
-		$sr.length > 0 && (
-			$sr.removeClass 'DLing'
-				.addClass 'hasDLed'
-			$sr.find('.dlBtn').attr 'title', '已下载'
-		)
+    # 清空搜索结果
+    clear: ->
+        $(@table).find('.song').remove()
+
+        @updatePagination 0
+        @showTips @TIPS.SUGGEST
+
+    # 获取歌曲信息并播放
+    # @param {string} sid 歌曲ID
+    # @param {number} idx 歌曲索引
+    # @param {string} url 本地URL(optional)
+    getSongInfoAndPlay: (sid, idx, url) ->
+        $.ajax {
+            type: 'POST',
+            url: @API.INFO,
+            data: {
+                song_id: sid,
+                src: @src
+            },
+            beforeSend: =>
+                $('.song').removeClass 'playing'
+                @eventBus.emit 'MusicList::GetSongInfo'
+            ,
+            success: (data) =>
+                if data and data.status is 'success'
+                    if $.isEmptyObject(data.data.song_info) is false
+                        data.data.song_info.idx = idx
+                        url and data.data.song_info.song_url = url
+
+                        @fixSongInfo data.data.song_info
+                        @updatePlayingSong sid
+                        @eventBus.emit 'MusicList::PlaySong', data.data
+                    else
+                        Util.showMsg @TIPS.SONG_INFO_ERROR, 3000, 3
+                        @eventBus.emit 'MusicList::GetSongInfoFailed'
+
+                        return false
+            , 
+            error: (err) =>
+                Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
+                @eventBus.emit 'MusicList::GetSongInfoFailed'
+        }
+
+    # 获取歌曲信息并执行下载
+    # @param {string} sid 歌曲ID
+    getSongInfoAndDownload: (sid) ->
+        $.ajax {
+            type: 'POST',
+            url: @API.INFO,
+            data: {
+                song_id: sid,
+                src: @src
+            },
+            success: (data) =>
+                if data and data.status is 'success'
+                    if $.isEmptyObject(data.data.song_info) is false
+                        @updateDLingSong sid
+                        @eventBus.emit 'MusicList::DownloadSong', sid
+                        ipcRenderer.send 'ipcRenderer::DownloadSong', data.data.song_info
+                    else
+                        Util.showMsg @TIPS.SONG_INFO_ERROR, 3000, 3
+                        @eventBus.emit 'MusicList::GetSongInfoFailed'
+                        
+                        return false
+            , 
+            error: (err) =>
+                Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
+                @eventBus.emit 'MusicList::GetSongInfoFailed'
+        }
+
+    # 下载该页全部歌曲
+    downloadAllSongs: ->
+        self = @
+        $songs = $(@table).find('.song')
+
+        if $songs.length > 0
+            $songs.each ->
+                $(@).find('.dlBtn').trigger 'click'
+        else
+            Util.showMsg @TIPS.NO_SONG, 3000, 3
 
 module.exports = MusicList

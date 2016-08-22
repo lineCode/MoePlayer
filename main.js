@@ -18,33 +18,33 @@ let dlQueue = [];
  *               Function Definition
  *************************************************/
 function createWin() {
-	win = new BrowserWindow({
-		width: config.width,
-		height: config.height,
-		resizable: config.resizable,
-		webPreferences: {
-			backgroundThrottling: false
-		}
-	});
+    win = new BrowserWindow({
+        width: config.width,
+        height: config.height,
+        resizable: config.resizable,
+        webPreferences: {
+            backgroundThrottling: false
+        }
+    });
 
-	webController = win.webContents;
-	session = webController.session;
+    webController = win.webContents;
+    session = webController.session;
 
-	win.on('closed', () => {
-		win = null;
-	});
+    win.on('closed', () => {
+        win = null;
+    });
 
-	session.on('will-download', dlSetting);
+    session.on('will-download', dlSetting);
 
-	win.loadURL(`file://${__dirname}/index.html`);
+    win.loadURL(`file://${__dirname}/index.html`);
 
-	// Whether To Open Dev Tools
-	if (config.debug === true) {
-		win.webContents.openDevTools();
-		client.create(win, {
-			sendBounds: false
-		});
-	}
+    // Whether To Open Dev Tools
+    if (config.debug === true) {
+        win.webContents.openDevTools();
+        client.create(win, {
+            sendBounds: false
+        });
+    }
 }
 
 /**
@@ -54,41 +54,41 @@ function createWin() {
  * @param  {object} webContents webContents
  */
 function dlSetting(event, item, webContents) {
-	let dlItem = dlQueue.shift();
-	let suffix = dlItem.save_path.slice(-4);
-	// sen -> download success event name
-	// fen -> download failed  event name
-	let type, sen, fen; 
+    let dlItem = dlQueue.shift();
+    let suffix = dlItem.save_path.slice(-4);
+    // sen -> download success event name
+    // fen -> download failed  event name
+    let type, sen, fen; 
 
-	switch (suffix) {
-		case '.mp3':
-			type = 'Song';
-			break;
-		case '.jpg':
-			type = 'Cover';
-			break;
-		case '.lrc':
-			type = 'Lyric';
-			break;
-	}
+    switch (suffix) {
+        case '.mp3':
+            type = 'Song';
+            break;
+        case '.jpg':
+            type = 'Cover';
+            break;
+        case '.lrc':
+            type = 'Lyric';
+            break;
+    }
 
-	sen = `ipcMain::Download${type}Success`;
-	fen = `ipcMain::Download${type}Failed`;
+    sen = `ipcMain::Download${type}Success`;
+    fen = `ipcMain::Download${type}Failed`;
 
-	// Set Savepath
-	item.setSavePath(dlItem.save_path);
+    // Set Savepath
+    item.setSavePath(dlItem.save_path);
 
-	// Sync Download Status
-	item.once('done', (event, state) => {
-		if (state =='completed') {
-			webController.send(sen, {
-				song_id: dlItem.song_id,
-				song_name: dlItem.song_name
-			});
-		} else {
-			webController.send(fen, state);
-		}
-	});
+    // Sync Download Status
+    item.once('done', (event, state) => {
+        if (state =='completed') {
+            webController.send(sen, {
+                song_id: dlItem.song_id,
+                song_name: dlItem.song_name
+            });
+        } else {
+            webController.send(fen, state);
+        }
+    });
 }
 
 /**
@@ -97,23 +97,23 @@ function dlSetting(event, item, webContents) {
  * @param  {object} song  songInfo
  */
 function dlCover(event, song) {
-	let savePath = `${config.save_path}/专辑封面/《${song.song_album}》.jpg`;
-	let c = _.assign({
-		save_path: savePath
-	}, song);
+    let savePath = `${config.save_path}/专辑封面/《${song.song_album}》.jpg`;
+    let c = _.assign({
+        save_path: savePath
+    }, song);
 
-	dlQueue.push(c);
+    dlQueue.push(c);
 
-	try {
-		let stat = fs.statSync(savePath);
-		// If Already Exists
-		if (stat)
-			webController.send('ipcMain::DownloadCoverSuccess', {});
-	}
-	catch (e) {
-		// If Not Exists
-		webController.downloadURL(song.song_cover);
-	}
+    try {
+        let stat = fs.statSync(savePath);
+        // If Already Exists
+        if (stat)
+            webController.send('ipcMain::DownloadCoverSuccess', {});
+    }
+    catch (e) {
+        // If Not Exists
+        webController.downloadURL(song.song_cover);
+    }
 }
 
 /**
@@ -122,26 +122,26 @@ function dlCover(event, song) {
  * @param  {object} song  songInfo
  */
 function dlSong(event, song) {
-	let savePath = `${config.save_path}/${song.song_artist}/[${song.song_id}] ${song.song_artist} - ${song.song_name}.mp3`;
-	let s = _.assign({
-		save_path: savePath
-	}, song);
+    let savePath = `${config.save_path}/${song.song_artist}/[${song.song_id}] ${song.song_artist} - ${song.song_name}.mp3`;
+    let s = _.assign({
+        save_path: savePath
+    }, song);
 
-	dlQueue.push(s);
+    dlQueue.push(s);
 
-	try {
-		let stat = fs.statSync(savePath);
-		// If Already Exists
-		if (stat)
-			webController.send('ipcMain::DownloadSongSuccess', {
-				song_id: song.song_id,
-				song_name: song.song_name
-			});
-	}
-	catch (e) {
-		// If Not Exists
-		webController.downloadURL(song.song_url);
-	}
+    try {
+        let stat = fs.statSync(savePath);
+        // If Already Exists
+        if (stat)
+            webController.send('ipcMain::DownloadSongSuccess', {
+                song_id: song.song_id,
+                song_name: song.song_name
+            });
+    }
+    catch (e) {
+        // If Not Exists
+        webController.downloadURL(song.song_url);
+    }
 }
 
 /**************************************************
@@ -150,14 +150,14 @@ function dlSong(event, song) {
 
 app.on('ready', createWin);
 app.on('window-all-closed', () => {
-	if (process.platform != 'darwin') {
-		app.quit();
-	}
+    if (process.platform != 'darwin') {
+        app.quit();
+    }
 });
 app.on('activate', () => {
-	if (win === null) {
-		createWin();
-	}
+    if (win === null) {
+        createWin();
+    }
 });
 
 ipcMain.on('ipcRenderer::DownloadSong', dlSong);

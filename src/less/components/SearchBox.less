@@ -2,58 +2,74 @@
 @import url(Loader.less);
 
 .searchBox {
-	position: relative;
-	font-size: 1.3rem;
+    position: relative;
+    font-size: 1.3rem;
 
-	.source {
-		&:hover {
-			border-color: @white;
-		}
-		outline: none;
-		color: @white;
-		background-color: @bg;
-		padding: 0.25rem .1rem;
-		margin-right: 1rem;
-		border: 0.1rem solid @table-border;
-	}
-	.search-input {
-		&:hover {
-			border-color: @white;
-		}
-		width: 25rem;
-		color: @white;
-		background-color: @bg;
-		padding: 0.4rem 0.6rem;
-		border: 0.1rem solid @table-border;
-	}
-	.go-btn {
-		&:hover {
-			color: @white;
-			border-color: @white;
-		}
-		cursor: pointer;
-		display: inline-block;
-		color: @table-font;
-		padding: 0.4rem 0.6rem;
-		border: 0.1rem solid @table-border;
-		background-color: @bg;
-	}
-	.clear-btn {
-		&:hover {
-			color: @white;
-			border-color: @white;
-		}
-		cursor: pointer;
-		display: inline-block;
-		color: @table-font;
-		padding: 0.4rem 0.6rem;
-		border: 0.1rem solid @table-border;
-		background-color: @bg;
-	}
-	.loader {
-		top: 0.3rem;
-		right: -5rem;
-		width: 2rem;
-		height: 2rem;
-	}
+    .source {
+        &:hover {
+            border-color: @white;
+        }
+        outline: none;
+        color: @white;
+        background-color: @bg;
+        padding: 0.25rem .1rem;
+        margin-right: 0.5rem;
+        border: 0.1rem solid @table-border;
+    }
+    .stype {
+        &:hover {
+            border-color: @white;
+        }
+        outline: none;
+        color: @white;
+        background-color: @bg;
+        padding: 0.4rem;
+        margin-right: 0.5rem;
+        border: 0.1rem solid @table-border;
+        position: relative;
+        -webkit-appearance: none;
+        -ms-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+    .search-input {
+        &:hover {
+            border-color: @white;
+        }
+        width: 25rem;
+        color: @white;
+        background-color: @bg;
+        padding: 0.4rem 0.6rem;
+        border: 0.1rem solid @table-border;
+    }
+    .go-btn {
+        &:hover {
+            color: @white;
+            border-color: @white;
+        }
+        cursor: pointer;
+        display: inline-block;
+        color: @table-font;
+        padding: 0.4rem 0.6rem;
+        border: 0.1rem solid @table-border;
+        background-color: @bg;
+    }
+    .clear-btn {
+        &:hover {
+            color: @white;
+            border-color: @white;
+        }
+        cursor: pointer;
+        display: inline-block;
+        color: @table-font;
+        padding: 0.4rem 0.6rem;
+        border: 0.1rem solid @table-border;
+        background-color: @bg;
+    }
+    .loader {
+        top: 0.3rem;
+        right: -5rem;
+        width: 2rem;
+        height: 2rem;
+    }
 }

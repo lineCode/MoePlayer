@@ -1,50 +1,50 @@
 @import url(variables.less);
 
 .lrcPanel {
-	position: relative;
-	width: 100%;
-	height: 100%;
-	border-top: 1px solid @table-border;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-top: 1px solid @table-border;
 
-	&.empty {
-		&:before {
-			content: '暂无歌词QAQ';
-			position: absolute;
-			top: 45%;
-			left: 40%;
-		}
-	}
-	.panel-c {
-		text-align: center;
-		width: 100%;
-		height: 100%;
-		overflow: hidden;
-		// overflow-y: scroll;
+    &.empty {
+        &:before {
+            content: '暂无歌词QAQ';
+            position: absolute;
+            top: 45%;
+            left: 40%;
+        }
+    }
+    .panel-c {
+        text-align: center;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        // overflow-y: scroll;
 
-		.lrc-ul {
-			display: -webkit-flex;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-			padding: 0;
-			margin: 0;
+        .lrc-ul {
+            display: -webkit-flex;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
 
-			li {
-				width: 100%;
-				list-style: none;
-				margin: 0.6rem 0;
-				text-align: center;
-				// max-width: 30rem;
-				line-height: 2rem;
-				font-size: 1.3rem;
-				height: 2rem;
-			}
-			.showing {
-				font-weight: bold;
-				color: @theme-color;
-				text-shadow: 0 0 2rem @theme-color;
-			}
-		}
-	}
+            li {
+                width: 100%;
+                list-style: none;
+                margin: 0.6rem 0;
+                text-align: center;
+                // max-width: 30rem;
+                line-height: 2rem;
+                font-size: 1.3rem;
+                height: 2rem;
+            }
+            .showing {
+                font-weight: bold;
+                color: @theme-color;
+                text-shadow: 0 0 2rem @theme-color;
+            }
+        }
+    }
 }

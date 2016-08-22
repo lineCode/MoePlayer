@@ -8,89 +8,89 @@
 @import url(MsgBox.less);
 
 .loading-mask {
-	display: -webkit-flex;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 99;
-	color: @white;
-	background-color: @black;
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+    color: @white;
+    background-color: @black;
 
-	.loading-img {
-		max-width: 5rem;
-		max-height: 5rem;
-		animation: rotate 2s linear infinite;
-	}
+    .loading-img {
+        max-width: 5rem;
+        max-height: 5rem;
+        animation: rotate 2s linear infinite;
+    }
 }
 .mp-container {
-	height: 100%;
-	width: 100%;
-	background-color: @bg;
+    height: 100%;
+    width: 100%;
+    background-color: @bg;
 
-	.mp-panel {
-		height: 59.6rem;
+    .mp-panel {
+        height: 59.6rem;
 
-		.panel-header {
-			height: 10%;
-			display: flex;
-			display: -webkit-flex;
-			justify-content: space-around;
-			align-items: center;
-			padding: 1rem;
-			background-color: @black;
-			border-bottom: 0.2rem solid @red;
+        .panel-header {
+            height: 10%;
+            display: flex;
+            display: -webkit-flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 1rem;
+            background-color: @black;
+            border-bottom: 0.2rem solid @red;
 
-			.logo {
-				color: @white;
-				cursor: pointer;
+            .logo {
+                color: @white;
+                cursor: pointer;
 
-				.app-name {
-					display: inline-block;
+                .app-name {
+                    display: inline-block;
 
-					&:hover {
-						text-shadow: 0 0 8px @white;
-					}
-					font-size: 3.5rem;
-				}
-				.app-ver {
-					display: inline-block;
-					font-size: 1.5rem;
-				}
-			}
-		}
-		.panel-body {
-			height: 90%;
-		}
-	}
-	.moePlayer-c {
-		border-top: 0.1rem solid @table-border;
-		height: 4.5rem;
-	}
-	.detailPanel-c {
-		position: absolute;
-		top: 5.96rem;
-		left: 0;
-		width: 100%;
-		height: 53.64rem;
-		opacity: 0;
-		-webkit-transform: scale(0);
-		-ms-transform: scale(0);
-		transform: scale(0);
-		-webkit-transform-origin: 0% 100% 0;
-		-ms-transform-origin: 0% 100% 0;
-		transform-origin: 0% 100% 0;
-		transition-duration: 0.3s;
-	}
-	.expand {
-		opacity: 1;
-		-webkit-transform: scale(1);
-		-ms-transform: scale(1);
-		transform: scale(1);
-	}
+                    &:hover {
+                        text-shadow: 0 0 8px @white;
+                    }
+                    font-size: 3.5rem;
+                }
+                .app-ver {
+                    display: inline-block;
+                    font-size: 1.5rem;
+                }
+            }
+        }
+        .panel-body {
+            height: 90%;
+        }
+    }
+    .moePlayer-c {
+        border-top: 0.1rem solid @table-border;
+        height: 4.5rem;
+    }
+    .detailPanel-c {
+        position: absolute;
+        top: 5.96rem;
+        left: 0;
+        width: 100%;
+        height: 53.64rem;
+        opacity: 0;
+        -webkit-transform: scale(0);
+        -ms-transform: scale(0);
+        transform: scale(0);
+        -webkit-transform-origin: 0% 100% 0;
+        -ms-transform-origin: 0% 100% 0;
+        transform-origin: 0% 100% 0;
+        transition-duration: 0.3s;
+    }
+    .expand {
+        opacity: 1;
+        -webkit-transform: scale(1);
+        -ms-transform: scale(1);
+        transform: scale(1);
+    }
 }

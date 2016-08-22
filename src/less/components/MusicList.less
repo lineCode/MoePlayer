@@ -6,117 +6,117 @@
 @hover-color: #2c2e32;
 
 .musicList {
-	.table-c {
-		min-height: 48.2rem;
+    .table-c {
+        min-height: 48.2rem;
 
-		table {
-			table-layout: fixed;
+        table {
+            table-layout: fixed;
 
-			tr {
-				&:hover {
-					background-color: @hover-color !important;
-				}
-				text-align: left;
+            tr {
+                &:hover {
+                    background-color: @hover-color !important;
+                }
+                text-align: left;
 
-				td {
-					border: none;
-					overflow: hidden;
-					text-overflow: ellipsis;
-					white-space: nowrap;
-				}
-				.list-index {
-					width: 6%;
-				}
-				.list-title {
-					width: 30%;
-				}
-				.list-artist {
-					width: 20%;
-				}
-				.list-album {
-					width: 29%;
-				}
-				.list-duration {
-					width: 10%;
-				}
-				.list-operation {
-					width: 5%;
-				}
-				.index-col {
-					text-align: center;
-				}
-				.title-col {
-					// color: @title-color;
-				}
-				.operation-col {
-					.btn {
-						display: inline-block;
-						vertical-align: top;
-						margin: 0 0.5rem;
-						cursor: pointer;
-					}
-					.dlBtn {
-						&:hover {
-							opacity: 1;
-						}
-						opacity: 0.5;
-						height: 1.4rem;
-						width: 2rem;
-						background-image: url(../../assets/download.png);
-						background-size: 74%;
-						background-position: center;
-						background-repeat: no-repeat;
-					}
-				}
-			}
-			.tips-row {
-				background-color: @odd-row-color !important;
-				text-align: center;
-			}
-			tr:nth-child(even) {
-				background-color: @even-row-color;
-			}
-			.song.playing {
-				color: @theme-color;
-				background-color: @hover-color !important;
+                td {
+                    border: none;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .list-index {
+                    width: 6%;
+                }
+                .list-title {
+                    width: 30%;
+                }
+                .list-artist {
+                    width: 20%;
+                }
+                .list-album {
+                    width: 29%;
+                }
+                .list-duration {
+                    width: 10%;
+                }
+                .list-operation {
+                    width: 5%;
+                }
+                .index-col {
+                    text-align: center;
+                }
+                .title-col {
+                    // color: @title-color;
+                }
+                .operation-col {
+                    .btn {
+                        display: inline-block;
+                        vertical-align: top;
+                        margin: 0 0.5rem;
+                        cursor: pointer;
+                    }
+                    .dlBtn {
+                        &:hover {
+                            opacity: 1;
+                        }
+                        opacity: 0.5;
+                        height: 1.4rem;
+                        width: 2rem;
+                        background-image: url(../../assets/download.png);
+                        background-size: 74%;
+                        background-position: center;
+                        background-repeat: no-repeat;
+                    }
+                }
+            }
+            .tips-row {
+                background-color: @odd-row-color !important;
+                text-align: center;
+            }
+            tr:nth-child(even) {
+                background-color: @even-row-color;
+            }
+            .song.playing {
+                color: @theme-color;
+                background-color: @hover-color !important;
 
-				.index-col {
-					position: relative;
-					color: transparent;
+                .index-col {
+                    position: relative;
+                    color: transparent;
 
-					&, &:before {
-						transition: none;
-					}
-					&:before {
-						content: '';
-						background-image: url(../../assets/playing.png);
-						background-size: 30% 55%;
-						background-position: center;
-						background-repeat: no-repeat;
-						position: absolute;
-						top: 0;
-						left: 0;
-						height: 100%;
-						width: 100%;
-					}
-				}
-			}
-			.song.hasDLed {
-				.operation-col {
-					.dlBtn {
-						cursor: default;
-						background-image: url(../../assets/success.png);
-					}
-				}
-			}
-			.song.DLing {
-				.operation-col {
-					.dlBtn {
-						cursor: default;
-						background-image: url(../../assets/doing.png);
-					}
-				}
-			}
-		}
-	}
+                    &, &:before {
+                        transition: none;
+                    }
+                    &:before {
+                        content: '';
+                        background-image: url(../../assets/playing.png);
+                        background-size: 30% 55%;
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        height: 100%;
+                        width: 100%;
+                    }
+                }
+            }
+            .song.hasDLed {
+                .operation-col {
+                    .dlBtn {
+                        cursor: default;
+                        background-image: url(../../assets/success.png);
+                    }
+                }
+            }
+            .song.DLing {
+                .operation-col {
+                    .dlBtn {
+                        cursor: default;
+                        background-image: url(../../assets/doing.png);
+                    }
+                }
+            }
+        }
+    }
 }
