@@ -97,17 +97,12 @@ class SearchBox extends BaseComp
     #---------------------------------------------------
 
     # 普通搜索
-    # @param {string} sstr  关键词
-    # @param {string} src   音乐来源
-    # @param {number} page  页码
-    # @param {string} stype 搜索类型
-    doSearch: (sstr = @sstr, src = @src, page = @page, stype = @type) ->
-        # 是否为分页请求
-        if sstr is @sstr and src is @src and stype is @type
-            refresh = false
-        else
-            refresh = true
-
+    # @param {string}  sstr    关键词
+    # @param {string}  src     音乐来源
+    # @param {number}  page    页码
+    # @param {string}  stype   搜索类型
+    # @param {boolean} refresh 是否刷新分页
+    doSearch: (sstr = @sstr, src = @src, page = @page, stype = @type, refresh = true) ->
         if sstr is ''
             return false
 

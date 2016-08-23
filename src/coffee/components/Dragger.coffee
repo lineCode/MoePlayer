@@ -1,7 +1,7 @@
 ##
 # 拖拽组件
 # @Author VenDream
-# @Update 2016-7-27 14:16:43
+# @Update 2016-8-23 14:52:40
 ##
 
 EventEmitter = require 'eventemitter3'
@@ -28,7 +28,8 @@ class Dragger extends EventEmitter
     # @param {number}  max       拖拽范围上界
     # @param {number}  direction 拖拽方向(0 = 水平，1 = 竖直)
     # @param {element} zone      拖拽生效的区域
-    enableDragging: (ele, min = 0, max = 100, direction = 0, zone = ele) ->
+    # @param {string}  name      拖拽方案名称
+    enableDragging: (ele, min = 0, max = 100, direction = 0, zone = ele, name = '') ->
         $ele = $(ele)
         $zone = $(zone)
         start = 0
@@ -80,7 +81,7 @@ class Dragger extends EventEmitter
             )
 
             $ele.css style, newPos + 'px'
-            @emit 'Dragger::Dragging', Math.abs(newPos - min) / Math.abs(max - min)
+            @emit "Dragger::Dragging##{name}", Math.abs(newPos - min) / Math.abs(max - min)
 
         # 拖拽结束，更新起始位置
         .on @dragEnd, (evt) =>
@@ -100,6 +101,7 @@ class Dragger extends EventEmitter
 
             origin = newPos
             $ele.removeClass 'dragging'
+            @emit "Dragger::DragEnd##{name}", Math.abs(newPos - min) / Math.abs(max - min)
 
     # 为元素取消拖拽绑定
     # @param {element} ele  取消对象

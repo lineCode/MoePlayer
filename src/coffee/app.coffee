@@ -52,12 +52,13 @@ eventBinding = ->
 
     # 选择分页
     eventBus.on 'MusicList::SelectPage', (pageIndex) ->
-        searchBox && searchBox.doSearch null, null, pageIndex, null
+        searchBox && searchBox.doSearch null, null, pageIndex, null, false
 
     # 选中播放
     eventBus.on 'MusicList::GetSongInfo', ->
         searchBox && searchBox.showLoader()
         moePlayer && moePlayer.stop()
+        detailPanel && detailPanel.pause()
     eventBus.on 'MusicList::GetSongInfoFailed', ->
         searchBox && searchBox.hideLoader()
     eventBus.on 'MusicList::PlaySong', (song) ->

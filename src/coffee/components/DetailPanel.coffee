@@ -141,6 +141,7 @@ class DetailPanel extends BaseComp
     # 显示歌曲详情
     # @param {object} song 歌曲对象
     show: (song) ->
+        @resume()
         @CUR_SONG = song.song_info
         s = song.song_info
 

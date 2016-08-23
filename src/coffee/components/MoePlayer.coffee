@@ -125,6 +125,7 @@ class MoePlayer extends BaseComp
         @emit 'renderFinished'
 
     eventBinding: ->
+        @progressControl true
         @volumeControl()
         @playModeControl()
         @playControl()
@@ -132,16 +133,40 @@ class MoePlayer extends BaseComp
         $(@cover).unbind().on 'click', =>
             @CUR_SONG and @eventBus.emit 'MoePlayer::ExpandDetailPanel'
 
+    # 播放进度控制
+    # @param {boolean} reg 是否只注册事件
+    progressControl: (reg = false) ->
+        name = 'Progress'
+
+        if reg is true
+            @DRAGGER.on "Dragger::DragEnd##{name}", (percent) =>
+                @CUR_SONG && (
+                    totalTime = @CUR_SONG.song_info.song_duration / 1000
+                    curTime = totalTime * percent
+                    @CUR_TIME = Math.round curTime
+                    @player.pause()
+                    @player.currentTime = curTime
+                )
+        else
+            # 取消绑定
+            @DRAGGER.disableDragging @time
+
+            # 拖拽绑定
+            pbw = $(@progressBar).width()
+            pdbw = $(@progressDragBar).width()
+            @DRAGGER.enableDragging @progressDragBar, -pdbw / 2, pbw - pdbw / 2, 0, @time, name
+
     # 音量控制
     volumeControl: ->
         # 拖拽绑定
+        name = 'Volume'
         vbw = $(@volumeBar).width()
         vdbw = $(@volumeDragBar).width()
         $vIcon = $(@volumeIcon).find('img')
-        @DRAGGER.enableDragging @volumeDragBar, -vdbw / 2, vbw - vdbw / 2, 0, @volume
+        @DRAGGER.enableDragging @volumeDragBar, -vdbw / 2, vbw - vdbw / 2, 0, @volume, name
 
         # 调节音量
-        @DRAGGER.on 'Dragger::Dragging', (percent) =>
+        @DRAGGER.on "Dragger::Dragging##{name}", (percent) =>
             @player.volume = percent
 
             if percent is 0
@@ -270,6 +295,9 @@ class MoePlayer extends BaseComp
         # 切换图标状态
         $(@status).addClass 'playing'
             .find('img').attr 'src', @ICONS.PAUSE
+
+        # 重置拖拽
+        @progressControl()
 
         # 切换音质显示
         sq = parseInt(song.song_info.song_quality)
