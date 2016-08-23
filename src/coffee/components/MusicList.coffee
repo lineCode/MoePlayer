@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-22 16:58:59
+# @Update 2016-8-23 09:22:25
 ##
 
 BaseComp = require './BaseComp'
@@ -56,8 +56,9 @@ class MusicList extends BaseComp
         ipcRenderer.on 'ipcMain::DownloadSongSuccess', (event, s) =>
             @updateDLedSong s.song_id
             Util.showMsg "#{@TIPS.DOWNLOAD_SUCCESS}: 《#{s.song_name}》", null, 2
-        ipcRenderer.on 'ipcMain::DownloadSongFailed', (event, err) =>
-            Util.showMsg "#{@TIPS.DOWNLOAD_FAILED}: #{err}", null, 3
+        ipcRenderer.on 'ipcMain::DownloadSongFailed', (event, s) =>
+            @updateDefault s.song_id
+            Util.showMsg "#{@TIPS.DOWNLOAD_FAILED}: #{s.state}", null, 3
 
         @buildCtcMenu()
         @updatePagination 0
@@ -164,6 +165,15 @@ class MusicList extends BaseComp
         !songInfo.song_name && songInfo.song_name = TI
         !songInfo.song_album && songInfo.song_album = AL
         !songInfo.song_artist && songInfo.song_artist = AR
+
+    # 还原默认状态
+    # @param {string} sid 歌曲ID
+    updateDefault: (sid) ->
+        $sr = $('.song[data-sid="' + sid + '"]')
+        $sr.length > 0 && (
+            $sr.removeClass 'hasDLed'
+                .removeClass 'DLing'
+        )
 
     # 更新显示正在播放的歌曲
     # @param {string} sid 歌曲ID

@@ -1,7 +1,7 @@
 ##
 # 歌曲详情面板组件
 # @Author VenDream
-# @Update 2016-8-19 17:36:18
+# @Update 2016-8-23 09:22:31
 ##
 
 BaseComp = require './BaseComp'
@@ -43,6 +43,9 @@ class DetailPanel extends BaseComp
                 @updateDLedSong s.song_id
             else
                 Util.removeFromArr @DLING_SONGS, s.song_id
+
+        ipcRenderer.on 'ipcMain::DownloadSongFailed', (event, s) =>
+            @updateDefault s.song_id
 
         ipcRenderer.on 'ipcMain::DownloadCoverSuccess', (event, s) =>
             $(@dlCoverBtn).removeClass 'DLing'
@@ -161,11 +164,10 @@ class DetailPanel extends BaseComp
         # 歌曲
         if isDLing is true
             @updateDLingSong s.song_id, false
+        else if hasSongDLed is true
+            @updateDLedSong s.song_id, false
         else
-            if hasSongDLed is true
-                @updateDLedSong s.song_id, false
-            else
-                @updateDefault()
+            @updateDefault()
 
         # 封面
         if hasCoverDLed is true

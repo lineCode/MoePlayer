@@ -80,13 +80,21 @@ function dlSetting(event, item, webContents) {
 
     // Sync Download Status
     item.once('done', (event, state) => {
-        if (state =='completed') {
+        if (state == 'completed') {
             webController.send(sen, {
                 song_id: dlItem.song_id,
                 song_name: dlItem.song_name
             });
         } else {
-            webController.send(fen, state);
+            if (type == 'Song') {
+                webController.send(fen, {
+                    song_id: dlItem.song_id,
+                    song_name: dlItem.song_name,
+                    state: state
+                });
+            } else {
+                webController.send(fen, state);
+            }
         }
     });
 }
