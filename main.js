@@ -2,10 +2,9 @@ const _ = require('underscore');
 const fs = require('fs');
 
 const electron = require('electron');
-const {app} = electron;
-const {ipcMain} = electron;
-const {BrowserWindow} = electron;
+const {app, ipcMain, Menu, BrowserWindow} = electron;
 
+const devtron = require('devtron')
 const config = require('./config');
 const client = require('electron-connect').client;
 
@@ -13,6 +12,7 @@ let win;
 let session;
 let webController;
 let dlQueue = [];
+let contextMenu;
 
 /**************************************************
  *               Function Definition
@@ -41,6 +41,7 @@ function createWin() {
     // Whether To Open Dev Tools
     if (config.debug === true) {
         win.webContents.openDevTools();
+        devtron.install();
         client.create(win, {
             sendBounds: false
         });
@@ -152,6 +153,35 @@ function dlSong(event, song) {
     }
 }
 
+/**
+ * Open Context Menu
+ * @param  {object} event    event
+ */
+function openMenu(event) {
+    let template = [{
+        label: '搜索这位歌手',
+        click: () => {
+            webController.send('ipcMain::SearchArtist');
+        }
+    }, {
+        label: '搜索这张专辑',
+        click: () => {
+            webController.send('ipcMain::SearchAlbum');
+        }
+    }, {
+        label: '下载全部歌曲',
+        click: () => {
+            webController.send('ipcMain::DownloadAllSongs');
+        }
+    }];
+
+    !contextMenu && (
+        contextMenu = Menu.buildFromTemplate(template)
+    );
+
+    contextMenu.popup(win);
+}
+
 /**************************************************
  *                 Event Listening
  *************************************************/
@@ -170,3 +200,4 @@ app.on('activate', () => {
 
 ipcMain.on('ipcRenderer::DownloadSong', dlSong);
 ipcMain.on('ipcRenderer::DownloadCover', dlCover);
+ipcMain.on('ipcRenderer::OpenContextMenu', openMenu);

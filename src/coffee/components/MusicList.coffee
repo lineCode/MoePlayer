@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-23 09:22:25
+# @Update 2016-8-23 10:58:26
 ##
 
 BaseComp = require './BaseComp'
@@ -130,27 +130,20 @@ class MusicList extends BaseComp
 
     # 创建右键菜单
     buildCtcMenu: ->
-        @menu = new Menu()
-        @menu.append(new MenuItem({
-            label: '搜索这位歌手',
-            click: =>
-                @CONTEXT.AR and @eventBus.emit 'MusicList::SearchArtist', @CONTEXT.AR
-        }))
-        @menu.append(new MenuItem({
-            label: '搜索这张专辑',
-            click: =>
-                @CONTEXT.AL and @eventBus.emit 'MusicList::SearchAlbum', @CONTEXT.AL
-        }))
-        @menu.append(new MenuItem({
-            label: '下载全部歌曲',
-            click: =>
-                @downloadAllSongs()
-        }))
+        # 搜索歌手
+        ipcRenderer.on 'ipcMain::SearchArtist', =>
+            @CONTEXT.AR and @eventBus.emit 'MusicList::SearchArtist', @CONTEXT.AR
+        # 搜索专辑
+        ipcRenderer.on 'ipcMain::SearchAlbum', =>
+            @CONTEXT.AL and @eventBus.emit 'MusicList::SearchAlbum', @CONTEXT.AL
+        # 下载全部歌曲
+        ipcRenderer.on 'ipcMain::DownloadAllSongs', =>
+            @downloadAllSongs()
 
         $(@table).on 'contextmenu', (e) =>
             e.preventDefault()
-            $(@table).find('.song').length > 0 and \
-            @menu.popup remote.getCurrentWindow(), false
+            $(@table).find('.song').length > 0 and e.target.nodeName is 'TD' and \
+            ipcRenderer.send 'ipcRenderer::OpenContextMenu'
 
     # 歌曲信息获取不到时，使用备用歌曲信息
     # @param {object} songInfo 歌曲信息对象
