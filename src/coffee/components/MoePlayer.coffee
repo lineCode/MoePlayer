@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-8-24 16:07:44
+# @Update 2016-8-24 17:16:45
 ##
 
 BaseComp = require './BaseComp'
@@ -357,7 +357,7 @@ class MoePlayer extends BaseComp
             @startProgress song.song_info.song_duration
 
             # 同步缓冲进度
-            $(@player).unbind('progress').on 'progress', =>
+            $(@player).on 'progress', =>
                 total = song.song_info.song_duration / 1000
                 buffered = @player.buffered
                 percent = buffered.length and buffered.end(buffered.length - 1) / total or 0.00
@@ -367,6 +367,10 @@ class MoePlayer extends BaseComp
             @pause()
             @CUR_SONG = null
             @curIndex = undefined
+
+            $(@quality).text '默认'
+            @quality.className = 'song-quality'
+
             Util.showMsg @TIPS.URL_ERROR, 3000, 3
             @eventBus.emit 'MoePlayer::UrlError', song
 
@@ -400,12 +404,17 @@ class MoePlayer extends BaseComp
 
         # 封面还原为默认
         $(@cover).find('img').attr 'src', @ICONS.COVER
+
         # 时间重置为 00:00
         $(@playedTime).text '00:00'
+
         # 进度指示器回到原位置
         oriPos = -$(@progressDragBar).width() / 2
         $(@progressDragBar).css('left', oriPos + 'px')
         $(@bufferBar).css 'width', 0
+
+        # 解除缓冲进度同步
+        $(@player).unbind('progress')
 
         @TIMER.stop()
     
