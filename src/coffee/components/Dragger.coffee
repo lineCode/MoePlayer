@@ -1,7 +1,7 @@
 ##
 # 拖拽组件
 # @Author VenDream
-# @Update 2016-8-24 14:31:27
+# @Update 2016-8-24 16:07:50
 ##
 
 EventEmitter = require 'eventemitter3'
@@ -26,10 +26,11 @@ class Dragger extends EventEmitter
     # @param {element} ele       绑定对象
     # @param {number}  min       拖拽范围下界
     # @param {number}  max       拖拽范围上界
+    # @param {number}  total     拖拽总范围
     # @param {number}  direction 拖拽方向(0 = 水平，1 = 竖直)
     # @param {element} zone      拖拽生效的区域
     # @param {string}  name      拖拽方案名称
-    enableDragging: (ele, min = 0, max = 100, direction = 0, zone = ele, name = '') ->
+    enableDragging: (ele, min = 0, max = 100, total = max, direction = 0, zone = ele, name = '') ->
         $ele = $(ele)
         $zone = $(zone)
         start = 0
@@ -84,7 +85,7 @@ class Dragger extends EventEmitter
 
             $ele.css style, newPos + 'px'
 
-            percent = Math.abs(newPos - min) / Math.abs(max - min)
+            percent = Math.abs(newPos - min) / total
             @emit "Dragger::Dragging##{name}", percent
 
         # 拖拽结束，更新起始位置
@@ -107,9 +108,9 @@ class Dragger extends EventEmitter
             
             if newPos isnt -1
                 origin = newPos
-                percent = Math.abs(newPos - min) / Math.abs(max - min)
+                percent = Math.abs(newPos - min) / total
             else
-                percent = Math.abs(origin - min) / Math.abs(max - min)
+                percent = Math.abs(origin - min) / total
 
             @emit "Dragger::DragEnd##{name}", percent
 

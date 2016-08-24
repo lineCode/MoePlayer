@@ -118,8 +118,17 @@
                 position: relative;
                 height: 0.5rem;
                 width: 65%;
-                cursor: pointer;
                 background-color: @progress-bar;
+
+                .buffer-bar {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    height: 100%;
+                    width: 0%;
+                    cursor: pointer;
+                    background-color: @buffer-bar;
+                }
 
                 .progress-drag-bar {
                     &:hover {

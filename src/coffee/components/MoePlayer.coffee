@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-8-24 14:53:06
+# @Update 2016-8-24 16:07:44
 ##
 
 BaseComp = require './BaseComp'
@@ -51,6 +51,7 @@ class MoePlayer extends BaseComp
         #-------------
         @playedTime = @time.querySelector '.played-time'
         @progressBar = @time.querySelector '.progress-bar'
+        @bufferBar = @time.querySelector '.buffer-bar'
         @progressDragBar = @time.querySelector '.progress-drag-bar'
         @totalTime = @time.querySelector '.total-time'
         @quality = @time.querySelector '.song-quality'
@@ -94,6 +95,7 @@ class MoePlayer extends BaseComp
                     <div class="time-c">
                         <div class="played-time">00:00</div>
                         <div class="progress-bar">
+                            <div class="buffer-bar"></div>
                             <div class="progress-drag-bar"></div>
                         </div>
                         <div class="total-time">00:00</div>
@@ -154,7 +156,7 @@ class MoePlayer extends BaseComp
                 @resume()
             )
 
-        $(@progressBar).unbind().on 'mousedown', (e) =>
+        $(@bufferBar).unbind().on 'mousedown', (e) =>
             @CUR_SONG && (
                 totalTime = @CUR_SONG.song_info.song_duration / 1000
                 barLeft = @progressBar.getBoundingClientRect().left
@@ -182,8 +184,9 @@ class MoePlayer extends BaseComp
     regProgressDragging: ->
         name = 'Progress'
         pbw = $(@progressBar).width()
+        bbw = $(@bufferBar).width()
         pdbw = $(@progressDragBar).width()
-        @DRAGGER.enableDragging @progressDragBar, -pdbw / 2, pbw - pdbw / 2, 0, @time, name
+        @DRAGGER.enableDragging @progressDragBar, -pdbw / 2, bbw - pdbw / 2, pbw, 0, @time, name
 
     # 音量控制
     volumeControl: ->
@@ -192,7 +195,7 @@ class MoePlayer extends BaseComp
         vbw = $(@volumeBar).width()
         vdbw = $(@volumeDragBar).width()
         $vIcon = $(@volumeIcon).find('img')
-        @DRAGGER.enableDragging @volumeDragBar, -vdbw / 2, vbw - vdbw / 2, 0, @volume, name
+        @DRAGGER.enableDragging @volumeDragBar, -vdbw / 2, vbw - vdbw / 2, vbw, 0, @volume, name
 
         # 调节音量
         @DRAGGER.on "Dragger::Dragging##{name}", (percent) =>
@@ -350,6 +353,12 @@ class MoePlayer extends BaseComp
             $(@cover).find('img').attr 'src', song.song_info.song_cover or @defaultCover
             # 载入总时长
             $(@totalTime).text Util.normalizeSeconds(song.song_info.song_duration)
+
+        .on 'progress', =>
+            total = song.song_info.song_duration / 1000
+            buffered = @player.buffered
+            percent = buffered.length and buffered.end(buffered.length - 1) / total or 0.00
+            $(@bufferBar).css 'width', (percent * 100) + '%'
 
         .on 'timeupdate', =>
             @eventBus.emit 'MoePlayer::UpdateTime', @player.currentTime
