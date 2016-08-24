@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-8-12 18:53:09
+# @Update 2016-8-24 14:53:06
 ##
 
 BaseComp = require './BaseComp'
@@ -125,7 +125,7 @@ class MoePlayer extends BaseComp
         @emit 'renderFinished'
 
     eventBinding: ->
-        @progressControl true
+        @progressBind()
         @volumeControl()
         @playModeControl()
         @playControl()
@@ -133,28 +133,57 @@ class MoePlayer extends BaseComp
         $(@cover).unbind().on 'click', =>
             @CUR_SONG and @eventBus.emit 'MoePlayer::ExpandDetailPanel'
 
-    # 播放进度控制
-    # @param {boolean} reg 是否只注册事件
-    progressControl: (reg = false) ->
+    # 进度拖拽事件监听
+    progressBind: ->
         name = 'Progress'
 
-        if reg is true
-            @DRAGGER.on "Dragger::DragEnd##{name}", (percent) =>
-                @CUR_SONG && (
-                    totalTime = @CUR_SONG.song_info.song_duration / 1000
-                    curTime = totalTime * percent
-                    @CUR_TIME = Math.round curTime
-                    @player.pause()
-                    @player.currentTime = curTime
-                )
-        else
-            # 取消绑定
-            @DRAGGER.disableDragging @time
+        @DRAGGER.on "Dragger::Dragging##{name}", (percent) =>
+            @CUR_SONG && (
+                totalTime = @CUR_SONG.song_info.song_duration / 1000
+                curTime = totalTime * percent
+                @CUR_TIME = Math.round curTime
+                $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
+            )
+        @DRAGGER.on "Dragger::DragEnd##{name}", (percent) =>
+            @CUR_SONG && (
+                totalTime = @CUR_SONG.song_info.song_duration / 1000
+                curTime = totalTime * percent
+                @player.currentTime = curTime
+                @DRAGGER.disableDragging @progressDragBar, @time
 
-            # 拖拽绑定
-            pbw = $(@progressBar).width()
-            pdbw = $(@progressDragBar).width()
-            @DRAGGER.enableDragging @progressDragBar, -pdbw / 2, pbw - pdbw / 2, 0, @time, name
+                @resume()
+            )
+
+        $(@progressBar).unbind().on 'mousedown', (e) =>
+            @CUR_SONG && (
+                totalTime = @CUR_SONG.song_info.song_duration / 1000
+                barLeft = @progressBar.getBoundingClientRect().left
+                barWidth = $(@progressBar).width()
+                dragBarWidth = $(@progressDragBar).width()
+                offset =  Math.max(e.clientX - barLeft, 0)
+                percent = offset / barWidth
+                curTime = totalTime * percent
+
+                @player.currentTime = curTime
+
+                @CUR_TIME = Math.round curTime
+                $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
+
+                $(@progressDragBar).css 'left', (offset - dragBarWidth / 2) + 'px'
+            )
+
+        $(@progressDragBar).unbind().on 'mousedown', (e) =>
+            @CUR_SONG && (
+                @pause()
+                @regProgressDragging()
+            )
+
+    # 绑定进度条拖拽
+    regProgressDragging: ->
+        name = 'Progress'
+        pbw = $(@progressBar).width()
+        pdbw = $(@progressDragBar).width()
+        @DRAGGER.enableDragging @progressDragBar, -pdbw / 2, pbw - pdbw / 2, 0, @time, name
 
     # 音量控制
     volumeControl: ->
@@ -267,6 +296,7 @@ class MoePlayer extends BaseComp
             curPos = parseFloat $(@progressDragBar).css('left')
             newPos = curPos + stepWidth
             @CUR_TIME += 1
+            @CUR_TIME >= timeWidth and @CUR_TIME = Math.floor(timeWidth)
 
             $(@progressDragBar).css('left', newPos + 'px')
             $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
@@ -296,9 +326,6 @@ class MoePlayer extends BaseComp
         $(@status).addClass 'playing'
             .find('img').attr 'src', @ICONS.PAUSE
 
-        # 重置拖拽
-        @progressControl()
-
         # 切换音质显示
         sq = parseInt(song.song_info.song_quality)
         if sq >= 320
@@ -315,6 +342,7 @@ class MoePlayer extends BaseComp
         $(@player).attr 'src', song.song_info.song_url
         @player.load()
         @CUR_SONG = song
+        @startProgress song.song_info.song_duration
 
         # 加载数据并播放
         $(@player).unbind().on 'loadedmetadata', =>
@@ -323,15 +351,15 @@ class MoePlayer extends BaseComp
             # 载入总时长
             $(@totalTime).text Util.normalizeSeconds(song.song_info.song_duration)
 
-        .on 'canplaythrough', =>
-            @player.play()
-            @startProgress song.song_info.song_duration
-
         .on 'timeupdate', =>
             @eventBus.emit 'MoePlayer::UpdateTime', @player.currentTime
 
         .on 'error', =>
             Util.showMsg @TIPS.URL_ERROR, 3000, 3
+
+        setTimeout =>
+            @player.play()
+        , 0
 
     # 继续播放
     # @param {boolean} isEmit 是否发送事件

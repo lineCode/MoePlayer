@@ -1,7 +1,7 @@
 ##
 # 拖拽组件
 # @Author VenDream
-# @Update 2016-8-23 14:52:40
+# @Update 2016-8-24 14:31:27
 ##
 
 EventEmitter = require 'eventemitter3'
@@ -37,12 +37,12 @@ class Dragger extends EventEmitter
         delta = 0
         style = if direction is 0 then 'left' else 'top'
         origin = parseFloat($ele.css style)
-        newPos = 0
+        newPos = -1
 
         $ele.addClass 'draggable'
 
         # 拖拽开始，记录起始位置
-        $zone.unbind().on @dragStart, (evt) =>
+        $zone.on @dragStart, (evt) =>
             $target = $(evt.target)
             if $target.hasClass('draggable') is true
                 $target.addClass 'dragging'
@@ -54,6 +54,8 @@ class Dragger extends EventEmitter
                 start = if direction is 0 \
                         then evt.pageX \
                         else evt.pageY
+
+            @emit "Dragger::DragStart##{name}"
 
         # 拖拽进行，更新元素位置
         .on @dragMove, (evt) =>
@@ -81,7 +83,9 @@ class Dragger extends EventEmitter
             )
 
             $ele.css style, newPos + 'px'
-            @emit "Dragger::Dragging##{name}", Math.abs(newPos - min) / Math.abs(max - min)
+
+            percent = Math.abs(newPos - min) / Math.abs(max - min)
+            @emit "Dragger::Dragging##{name}", percent
 
         # 拖拽结束，更新起始位置
         .on @dragEnd, (evt) =>
@@ -99,14 +103,23 @@ class Dragger extends EventEmitter
                       then evt.pageX \
                       else evt.pageY
 
-            origin = newPos
             $ele.removeClass 'dragging'
-            @emit "Dragger::DragEnd##{name}", Math.abs(newPos - min) / Math.abs(max - min)
+            
+            if newPos isnt -1
+                origin = newPos
+                percent = Math.abs(newPos - min) / Math.abs(max - min)
+            else
+                percent = Math.abs(origin - min) / Math.abs(max - min)
+            @emit "Dragger::DragEnd##{name}", percent
+
+            
 
     # 为元素取消拖拽绑定
     # @param {element} ele  取消对象
     # @param {element} zone 拖拽区域
     disableDragging: (ele, zone = ele) ->
-        $(zone).unbind()
+        $(zone).unbind @dragStart
+            .unbind @dragMove
+            .unbind @dragEnd
 
 module.exports = Dragger

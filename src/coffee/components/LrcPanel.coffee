@@ -1,7 +1,7 @@
 ##
 # 歌词面板组件
 # @Author VenDream
-# @Update 2016-8-15 11:35:30
+# @Update 2016-8-24 10:33:21
 ##
 
 BaseComp = require './BaseComp'
@@ -227,8 +227,7 @@ class LrcPanel extends BaseComp
             $line = $(@lrcUL).find("li[data-line=\"#{@CUR_LINE}\"]")
 
             # 高亮显示
-            if l isnt 0
-                $(@lrcUL).find('li').removeClass 'showing'
+            $(@lrcUL).find('li').removeClass 'showing'
             if $line.hasClass('showing') is false
                 $line.addClass 'showing'
                 if la.length > 1
@@ -239,7 +238,10 @@ class LrcPanel extends BaseComp
             top = parseInt $line.attr('data-offset')
             if top > @CENTER_TOP # 歌词在中央部位以下，需要滚动
                 offset = "#{-Math.abs(top - @CENTER_TOP)}px"
-                $(@lrcUL).css 'margin-top', offset
+            else
+                offset = '0px'
+
+            $(@lrcUL).css 'margin-top', offset
 
     # 过滤歌词中的空格
     # # @param {string} lrc 歌词数据
