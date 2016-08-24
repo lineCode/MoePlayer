@@ -304,6 +304,10 @@ class MusicList extends BaseComp
         @updatePagination 0
         @showTips @TIPS.SUGGEST
 
+    # 重置歌曲播放状态
+    resetPlaying: ->
+        $('.song').removeClass 'playing'
+
     # 获取歌曲信息并播放
     # @param {string} sid 歌曲ID
     # @param {number} idx 歌曲索引

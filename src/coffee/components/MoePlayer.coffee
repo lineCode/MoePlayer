@@ -127,6 +127,7 @@ class MoePlayer extends BaseComp
         @emit 'renderFinished'
 
     eventBinding: ->
+        @playerBind()
         @progressBind()
         @volumeControl()
         @playModeControl()
@@ -134,6 +135,11 @@ class MoePlayer extends BaseComp
 
         $(@cover).unbind().on 'click', =>
             @CUR_SONG and @eventBus.emit 'MoePlayer::ExpandDetailPanel'
+
+    # Audio事件绑定
+    playerBind: ->
+        $(@player).on 'timeupdate', =>
+            @eventBus.emit 'MoePlayer::UpdateTime', @player.currentTime
 
     # 进度拖拽事件监听
     progressBind: ->
@@ -224,7 +230,7 @@ class MoePlayer extends BaseComp
             evt.stopPropagation()
             $target = $(evt.currentTarget)
 
-            if not $(@player).attr('src') or $(@player).attr('src') is ''
+            if not @CUR_SONG
                 return
 
             # 播放状态
@@ -256,6 +262,8 @@ class MoePlayer extends BaseComp
                 idx: prevIndex
             }
 
+            @stop()
+
         $(@next).on 'click', (evt) =>
             evt.stopPropagation()
             $target = $(evt.currentTarget)
@@ -275,6 +283,8 @@ class MoePlayer extends BaseComp
                 song_id: nextSong.song_id,
                 idx: nextIndex
             }
+
+            @stop()
 
 
     # 开始同步播放进度
@@ -316,59 +326,49 @@ class MoePlayer extends BaseComp
     play: (song) ->
         @pause false
 
-        # 时间重置为 00:00
-        $(@playedTime).text '00:00'
-        # 进度指示器回到原位置
-        oriPos = -$(@progressDragBar).width() / 2
-        $(@progressDragBar).css('left', oriPos + 'px')
-
-        # 切换新歌曲
-        @curIndex = parseInt(song.song_info.idx)
-
-        # 切换图标状态
-        $(@status).addClass 'playing'
-            .find('img').attr 'src', @ICONS.PAUSE
-
-        # 切换音质显示
-        sq = parseInt(song.song_info.song_quality)
-        if sq >= 320
-            $(@quality).text '高音质'
-            @quality.className = 'song-quality high'
-        else if 128 <= sq < 320
-            $(@quality).text '中音质'
-            @quality.className = 'song-quality medium'
-        else
-            $(@quality).text '低音质'
-            @quality.className = 'song-quality low'
-
-        # 载入歌曲URL
+        # 加载歌曲数据
         $(@player).attr 'src', song.song_info.song_url
         @player.load()
-        @CUR_SONG = song
-        @startProgress song.song_info.song_duration
-
-        # 加载数据并播放
-        $(@player).unbind().on 'loadedmetadata', =>
+        @player.play().then =>
+            # 切换新歌曲
+            @CUR_SONG = song
+            @curIndex = parseInt(song.song_info.idx)
+            # 切换图标状态
+            $(@status).addClass 'playing'
+                .find('img').attr 'src', @ICONS.PAUSE
             # 载入封面
             $(@cover).find('img').attr 'src', song.song_info.song_cover or @defaultCover
             # 载入总时长
             $(@totalTime).text Util.normalizeSeconds(song.song_info.song_duration)
 
-        .on 'progress', =>
-            total = song.song_info.song_duration / 1000
-            buffered = @player.buffered
-            percent = buffered.length and buffered.end(buffered.length - 1) / total or 0.00
-            $(@bufferBar).css 'width', (percent * 100) + '%'
+            # 切换音质显示
+            sq = parseInt(song.song_info.song_quality)
+            if sq >= 320
+                $(@quality).text '高音质'
+                @quality.className = 'song-quality high'
+            else if 128 <= sq < 320
+                $(@quality).text '中音质'
+                @quality.className = 'song-quality medium'
+            else
+                $(@quality).text '低音质'
+                @quality.className = 'song-quality low'
 
-        .on 'timeupdate', =>
-            @eventBus.emit 'MoePlayer::UpdateTime', @player.currentTime
+            # 同步播放进度
+            @startProgress song.song_info.song_duration
 
-        .on 'error', =>
+            # 同步缓冲进度
+            $(@player).unbind('progress').on 'progress', =>
+                total = song.song_info.song_duration / 1000
+                buffered = @player.buffered
+                percent = buffered.length and buffered.end(buffered.length - 1) / total or 0.00
+                $(@bufferBar).css 'width', (percent * 100) + '%'
+
+        .catch (e) =>
+            @pause()
+            @CUR_SONG = null
+            @curIndex = undefined
             Util.showMsg @TIPS.URL_ERROR, 3000, 3
-
-        setTimeout =>
-            @player.play()
-        , 0
+            @eventBus.emit 'MoePlayer::UrlError', song
 
     # 继续播放
     # @param {boolean} isEmit 是否发送事件
@@ -405,6 +405,7 @@ class MoePlayer extends BaseComp
         # 进度指示器回到原位置
         oriPos = -$(@progressDragBar).width() / 2
         $(@progressDragBar).css('left', oriPos + 'px')
+        $(@bufferBar).css 'width', 0
 
         @TIMER.stop()
     

@@ -1,10 +1,12 @@
 ##
 # 工具函数
 # @Author VenDream
-# @Update 2016-8-8 18:05:07
+# @Update 2016-8-24 17:08:36
 ##
 
 fs = window.require 'fs'
+electron = window.require 'electron'
+shell = electron.shell
 
 module.exports = {
     # 根据总数进行补零操作
@@ -117,6 +119,7 @@ module.exports = {
                 ln = 'success'
             when 3
                 ln = 'error'
+                shell.beep()
             else
                 ln = 'normal'
 

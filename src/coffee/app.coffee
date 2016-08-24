@@ -85,6 +85,8 @@ eventBinding = ->
         detailPanel && detailPanel.resume() 
 
     # 切换歌曲
+    eventBus.on 'MoePlayer::UrlError', (song) ->
+        musicList && musicList.resetPlaying()
     eventBus.on 'MoePlayer::PlayPrevSong', (data) ->
         musicList && (
             musicList.getSongInfoAndPlay data.song_id, data.idx
