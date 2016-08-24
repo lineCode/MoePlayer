@@ -110,9 +110,8 @@ class Dragger extends EventEmitter
                 percent = Math.abs(newPos - min) / Math.abs(max - min)
             else
                 percent = Math.abs(origin - min) / Math.abs(max - min)
-            @emit "Dragger::DragEnd##{name}", percent
 
-            
+            @emit "Dragger::DragEnd##{name}", percent
 
     # 为元素取消拖拽绑定
     # @param {element} ele  取消对象
