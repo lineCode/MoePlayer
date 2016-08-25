@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-8-24 17:16:45
+# @Update 2016-8-25 09:59:23
 ##
 
 BaseComp = require './BaseComp'
@@ -216,12 +216,16 @@ class MoePlayer extends BaseComp
     # 播放模式控制
     playModeControl: ->
         $(@playMode).on 'click', (evt) =>
-            if @PLAY_MODE is 0
-                @PLAY_MODE = 1
-                $(@playMode).text '随机'
-            else
-                @PLAY_MODE = 0
-                $(@playMode).text '顺序'
+            switch @PLAY_MODE
+                when 0
+                    @PLAY_MODE = 1
+                    $(@playMode).text '随机'
+                when 1
+                    @PLAY_MODE = 2
+                    $(@playMode).text '单曲'
+                when 2
+                    @PLAY_MODE = 0
+                    $(@playMode).text '顺序'
 
     # 播放控制
     playControl: ->
@@ -248,12 +252,14 @@ class MoePlayer extends BaseComp
             if @LIST.length is 0 or @curIndex is undefined
                 return false
 
-            # 顺序播放
-            if @PLAY_MODE is 0
-                prevIndex = Math.max(@curIndex - 1, 0)
-            # 随机播放
-            else
-                prevIndex = Util.random 0, @LIST.length - 1, @curIndex
+            # 播放模式
+            switch @PLAY_MODE
+                when 0
+                    prevIndex = Math.max(@curIndex - 1, 0)
+                when 1
+                    prevIndex = Util.random 0, @LIST.length - 1, @curIndex
+                when 2
+                    prevIndex = @curIndex
 
             prevSong = @LIST[prevIndex]
 
@@ -271,12 +277,14 @@ class MoePlayer extends BaseComp
             if @LIST.length is 0 or @curIndex is undefined
                 return false
 
-            # 顺序播放
-            if @PLAY_MODE is 0
-                nextIndex = Math.min(@curIndex + 1, @LIST.length - 1)
-            # 随机播放
-            else
-                nextIndex = Util.random 0, @LIST.length - 1, @curIndex
+            # 播放模式
+            switch @PLAY_MODE
+                when 0
+                    nextIndex = Math.min(@curIndex + 1, @LIST.length - 1)
+                when 1
+                    nextIndex = Util.random 0, @LIST.length - 1, @curIndex
+                when 2
+                    nextIndex = @curIndex
             
             nextSong = @LIST[nextIndex]
             @eventBus.emit 'MoePlayer::PlayNextSong', {
@@ -287,9 +295,9 @@ class MoePlayer extends BaseComp
             @stop()
 
 
-    # 开始同步播放进度
+    # 同步播放进度
     # @param {number} timeWidth 总时间长度(毫秒)
-    startProgress: (timeWidth) ->
+    syncProgress: (timeWidth) ->
         timeWidth = timeWidth / 1000
 
         # 计数清零
@@ -316,6 +324,15 @@ class MoePlayer extends BaseComp
 
         @TIMER.set updatePos, 1000
             .start()
+
+    # 同步缓冲进度
+    # @param {TimeRange} buffered 已缓冲范围
+    syncBuffer: (buffered) ->
+        @CUR_SONG and (
+            total = @CUR_SONG.song_info.song_duration / 1000
+            percent = buffered.length and buffered.end(buffered.length - 1) / total or 0.00
+            $(@bufferBar).css 'width', (percent * 100) + '%'
+        )
 
     #---------------------------------------------------
     #                     对外接口
@@ -353,15 +370,12 @@ class MoePlayer extends BaseComp
                 $(@quality).text '低音质'
                 @quality.className = 'song-quality low'
 
-            # 同步播放进度
-            @startProgress song.song_info.song_duration
+            # 同步播放/缓冲进度
+            @syncProgress song.song_info.song_duration
+            @syncBuffer @player.buffered
 
-            # 同步缓冲进度
             $(@player).on 'progress', =>
-                total = song.song_info.song_duration / 1000
-                buffered = @player.buffered
-                percent = buffered.length and buffered.end(buffered.length - 1) / total or 0.00
-                $(@bufferBar).css 'width', (percent * 100) + '%'
+                @syncBuffer @player.buffered
 
         .catch (e) =>
             @pause()

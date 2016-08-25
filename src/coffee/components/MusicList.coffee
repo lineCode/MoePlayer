@@ -98,16 +98,7 @@ class MusicList extends BaseComp
             $target = $(evt.currentTarget)
             idx = $target.attr 'data-idx'
             sid = $target.attr 'data-sid'
-            isDLed = $target.hasClass 'hasDLed'
-            url = null
-
-            # 如果歌曲已下载，则优先使用本地文件进行播放
-            if isDLed
-                ar = $target.find('.artist-col').text()
-                ti = $target.find('.title-col').text()
-                url = "#{config.save_path}/#{ar}/[#{sid}] #{ar} - #{ti}.mp3"
-
-            sid && @getSongInfoAndPlay sid, idx, url
+            sid && @getSongInfoAndPlay sid, idx
         .on 'mousedown', (e) =>
             if e.button is 2
                 $target = $(e.currentTarget)
@@ -311,8 +302,7 @@ class MusicList extends BaseComp
     # 获取歌曲信息并播放
     # @param {string} sid 歌曲ID
     # @param {number} idx 歌曲索引
-    # @param {string} url 本地URL(optional)
-    getSongInfoAndPlay: (sid, idx, url) ->
+    getSongInfoAndPlay: (sid, idx) ->
         $.ajax {
             type: 'POST',
             url: @API.INFO,
@@ -327,10 +317,18 @@ class MusicList extends BaseComp
             success: (data) =>
                 if data and data.status is 'success'
                     if $.isEmptyObject(data.data.song_info) is false
-                        data.data.song_info.idx = idx
-                        url and data.data.song_info.song_url = url
+                        s = data.data.song_info
+                        s.idx = idx
+                        id = s.song_id
+                        ar = s.song_artist
+                        sn = s.song_name
 
-                        @fixSongInfo data.data.song_info
+                        # 若歌曲已下载，则使用本地文件进行播放
+                        localpath = "#{config.save_path}/#{ar}/[#{id}] #{ar} - #{sn}.mp3"
+                        if Util.checkDLed(localpath) is true
+                            s.song_url = localpath
+
+                        @fixSongInfo s
                         @updatePlayingSong sid
                         @eventBus.emit 'MusicList::PlaySong', data.data
                     else
