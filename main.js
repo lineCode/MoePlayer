@@ -4,7 +4,7 @@ const fs = require('fs');
 const electron = require('electron');
 const {app, ipcMain, Menu, BrowserWindow} = electron;
 
-const devtron = require('devtron')
+const devtron = require('devtron');
 const config = require('./config');
 const client = require('electron-connect').client;
 

@@ -84,7 +84,7 @@ gulp.task 'restart', ->
 
 # 监听文件改动
 gulp.task 'watch', ->
-    # gulp.watch ['main.js'], ['restart']
+    gulp.watch ['main.js'], ['restart']
     
     gulp.watch paths.coffeeSrc, ->
         sequence('coffee', 'reload')
@@ -92,7 +92,7 @@ gulp.task 'watch', ->
     gulp.watch paths.lessSrc, ->
         sequence('less', 'reload')
 
-    # gulp.watch ['index.html'], ['reload']
+    gulp.watch ['index.html'], ['reload']
 
 # 默认任务流程
 gulp.task 'default', ->
