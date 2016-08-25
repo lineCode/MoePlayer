@@ -219,6 +219,7 @@ function closeWin() {
  *                 Event Listening
  *************************************************/
 
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.on('ready', createWin);
 app.on('window-all-closed', () => {
     if (process.platform != 'darwin') {
