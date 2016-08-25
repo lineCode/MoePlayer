@@ -84,7 +84,7 @@ gulp.task 'restart', ->
 
 # 监听文件改动
 gulp.task 'watch', ->
-    gulp.watch ['main.js'], ['restart']
+    gulp.watch ['main.js', 'config.js'], ['restart']
     
     gulp.watch paths.coffeeSrc, ->
         sequence('coffee', 'reload')

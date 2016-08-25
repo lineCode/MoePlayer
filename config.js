@@ -4,7 +4,7 @@ const config = {
     // 端口
     port: 5000,
     // 版本
-    version: '0.1.0',
+    version: '1.0.0',
     // 是否开启调试面板
     debug: true,
     // 是否可以调整窗口大小
@@ -12,7 +12,7 @@ const config = {
     // 窗口宽度
     width: 1000,
     // 窗口高度
-    height: 700,
+    height: 640,
     // 每页显示的歌曲数
     num_per_page: 15,
     // 歌曲存储路径

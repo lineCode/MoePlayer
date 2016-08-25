@@ -1,12 +1,14 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2016-8-22 14:28:39
+# @Update 2016-8-25 11:49:10
 ##
 
 BaseComp = require './BaseComp'
 Util = require './Util'
 config = require '../../../config.js'
+electron = window.require 'electron'
+ipcRenderer = electron.ipcRenderer
 
 class SearchBox extends BaseComp
     constructor: (selector, eventBus) ->
@@ -33,6 +35,8 @@ class SearchBox extends BaseComp
         @goBtn = @html.querySelector '.go-btn'
         @clearBtn = @html.querySelector '.clear-btn'
         @loader = @html.querySelector '.loader'
+        @minBtn = @html.querySelector '.min-btn'
+        @closeBtn = @html.querySelector '.close-btn'
 
         $(@loader).fadeOut 0
         @eventBinding()
@@ -51,9 +55,12 @@ class SearchBox extends BaseComp
                 </select>
                 <input name="music-info" type="text" class="search-input" 
                     placeholder="输入歌曲信息（名称、歌手）" />
-                <div class="go-btn not-select">搜索</div>
-                <div class="clear-btn not-select">清空</div>
+                <div class="go-btn not-select" title="搜索">搜索</div>
+                <div class="clear-btn not-select" title="清空">清空</div>
                 <div class="loader"></div>
+                <div class="divider not-select"></div>
+                <div class="min-btn not-select" title="最小化"></div>
+                <div class="close-btn not-select" title="关闭"></div>
             </div>
             """
 
@@ -76,6 +83,14 @@ class SearchBox extends BaseComp
         # 清空
         $(@clearBtn).on 'click', (evt) =>
             @clear()
+
+        # 最小化
+        $(@minBtn).on 'click', (evt) =>
+            ipcRenderer.send 'ipcRenderer::Minimize'
+
+        # 关闭窗口
+        $(@closeBtn).on 'click', (evt) =>
+            ipcRenderer.send 'ipcRenderer::CloseWin'
 
         # Enter快捷键搜索
         $(@input).on 'keydown', (evt) =>

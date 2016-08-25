@@ -23,8 +23,11 @@ initComp = ->
     musicList.render()
     moePlayer.render()
     detailPanel.render()
+
+    # 设置版本号
     $('.app-ver').text config.version
 
+    # Loading动画
     setTimeout ->
         $('.loading-mask').fadeOut 500
     , 500

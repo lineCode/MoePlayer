@@ -2,7 +2,12 @@ const _ = require('underscore');
 const fs = require('fs');
 
 const electron = require('electron');
-const {app, ipcMain, Menu, BrowserWindow} = electron;
+const {
+    app,
+    ipcMain,
+    Menu,
+    BrowserWindow
+} = electron;
 
 const devtron = require('devtron');
 const config = require('./config');
@@ -22,6 +27,7 @@ function createWin() {
         width: config.width,
         height: config.height,
         resizable: config.resizable,
+        frame: false,
         webPreferences: {
             backgroundThrottling: false
         }
@@ -46,6 +52,23 @@ function createWin() {
             sendBounds: false
         });
     }
+
+    // Set App Menu
+    setAppMenu();
+}
+
+// Set App Menu
+function setAppMenu() {
+    let template = [{
+        label: 'View',
+        accelerator: 'F5',
+        click: (item, focusWin) => {
+            focusWin && focusWin.reload();
+        }
+    }];
+
+    const menu = Menu.buildFromTemplate(template);
+    Menu.setApplicationMenu(menu);
 }
 
 /**
@@ -59,7 +82,7 @@ function dlSetting(event, item, webContents) {
     let suffix = dlItem.save_path.slice(-4);
     // sen -> download success event name
     // fen -> download failed  event name
-    let type, sen, fen; 
+    let type, sen, fen;
 
     switch (suffix) {
         case '.mp3':
@@ -118,8 +141,7 @@ function dlCover(event, song) {
         // If Already Exists
         if (stat)
             webController.send('ipcMain::DownloadCoverSuccess', {});
-    }
-    catch (e) {
+    } catch (e) {
         // If Not Exists
         webController.downloadURL(song.song_cover);
     }
@@ -146,8 +168,7 @@ function dlSong(event, song) {
                 song_id: song.song_id,
                 song_name: song.song_name
             });
-    }
-    catch (e) {
+    } catch (e) {
         // If Not Exists
         webController.downloadURL(song.song_url);
     }
@@ -182,6 +203,18 @@ function openMenu(event) {
     contextMenu.popup(win);
 }
 
+function minimize() {
+    win.minimize();
+}
+
+function closeWin() {
+    if (process.platform != 'darwin') {
+        app.quit();
+    } else {
+        win.close();
+    }
+}
+
 /**************************************************
  *                 Event Listening
  *************************************************/
@@ -198,6 +231,8 @@ app.on('activate', () => {
     }
 });
 
+ipcMain.on('ipcRenderer::Minimize', minimize);
+ipcMain.on('ipcRenderer::CloseWin', closeWin);
 ipcMain.on('ipcRenderer::DownloadSong', dlSong);
 ipcMain.on('ipcRenderer::DownloadCover', dlCover);
 ipcMain.on('ipcRenderer::OpenContextMenu', openMenu);

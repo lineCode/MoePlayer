@@ -62,7 +62,7 @@ class DetailPanel extends BaseComp
                 <div class="panel-left">
                     <div class="panel-c">
                         <div class="cover">
-                            <img src="" alt="COVER">
+                            <img src="" alt="COVER" class="not-select">
                         </div>
                         <div class="operation">
                             <div class="button not-select dlSongBtn">

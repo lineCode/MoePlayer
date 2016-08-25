@@ -40,15 +40,21 @@
             height: 10%;
             display: flex;
             display: -webkit-flex;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
             padding: 1rem;
             background-color: @black;
             border-bottom: 0.2rem solid @red;
+            -webkit-app-region: drag;
+
+            & > * {
+                -webkit-app-region: no-drag;
+            }
 
             .logo {
                 color: @white;
                 cursor: pointer;
+                padding-left: 5rem;
 
                 .app-name {
                     display: inline-block;
