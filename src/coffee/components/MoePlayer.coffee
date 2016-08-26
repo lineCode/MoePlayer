@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-8-25 09:59:23
+# @Update 2016-8-26 10:11:29
 ##
 
 BaseComp = require './BaseComp'
@@ -114,8 +114,9 @@ class MoePlayer extends BaseComp
                 </div>
                 <div class="mp-part mp-addons not-select">
                     <div class="addons-c">
-                        <div class="play-mode" data-mode=0>
-                            顺序
+                        <div class="play-mode sequence-mode" title="模式切换">
+                            <div class="mode-icon"></div>
+                            <div class="mode-text">顺序播放</div>
                         </div>
                     </div>
                 </div>
@@ -219,13 +220,16 @@ class MoePlayer extends BaseComp
             switch @PLAY_MODE
                 when 0
                     @PLAY_MODE = 1
-                    $(@playMode).text '随机'
+                    $(@playMode).attr 'class', 'play-mode random-mode'
+                    $(@playMode).find('.mode-text').text '随机播放'
                 when 1
                     @PLAY_MODE = 2
-                    $(@playMode).text '单曲'
+                    $(@playMode).attr 'class', 'play-mode loop-mode'
+                    $(@playMode).find('.mode-text').text '单曲循环'
                 when 2
                     @PLAY_MODE = 0
-                    $(@playMode).text '顺序'
+                    $(@playMode).attr 'class', 'play-mode sequence-mode'
+                    $(@playMode).find('.mode-text').text '顺序播放'
 
     # 播放控制
     playControl: ->

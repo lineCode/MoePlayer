@@ -39,13 +39,11 @@
                 background-repeat: no-repeat;
                 transition: opacity 0.2s ease-in-out;
             }
-
             &:hover {
                 &:before {
                     opacity: 1;
                 }
             }
-
             position: relative;
             width: 100%;
             height: 100%;
@@ -131,7 +129,6 @@
                     background-color: @buffer-bar;
                     border-radius: 0.4rem;
                 }
-
                 .progress-drag-bar {
                     &:hover {
                         border-color: @red;
@@ -263,17 +260,43 @@
             align-items: center;
 
             .play-mode {
-                &:hover {
-                    opacity: 1;
-                    color: @theme-color;
-                    border-color: @theme-color;
+                .mode-icon, .mode-text {
+                    display: inline-block;
+                    vertical-align: middle;
+                    cursor: pointer;
                 }
-                opacity: 0.8;
-                font-size: 1.2rem;
-                cursor: pointer;
-                padding: 0.2rem 0.4rem;
-                color: @white;
-                border: 0.1rem solid @white;
+                .mode-icon {
+                    &:hover {
+                        opacity: 1;
+                    }
+                    opacity: 0.8;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-size: 100% 100%;
+                    width: 2rem;
+                    height: 2rem;
+                }
+                .mode-text {
+                    color: @table-font;
+                    font-size: 1.2rem;
+                    height: 2rem;
+                    line-height: 2rem;
+                }
+            }
+            .sequence-mode {
+                .mode-icon {
+                    background-image: url(../../assets/sequence.png);
+                }
+            }
+            .random-mode {
+                .mode-icon {
+                    background-image: url(../../assets/random.png);
+                }
+            }
+            .loop-mode {
+                .mode-icon {
+                    background-image: url(../../assets/loop.png);
+                }
             }
         }
     }
