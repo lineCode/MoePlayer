@@ -25,7 +25,7 @@ initComp = ->
     detailPanel.render()
 
     # 设置版本号
-    $('.app-ver').text config.version
+    $('.app-ver').text config.release.appVer
 
     # Loading动画
     setTimeout ->
