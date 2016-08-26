@@ -297,6 +297,7 @@ class MusicList extends BaseComp
 
     # 重置歌曲播放状态
     resetPlaying: ->
+        @curSongId = ''
         $('.song').removeClass 'playing'
 
     # 获取歌曲信息并播放

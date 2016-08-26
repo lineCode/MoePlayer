@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-8-26 10:11:29
+# @Update 2016-8-26 19:00:00
 ##
 
 BaseComp = require './BaseComp'
@@ -382,12 +382,9 @@ class MoePlayer extends BaseComp
                 @syncBuffer @player.buffered
 
         .catch (e) =>
-            @pause()
+            @stop()
             @CUR_SONG = null
             @curIndex = undefined
-
-            $(@quality).text '默认'
-            @quality.className = 'song-quality'
 
             Util.showMsg @TIPS.URL_ERROR, 3000, 3
             @eventBus.emit 'MoePlayer::UrlError', song
@@ -425,6 +422,11 @@ class MoePlayer extends BaseComp
 
         # 时间重置为 00:00
         $(@playedTime).text '00:00'
+        $(@totalTime).text '00:00'
+
+        # 音质还原
+        $(@quality).text '默认'
+        @quality.className = 'song-quality'
 
         # 进度指示器回到原位置
         oriPos = -$(@progressDragBar).width() / 2
