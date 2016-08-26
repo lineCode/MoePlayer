@@ -19,6 +19,7 @@ class MoePlayer extends BaseComp
         @CUR_TIME = 0
         @CUR_SONG = null
         @PLAY_MODE = 0
+        @STALLED_TIME = null
 
         @ICONS = {
             COVER: 'assets/cover.png',
@@ -31,7 +32,8 @@ class MoePlayer extends BaseComp
         }
 
         @TIPS = {
-            URL_ERROR: '播放地址无效QAQ'
+            URL_ERROR: '播放地址无效QAQ',
+            STALLED: '网络不太给力啊QAQ'
         }
 
     init: ->
@@ -378,7 +380,7 @@ class MoePlayer extends BaseComp
             @syncProgress song.song_info.song_duration
             @syncBuffer @player.buffered
 
-            $(@player).on 'progress', =>
+            $(@player).unbind('progress').on 'progress', =>
                 @syncBuffer @player.buffered
 
         .catch (e) =>

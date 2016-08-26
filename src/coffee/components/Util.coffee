@@ -1,7 +1,7 @@
 ##
 # 工具函数
 # @Author VenDream
-# @Update 2016-8-24 17:08:36
+# @Update 2016-8-26 23:02:31
 ##
 
 fs = window.require 'fs'
@@ -126,13 +126,13 @@ module.exports = {
         $msgLine = $("""<div class="msg-c slideIn #{ln}">#{msg}</div>""")
         $msgBox.append $msgLine
 
+        te = 'webkitTramsitionEnd ' + 'mozTramsitionEnd ' + 
+             'MSTramsitionEnd ' + 'otransitionend ' + 'transitionend'
+        ae = 'webkitAnimationEnd ' + 'mozAnimationEnd ' + 
+             'MSAnimationEnd ' + 'oanimationend ' + 'animationend'
+
         if duration >= 0
             setTimeout ->
-                te = 'webkitTramsitionEnd ' + 'mozTramsitionEnd ' + 
-                     'MSTramsitionEnd ' + 'otransitionend ' + 'transitionend'
-                ae = 'webkitAnimationEnd ' + 'mozAnimationEnd ' + 
-                     'MSAnimationEnd ' + 'oanimationend ' + 'animationend'
-
                 $msgLine.one ae, (evt) ->
                     $(@).remove()
                     if $msgBox.children().length is 0
@@ -141,4 +141,12 @@ module.exports = {
                 $msgLine.removeClass 'slideIn'
                     .addClass 'slideOut'
             , duration
+        else
+            $msgLine.on 'click', ->
+                $msgLine.one ae, (evt) ->
+                    $(@).remove()
+                    if $msgBox.children().length is 0
+                        $msgBox.remove()
+                $(@).removeClass 'slideIn'
+                    .addClass 'slideOut'
 }
