@@ -14,7 +14,7 @@ const config = {
     // 每页显示的歌曲数
     num_per_page: 15,
     // 歌曲存储路径
-    save_path: './download',
+    save_path: 'download',
     // 发布配置
     // 详见: https://github.com/electron-userland/electron-packager/blob/master/usage.txt
     release: {

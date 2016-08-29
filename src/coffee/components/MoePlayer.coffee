@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-8-26 19:00:00
+# @Update 2016-8-29 11:13:18
 ##
 
 BaseComp = require './BaseComp'
@@ -19,7 +19,6 @@ class MoePlayer extends BaseComp
         @CUR_TIME = 0
         @CUR_SONG = null
         @PLAY_MODE = 0
-        @STALLED_TIME = null
 
         @ICONS = {
             COVER: 'assets/cover.png',
@@ -143,6 +142,9 @@ class MoePlayer extends BaseComp
     playerBind: ->
         $(@player).on 'timeupdate', =>
             @eventBus.emit 'MoePlayer::UpdateTime', @player.currentTime
+        .on 'stalled', =>
+            @pause()
+            Util.showMsg @TIPS.STALLED, -1, 3
 
     # 进度拖拽事件监听
     progressBind: ->
@@ -340,6 +342,15 @@ class MoePlayer extends BaseComp
             $(@bufferBar).css 'width', (percent * 100) + '%'
         )
 
+    # 修正歌曲的路径问题
+    # @param {string} path 歌曲路径
+    fixSongURL: (path) ->
+        if @player.baseURI and @player.baseURI.indexOf('app.asar') >= 0 and \
+        /^https?:\/\//g.test(path) is false
+            path = "../../#{path}"
+
+        return path
+
     #---------------------------------------------------
     #                     对外接口
     #---------------------------------------------------
@@ -350,7 +361,7 @@ class MoePlayer extends BaseComp
         @pause false
 
         # 加载歌曲数据
-        $(@player).attr 'src', song.song_info.song_url
+        $(@player).attr 'src', @fixSongURL(song.song_info.song_url)
         @player.load()
         @player.play().then =>
             # 切换新歌曲

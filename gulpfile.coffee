@@ -49,20 +49,15 @@ logError = (e) ->
 
 # 清理文件
 gulp.task 'cleanAll', ->
-    gulp.src ['app/'], {read: false}
-        .pipe clean({force: true})
-    gulp.src ['dist/'], {read: false}
-        .pipe clean({force: true})
-    gulp.src ['release'], {read: false}
+    packDir = "#{rI.appName}-#{rI.platform}-#{rI.arch}"
+
+    gulp.src ['app/', 'dist/', 'release/', packDir], {read: false}
         .pipe clean({force: true})
 
 # 清理中间过程文件
 gulp.task 'cleanTemp', ->
-    gulp.src ['app/'], {read: false}
+    gulp.src ['app/', 'dist/'], {read: false}
         .pipe clean({force: true})
-    gulp.src ['dist/'], {read: false}
-        .pipe clean({force: true})
-
 
 # 把coffee文件编译为js文件
 gulp.task 'coffee', ->
