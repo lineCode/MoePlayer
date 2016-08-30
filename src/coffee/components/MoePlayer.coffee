@@ -338,10 +338,6 @@ class MoePlayer extends BaseComp
     syncBuffer: (buffered) ->
         @CUR_SONG and (
             total = @CUR_SONG.song_info.song_duration / 1000
-
-            console.log buffered.end(buffered.length - 1)
-            console.log total
-
             percent = buffered.length and buffered.end(buffered.length - 1) / total or 0.00
             percent < 0.0 and percent = 0.0
             percent > 1.0 and percent = 1.0

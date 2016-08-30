@@ -173,7 +173,7 @@ gulp.task 'default', ->
     )
 
 # 打包发布
-gulp.task 'package', ->
+gulp.task 'release', ->
     sequence(
         'cleanAll',
         'coffee',
