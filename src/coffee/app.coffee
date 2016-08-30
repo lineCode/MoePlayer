@@ -3,6 +3,7 @@ SearchBox = require './components/SearchBox'
 MusicList = require './components/MusicList'
 MoePlayer = require './components/MoePlayer'
 DetailPanel = require './components/DetailPanel'
+SettingPanel = require './components/SettingPanel'
 Util = require './components/Util'
 config = require '../../config'
 
@@ -11,6 +12,7 @@ searchBox = null
 musicList = null
 moePlayer = null
 detailPanel = null
+settingPanel = null
 
 initComp = ->
     eventBus = new EventEmitter()
@@ -18,11 +20,13 @@ initComp = ->
     musicList = new MusicList '.musicList-c', eventBus
     moePlayer = new MoePlayer '.moePlayer-c', eventBus
     detailPanel = new DetailPanel '.detailPanel-c', eventBus
+    settingPanel = new SettingPanel '.settingPanel-c', eventBus
 
     searchBox.render()
     musicList.render()
     moePlayer.render()
     detailPanel.render()
+    settingPanel.render()
 
     # 设置版本号
     $('.app-ver').text config.release.appVer
@@ -46,12 +50,18 @@ eventBinding = ->
         musicList && musicList.show data.data, data.refresh
         moePlayer && moePlayer.updateList data.data.data
         detailPanel && detailPanel.shrink()
+        settingPanel && settingPanel.close()
     eventBus.on 'SearchBox::ClearSearchResult', ->
         musicList && musicList.clear()
         moePlayer && moePlayer.clearList()
         detailPanel && detailPanel.shrink()
+        settingPanel && settingPanel.close()
     eventBus.on 'SearchBox::NetworkError', (err) ->
         musicList && musicList.showTips()
+
+    # 打开设置面板
+    eventBus.on 'SearchBox::OpenSettingPanel', ->
+        settingPanel && settingPanel.open()
 
     # 选择分页
     eventBus.on 'MusicList::SelectPage', (pageIndex) ->

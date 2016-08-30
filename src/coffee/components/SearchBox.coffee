@@ -1,7 +1,7 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2016-8-25 11:49:10
+# @Update 2016-8-30 10:03:27
 ##
 
 BaseComp = require './BaseComp'
@@ -35,6 +35,7 @@ class SearchBox extends BaseComp
         @goBtn = @html.querySelector '.go-btn'
         @clearBtn = @html.querySelector '.clear-btn'
         @loader = @html.querySelector '.loader'
+        @settingBtn = @html.querySelector '.setting-btn'
         @minBtn = @html.querySelector '.min-btn'
         @closeBtn = @html.querySelector '.close-btn'
 
@@ -59,6 +60,7 @@ class SearchBox extends BaseComp
                 <div class="clear-btn not-select" title="清空">清空</div>
                 <div class="loader"></div>
                 <div class="divider not-select"></div>
+                <div class="setting-btn not-select" title="设置"></div>
                 <div class="min-btn not-select" title="最小化"></div>
                 <div class="close-btn not-select" title="关闭"></div>
             </div>
@@ -83,6 +85,10 @@ class SearchBox extends BaseComp
         # 清空
         $(@clearBtn).on 'click', (evt) =>
             @clear()
+
+        # 设置
+        $(@settingBtn).on 'click', (evt) =>
+            @eventBus.emit 'SearchBox::OpenSettingPanel'
 
         # 最小化
         $(@minBtn).on 'click', (evt) =>

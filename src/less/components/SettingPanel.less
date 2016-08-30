@@ -1,0 +1,92 @@
+@import url(variables.less);
+
+.settingPanel {
+    width: 100%;
+    height: 100%;
+    background-color: @bg;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 2rem;
+
+    .back-btn {
+        &:before {
+            content: '返回';
+            position: absolute;
+            top: 0;
+            left: 110%;
+            font-size: 1.8rem;
+            line-height: 2rem;
+            color: #fff;
+            width: 4rem;
+            height: 100%;
+        }
+        &:hover {
+            opacity: 1;
+        }
+        opacity: 0.4;
+        position: absolute;
+        top: 2rem;
+        right: 6rem;
+        cursor: pointer;
+        width: 2rem;
+        height: 2rem;
+        background-repeat: no-repeat;
+        background-size: 100%;
+        background-position: center;
+        background-image: url(../../assets/back.png);
+    }
+    .setting-type {
+        ul {
+            margin: 0;
+            padding: 0;
+            display: -webkit-flex;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 0.5rem;
+            border-bottom: 0.1rem solid @table-border;
+
+            li {
+                &:before {
+                    content: '';
+                    position: absolute;
+                    top: 115%;
+                    left: 0;
+                    width: 100%;
+                    height: 0.3rem;
+                    background-color: @red;
+                    border: 0.1rem solid @red;
+                    border-radius: 0.6rem;
+                    -webkit-transform: scaleX(0);
+                    transform: scaleX(0);
+                    -webkit-transform-origin: 50% 0 0;
+                    transform-origin: 50% 0 0;
+                    -webkit-transition-duration: 0.2s;
+                    transition-duration: 0.2s;
+                }
+                &.selected {
+                    color: @white;
+
+                    &:before {
+                        -webkit-transform: scaleX(1);
+                        transform: scaleX(1);
+                    }
+                }
+                list-style: none;
+                margin: 0 1rem;
+                color: @table-font;
+                font-size: 1.8rem;
+                cursor: pointer;
+                position: relative;
+            }
+        }
+    }
+    .setting-detail {
+        width: 100%;
+        height: 45rem;
+        padding: 2rem 20rem;
+        font-size: 1.2rem;
+        color: @table-font;
+    }
+}

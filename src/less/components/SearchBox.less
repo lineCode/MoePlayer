@@ -57,7 +57,7 @@
     }
     .loader {
         top: -0.1rem;
-        left: -42rem;
+        left: -39.5rem;
         width: 2.5rem;
         height: 2.5rem;
     }
@@ -69,13 +69,25 @@
         margin: 0 0.5rem;
         background-color: @table-font;
     }
-    .min-btn, .close-btn {
+    .setting-btn, .min-btn, .close-btn {
         display: inline-block;
         vertical-align: middle;
         background-color: transparent;
         position: relative;
         cursor: pointer;
         margin: 0 0.4rem;
+    }
+    .setting-btn {
+        &:hover {
+            opacity: 1;
+        }
+        width: 1.6rem;
+        height: 1.6rem;
+        opacity: 0.5;
+        background-repeat: no-repeat;
+        background-size: 100%;
+        background-position: center;
+        background-image: url(../../assets/setting.png);
     }
     .min-btn {
         &:before {
