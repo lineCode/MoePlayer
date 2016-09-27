@@ -144,7 +144,7 @@ class MoePlayer extends BaseComp
             @eventBus.emit 'MoePlayer::UpdateTime', @player.currentTime
         .on 'stalled', =>
             @pause()
-            Util.showMsg @TIPS.STALLED, -1, 3
+            Util.showMsg @TIPS.STALLED, 3000, 3
 
     # 进度拖拽事件监听
     progressBind: ->

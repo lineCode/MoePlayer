@@ -1,7 +1,7 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2016-8-30 10:03:27
+# @Update 2016-9-27 18:24:40
 ##
 
 BaseComp = require './BaseComp'
@@ -177,11 +177,13 @@ class SearchBox extends BaseComp
 
     # 展示loader
     showLoader: ->
-        $(@loader).fadeIn 200
+        $('.loading-mask').fadeIn 0
+        $(@loader).fadeIn 0
 
     # 隐藏loader
     hideLoader: ->
-        $(@loader).fadeOut 200
+        $('.loading-mask').fadeOut 0
+        $(@loader).fadeOut 0
 
     # 清空搜索结果
     clear: ->

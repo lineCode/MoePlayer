@@ -8,7 +8,7 @@
 @import url(MsgBox.less);
 @import url(SettingPanel.less);
 
-.loading-mask {
+.start-mask {
     display: -webkit-flex;
     display: flex;
     flex-direction: column;
@@ -19,16 +19,35 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 99;
+    z-index: 100;
     color: @white;
     background-color: @black;
 
-    .loading-img {
+    .start-img {
         max-width: 5rem;
         max-height: 5rem;
         animation: rotate 2s linear infinite;
     }
+
 }
+
+.loading-mask {
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 5.96rem;
+    left: 0;
+    width: 100%;
+    height: 91%;
+    z-index: 99;
+    color: @white;
+    background-color: rgba(0, 0, 0, 0.5);
+    font-size: 1.2rem;
+}
+
 .mp-container {
     height: 100%;
     width: 100%;
@@ -51,6 +70,7 @@
             & > * {
                 -webkit-app-region: no-drag;
             }
+
             .logo {
                 color: @white;
                 cursor: pointer;
@@ -62,22 +82,30 @@
                     &:hover {
                         text-shadow: 0 0 8px @white;
                     }
+
                     font-size: 3.5rem;
                 }
+
                 .app-ver {
                     display: inline-block;
                     font-size: 1.5rem;
                 }
+
             }
+
         }
+
         .panel-body {
             height: 90%;
         }
+
     }
+
     .moePlayer-c {
         border-top: 0.1rem solid @table-border;
         height: 4.5rem;
     }
+
     .detailPanel-c {
         &.expand {
             opacity: 1;
@@ -85,6 +113,7 @@
             -ms-transform: scale(1);
             transform: scale(1);
         }
+
         position: absolute;
         top: 5.96rem;
         left: 0;
@@ -99,6 +128,7 @@
         transform-origin: 0% 100% 0;
         transition-duration: 0.3s;
     }
+
     .settingPanel-c {
         position: absolute;
         top: 5.96rem;
@@ -106,4 +136,5 @@
         width: 100%;
         height: 53.64rem;
     }
+
 }

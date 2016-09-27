@@ -1,14 +1,17 @@
 ##
 # 设置面板组件
 # @Author VenDream
-# @Update 2016-8-30 18:17:04
+# @Update 2016-9-27 16:41:47
 ##
 
 BaseComp = require './BaseComp'
+config = require '../../../config'
 
 class SettingPanel extends BaseComp
     constructor: (selector, eventBus) ->
         super selector, eventBus
+
+        @__DIRNAME = window.__dirname.replace /\\/g, '/'
 
     init: ->
         @panel = @html.querySelector '.settingPanel'
@@ -36,13 +39,22 @@ class SettingPanel extends BaseComp
                 </div>
                 <div class="setting-detail">
                     <div class="detail normal-setting">
-                        常规设置
+                        <div class="setting-block">
+                            <p>当前服务器</p>
+                            <input class="not-select" type="text" value="#{config.host}:#{config.port}" disabled>
+                        </div>
                     </div>
                     <div class="detail quality-setting hidden">
-                        音质设置
+                        <div class="setting-block">
+                            <p>优先选择音质</p>
+                            <input class="not-select" type="text" value="高音质(320K)" disabled>
+                        </div>
                     </div>
                     <div class="detail download-setting hidden">
-                        下载设置
+                        <div class="setting-block">
+                            <p>下载目录</p>
+                            <input class="not-select" type="text" value="#{@__DIRNAME}/#{config.save_path}" disabled>
+                        </div>
                     </div>
                     <div class="detail about hidden">
                         关于

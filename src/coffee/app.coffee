@@ -31,10 +31,11 @@ initComp = ->
     # 设置版本号
     $('.app-ver').text config.release.appVer
 
-    # Loading动画
+    # 启动动画
     setTimeout ->
-        $('.loading-mask').fadeOut 500
+        $('.start-mask').fadeOut 500
     , 500
+    $('.loading-mask').fadeOut 0
 
     eventBinding()
 

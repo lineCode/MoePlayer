@@ -1,29 +1,38 @@
 @import url(variables.less);
 @import url(fonts.less);
 
-*, *:before, *:after {
+*,
+*:before,
+*:after {
     box-sizing: inherit;
-    transition: all 0.2s ease-in-out;
     font-family: 'Trebuchet MS', Arial, sans-serif;
+    -webkit-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
 }
+
 ::selection {
     color: @white;
     background-color: @light-blue;
 }
+
 ::-moz-selection {
     color: @white;
     background-color: @light-blue;
 }
-html, body {
+
+html,
+body {
     height: 100%;
     width: 100%;
     font-size: 10px;
     box-sizing: border-box;
     overflow: hidden;
 }
+
 input {
     outline: none;
 }
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -32,11 +41,14 @@ table {
         color: @table-font;
         font-size: 1.3rem;
 
-        th, td {
+        th,
+        td {
             cursor: default;
             padding: 0.8rem 0.4rem;
             font-weight: normal;
             border: 0.1rem solid @table-border;
         }
+
     }
+
 }
