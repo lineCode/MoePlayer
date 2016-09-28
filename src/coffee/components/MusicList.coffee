@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-8-23 10:58:26
+# @Update 2016-9-28 15:48:53
 ##
 
 BaseComp = require './BaseComp'
@@ -28,8 +28,9 @@ class MusicList extends BaseComp
             DOWNLOAD_SUCCESS: '歌曲下载完成',
             NOT_FOUND_ERROR: '搜索不到相关的东西惹QAQ',
             NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
-            SONG_INFO_ERROR: '歌曲已失效或需要付费，请重试QAQ'
-            RETRY_TIPS: '请求失败了，请重试QAQ'
+            SONG_INFO_ERROR: '歌曲已失效或需要付费，请重试QAQ',
+            RETRY_TIPS: '请求失败了，请重试QAQ',
+            LOADER_TEXT: '正在获取歌曲URL...'
         }
 
         @CONTEXT = {
@@ -98,7 +99,9 @@ class MusicList extends BaseComp
             $target = $(evt.currentTarget)
             idx = $target.attr 'data-idx'
             sid = $target.attr 'data-sid'
-            sid && @getSongInfoAndPlay sid, idx
+            sn = $target.find('.title-col').text()
+            loaderText = "#{@TIPS.LOADER_TEXT}『#{sn}』"
+            sid && @getSongInfoAndPlay sid, idx, loaderText
         .on 'mousedown', (e) =>
             if e.button is 2
                 $target = $(e.currentTarget)
@@ -301,9 +304,10 @@ class MusicList extends BaseComp
         $('.song').removeClass 'playing'
 
     # 获取歌曲信息并播放
-    # @param {string} sid 歌曲ID
-    # @param {number} idx 歌曲索引
-    getSongInfoAndPlay: (sid, idx) ->
+    # @param {string} sid        歌曲ID
+    # @param {number} idx        歌曲索引
+    # @param {string} loaderText 加载文本
+    getSongInfoAndPlay: (sid, idx, loaderText) ->
         $.ajax {
             type: 'POST',
             url: @API.INFO,
@@ -313,7 +317,7 @@ class MusicList extends BaseComp
             },
             beforeSend: =>
                 $('.song').removeClass 'playing'
-                @eventBus.emit 'MusicList::GetSongInfo'
+                @eventBus.emit 'MusicList::GetSongInfo', loaderText
             ,
             success: (data) =>
                 if data and data.status is 'success'

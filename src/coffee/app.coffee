@@ -35,7 +35,6 @@ initComp = ->
     setTimeout ->
         $('.start-mask').fadeOut 500
     , 500
-    $('.loading-mask').fadeOut 0
 
     eventBinding()
 
@@ -69,8 +68,8 @@ eventBinding = ->
         searchBox && searchBox.doSearch null, null, pageIndex, null, false
 
     # 选中播放
-    eventBus.on 'MusicList::GetSongInfo', ->
-        searchBox && searchBox.showLoader()
+    eventBus.on 'MusicList::GetSongInfo', (loaderText) ->
+        searchBox && searchBox.showLoader loaderText
         moePlayer && moePlayer.stop()
         detailPanel && detailPanel.pause()
     eventBus.on 'MusicList::GetSongInfoFailed', ->
