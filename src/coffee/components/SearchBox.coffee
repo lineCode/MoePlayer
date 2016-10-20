@@ -1,7 +1,7 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2016-9-28 15:48:47
+# @Update 2016-10-20 16:10:23
 ##
 
 BaseComp = require './BaseComp'
@@ -19,10 +19,7 @@ class SearchBox extends BaseComp
         }
 
         @LOADING_TEXT = {
-            DEFAULT: '正在请求数据...',
-            SINGLE: '正在搜索歌曲...',
-            ARTIST: '正在搜索歌手...'
-            ALBUM: '正在搜索专辑...'
+            DEFAULT: '努力加载中...ORZ'
         }
 
         @API = {
@@ -146,18 +143,13 @@ class SearchBox extends BaseComp
         if sstr is ''
             return false
 
-        if stype is 'single'
-            api = @API.SINGLE
-            txt = "#{@LOADING_TEXT.SINGLE}『#{sstr}』"
-        if stype is 'artist'
-            api = @API.SINGLE
-            txt = "#{@LOADING_TEXT.ARTIST}『#{sstr}』"
-        if stype is 'album'
-            api = @API.ALBUM
-            backup = sstr
-            al = sstr.split('#')[0].replace /[《》]/g, ''
-            txt = "#{@LOADING_TEXT.ALBUM}『#{al}』"
-            sstr = sstr.split('#')[1]
+        switch stype
+            when 'single', 'artist'
+                api = @API.SINGLE
+            when 'album'
+                api = @API.ALBUM
+            else
+                return false
 
         $.ajax {
             type: 'POST',
@@ -169,19 +161,20 @@ class SearchBox extends BaseComp
             },
             beforeSend: =>
                 $(@goBtn).attr 'data-searching', '1'
-                @showLoader txt
+                @showLoader()
             ,
             complete: =>
                 $(@goBtn).attr 'data-searching', '0'
                 @hideLoader()
             success: (data) =>
                 if refresh is true
-                    @sstr = if stype is 'album' then backup else sstr
+                    @sstr = sstr
                     @src = src
                     @type = stype
-                    @page = page
+                @page = page
                 data.data.page = @page
                 data.data.src = @src
+                console.log data.data
                 @eventBus.emit 'SearchBox::GetSearchResult', {
                     data: data
                     refresh: refresh
@@ -202,10 +195,9 @@ class SearchBox extends BaseComp
     # 搜索专辑
     # @param {string} al 专辑
     searchAlbum: (al) ->
-        console.log al
         @toggleType 'album'
         $(@input).val al.split('#')[0]
-        @doSearch al, @src, 1, 'album'
+        @doSearch al.split('#')[1], @src, 1, 'album'
 
     # 展示loader
     # @param {string} msg loading文本

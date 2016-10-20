@@ -135,6 +135,8 @@ class MoePlayer extends BaseComp
         @playModeControl()
         @playControl()
 
+        $(@cover).find('img').on 'load', =>
+            $(@cover).removeClass 'loading'
         $(@cover).unbind().on 'click', =>
             @CUR_SONG and @eventBus.emit 'MoePlayer::ExpandDetailPanel'
 
@@ -365,29 +367,34 @@ class MoePlayer extends BaseComp
         # 加载歌曲数据
         $(@player).attr 'src', @fixSongURL(song.song_info.song_url)
         @player.load()
+
+        # 载入封面
+        $(@cover).addClass 'loading'
+        $(@cover).find('img').attr 'src', song.song_info.song_cover or @defaultCover
+
+        # 切换音质显示
+        sq = parseInt(song.song_info.song_quality)
+        if sq >= 320
+            $(@quality).text '高音质'
+            @quality.className = 'song-quality high'
+        else if 128 <= sq < 320
+            $(@quality).text '中音质'
+            @quality.className = 'song-quality medium'
+        else
+            $(@quality).text '低音质'
+            @quality.className = 'song-quality low'
+
         @player.play().then =>
             # 切换新歌曲
             @CUR_SONG = song
             @curIndex = parseInt(song.song_info.idx)
+
             # 切换图标状态
             $(@status).addClass 'playing'
                 .find('img').attr 'src', @ICONS.PAUSE
-            # 载入封面
-            $(@cover).find('img').attr 'src', song.song_info.song_cover or @defaultCover
+
             # 载入总时长
             $(@totalTime).text Util.normalizeSeconds(song.song_info.song_duration)
-
-            # 切换音质显示
-            sq = parseInt(song.song_info.song_quality)
-            if sq >= 320
-                $(@quality).text '高音质'
-                @quality.className = 'song-quality high'
-            else if 128 <= sq < 320
-                $(@quality).text '中音质'
-                @quality.className = 'song-quality medium'
-            else
-                $(@quality).text '低音质'
-                @quality.className = 'song-quality low'
 
             # 同步播放/缓冲进度
             @syncProgress song.song_info.song_duration

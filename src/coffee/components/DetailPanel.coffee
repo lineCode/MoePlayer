@@ -146,10 +146,12 @@ class DetailPanel extends BaseComp
         s = song.song_info
 
         # 显示封面
+        $(@cover).addClass 'loading'
         $img = $(@cover).find('img')
         $img.attr 'src', song.song_info.song_cover or @defaultCover
         $img[0].onload = =>
             $(@cover).removeClass 'rotate'
+                .removeClass 'loading'
 
             setTimeout =>
                 $(@cover).addClass 'rotate'

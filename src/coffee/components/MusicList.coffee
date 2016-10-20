@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-9-28 15:48:53
+# @Update 2016-10-20 16:10:43
 ##
 
 BaseComp = require './BaseComp'
@@ -28,9 +28,8 @@ class MusicList extends BaseComp
             DOWNLOAD_SUCCESS: '歌曲下载完成',
             NOT_FOUND_ERROR: '搜索不到相关的东西惹QAQ',
             NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
-            SONG_INFO_ERROR: '歌曲已失效或需要付费，请重试QAQ',
-            RETRY_TIPS: '请求失败了，请重试QAQ',
-            LOADER_TEXT: '正在获取歌曲URL...'
+            RETRY: '请求失败了，请重试QAQ',
+            NO_COPYRIGHT: '该歌曲为付费版权歌曲QAQ'
         }
 
         @CONTEXT = {
@@ -100,8 +99,7 @@ class MusicList extends BaseComp
             idx = $target.attr 'data-idx'
             sid = $target.attr 'data-sid'
             sn = $target.find('.title-col').text()
-            loaderText = "#{@TIPS.LOADER_TEXT}『#{sn}』"
-            sid && @getSongInfoAndPlay sid, idx, loaderText
+            sid && @getSongInfoAndPlay sid, idx
         .on 'mousedown', (e) =>
             if e.button is 2
                 $target = $(e.currentTarget)
@@ -306,7 +304,6 @@ class MusicList extends BaseComp
     # 获取歌曲信息并播放
     # @param {string} sid        歌曲ID
     # @param {number} idx        歌曲索引
-    # @param {string} loaderText 加载文本
     getSongInfoAndPlay: (sid, idx, loaderText) ->
         $.ajax {
             type: 'POST',
@@ -317,33 +314,35 @@ class MusicList extends BaseComp
             },
             beforeSend: =>
                 $('.song').removeClass 'playing'
-                @eventBus.emit 'MusicList::GetSongInfo', loaderText
+                @eventBus.emit 'MusicList::GetSongInfo'
             ,
             success: (data) =>
                 if data and data.status is 'success'
-                    if $.isEmptyObject(data.data.song_info) is false
-                        s = data.data.song_info
-                        s.idx = idx
-                        id = s.song_id
-                        ar = s.song_artist
-                        sn = s.song_name
+                    s = data.data.song_info
+                    s.idx = idx
+                    id = s.song_id
+                    ar = s.song_artist
+                    sn = s.song_name
 
-                        # 若歌曲已下载，则使用本地文件进行播放
-                        localpath = "#{config.save_path}/#{ar}/[#{id}] #{ar} - #{sn}.mp3"
-                        if Util.checkDLed(localpath) is true
-                            s.song_url = localpath
+                    # 若歌曲已下载，则使用本地文件进行播放
+                    localpath = "#{config.save_path}/#{ar}/[#{id}] #{ar} - #{sn}.mp3"
+                    if Util.checkDLed(localpath) is true
+                        s.song_url = localpath
 
-                        @fixSongInfo s
-                        @updatePlayingSong sid
-                        @eventBus.emit 'MusicList::PlaySong', data.data
+                    @fixSongInfo s
+                    @updatePlayingSong sid
+                    @eventBus.emit 'MusicList::PlaySong', data.data
+                else
+                    if data.status is 'copyright'
+                        Util.showMsg @TIPS.NO_COPYRIGHT, 3000, 3
                     else
-                        Util.showMsg @TIPS.SONG_INFO_ERROR, 3000, 3
-                        @eventBus.emit 'MusicList::GetSongInfoFailed'
+                        Util.showMsg @TIPS.NETWORK_ERROR, 3000, 3
+                    @eventBus.emit 'MusicList::GetSongInfoFailed'
 
-                        return false
+                    return false
             , 
             error: (err) =>
-                Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
+                Util.showMsg @TIPS.RETRY, 3000, 3
                 @eventBus.emit 'MusicList::GetSongInfoFailed'
         }
 
@@ -364,13 +363,13 @@ class MusicList extends BaseComp
                         @eventBus.emit 'MusicList::DownloadSong', sid
                         ipcRenderer.send 'ipcRenderer::DownloadSong', data.data.song_info
                     else
-                        Util.showMsg @TIPS.SONG_INFO_ERROR, 3000, 3
+                        Util.showMsg @TIPS.NETWORK_ERROR, 3000, 3
                         @eventBus.emit 'MusicList::GetSongInfoFailed'
                         
                         return false
             , 
             error: (err) =>
-                Util.showMsg @TIPS.RETRY_TIPS, 3000, 3
+                Util.showMsg @TIPS.RETRY, 3000, 3
                 @eventBus.emit 'MusicList::GetSongInfoFailed'
         }
 

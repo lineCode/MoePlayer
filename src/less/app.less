@@ -3,6 +3,8 @@
 @import url(../../lib/jquery_pagination/pagination.css);
 // 变量
 @import url(components/variables.less);
+// 动画
+@import url(components/animation.less);
 // 全局
 @import url(components/globals.less);
 // 组件
@@ -23,4 +25,37 @@
 .animation-paused {
     -webkit-animation-play-state: paused !important;
     animation-play-state: paused !important;
+}
+.loading {
+    position: relative;
+
+    &:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 1 !important;
+        background-color: rgba(0, 0, 0, 0.9) !important;
+        background-image: none !important;
+        cursor: default !important;
+        z-index: 1;
+    }
+    &:after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 2rem;
+        height: 2rem;
+        background-image: url(../../assets/loading_2.png);
+        background-repeat: no-repeat;
+        background-size: 100%;
+        background-position: center;
+        animation: rotate 2.5s linear infinite;
+        margin-left: -1rem;
+        margin-top: -1rem;
+        z-index: 1;
+    }
 }

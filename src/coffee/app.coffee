@@ -69,7 +69,7 @@ eventBinding = ->
 
     # 选中播放
     eventBus.on 'MusicList::GetSongInfo', (loaderText) ->
-        searchBox && searchBox.showLoader loaderText
+        searchBox && searchBox.showLoader()
         moePlayer && moePlayer.stop()
         detailPanel && detailPanel.pause()
     eventBus.on 'MusicList::GetSongInfoFailed', ->
