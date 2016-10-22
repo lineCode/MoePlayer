@@ -1,7 +1,7 @@
 ##
 # 歌词面板组件
 # @Author VenDream
-# @Update 2016-8-24 10:33:21
+# @Update 2016-10-22 18:06:34
 ##
 
 BaseComp = require './BaseComp'
@@ -22,15 +22,15 @@ class LrcPanel extends BaseComp
         # 预定义标签正则集合
         @TAG_REG_MAP = {
             # 艺术家
-            AR: /\[ar:([^\[\]:]*)\]\\n/g
+            AR: /\[ar:([^\[\]:]*)\]\\n/
             # 曲名
-            TI: /\[ti:([^\[\]:]*)\]\\n/g
+            TI: /\[ti:([^\[\]:]*)\]\\n/
             # 专辑名
-            AL: /\[al:([^\[\]:]*)\]\\n/g
+            AL: /\[al:([^\[\]:]*)\]\\n/
             # 歌词编辑者
-            BY: /\[by:([^\[\]:]*)\]\\n/g
+            BY: /\[by:([^\[\]:]*)\]\\n/
             # 时间补偿值
-            OFFSET: /\[offset:([^\[\]:]*)\]\\n/g
+            OFFSET: /\[offset:([^\[\]:]*)\]\\n/
         }
 
         # 时间标签正则集合

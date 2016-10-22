@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-10-20 16:10:43
+# @Update 2016-10-22 18:06:43
 ##
 
 BaseComp = require './BaseComp'
@@ -247,6 +247,8 @@ class MusicList extends BaseComp
             $tr = $(trHtml)
 
             # 设置title属性
+            $tr.find('.title-col').map (i, t) ->
+                $(t).attr 'title', $(@).text()
             $tr.find('.album-col').map (i, t) ->
                 $(t).attr 'title', $(@).text()
 

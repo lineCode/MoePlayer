@@ -1,7 +1,7 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2016-10-20 16:10:23
+# @Update 2016-10-22 18:06:13
 ##
 
 BaseComp = require './BaseComp'
@@ -53,6 +53,7 @@ class SearchBox extends BaseComp
             """
             <div class="searchBox">
                 <select class="source" title="音乐库">
+                    <option data-src="qq">QQ音乐(推荐)</option>
                     <option data-src="netease">网易云音乐</option>
                     <option data-src="kuwo">酷我音乐</option>
                 </select>
