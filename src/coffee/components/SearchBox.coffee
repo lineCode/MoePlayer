@@ -174,7 +174,6 @@ class SearchBox extends BaseComp
                 @page = page
                 data.data.page = @page
                 data.data.src = @src
-                console.log data.data
                 @eventBus.emit 'SearchBox::GetSearchResult', {
                     data: data
                     refresh: refresh

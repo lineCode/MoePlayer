@@ -1,7 +1,7 @@
 ##
 # 设置面板组件
 # @Author VenDream
-# @Update 2016-9-27 16:41:47
+# @Update 2016-10-22 10:49:15
 ##
 
 BaseComp = require './BaseComp'
@@ -89,7 +89,13 @@ class SettingPanel extends BaseComp
     # 打开面板
     open: ->
         $c = $(@panel).parent('.settingPanel-c')
+        $(@sType).find('li').eq(0).trigger 'click'
         $c.length > 0 and $c.fadeIn 0
+                            .addClass 'loading'
+
+        setTimeout =>
+            $c.removeClass 'loading'
+        , 400
 
     # 关闭面板
     close: ->
