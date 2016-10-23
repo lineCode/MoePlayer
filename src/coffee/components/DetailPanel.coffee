@@ -1,7 +1,7 @@
 ##
 # 歌曲详情面板组件
 # @Author VenDream
-# @Update 2016-8-23 09:22:31
+# @Update 2016-10-23 22:53:49
 ##
 
 BaseComp = require './BaseComp'
@@ -183,8 +183,8 @@ class DetailPanel extends BaseComp
         # 信息面板
         $(@name).text s.song_name or '暂无'
         $(@quality).text "#{s.song_quality}K"
-        $(@album).text "专辑: 《#{s.song_album or '暂无'}》"
-            .attr 'title', "《#{s.song_album or '暂无'}》"
+        $(@album).text "专辑: #{s.song_album}"
+            .attr 'title', s.song_album
         $(@artist).text "歌手: #{s.song_artist or '暂无'}"
             .attr 'title', s.song_artist or '暂无'
         $(@source).text "来源: #{song.source or '暂无'}"
@@ -193,7 +193,7 @@ class DetailPanel extends BaseComp
         switch s.song_quality
             when 320
                 c = 'high'
-            when 128
+            when 128, 192
                 c = 'medium'
             when 96
                 c = 'low'
