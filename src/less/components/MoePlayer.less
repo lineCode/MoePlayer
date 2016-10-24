@@ -39,11 +39,14 @@
                 background-repeat: no-repeat;
                 transition: opacity 0.2s ease-in-out;
             }
+
             &:hover {
                 &:before {
                     opacity: 1;
                 }
+
             }
+
             position: relative;
             width: 100%;
             height: 100%;
@@ -57,7 +60,9 @@
                 max-width: @cover-size;
                 max-height: @cover-size;
             }
+
         }
+
     }
 
     /***********************************************************
@@ -79,17 +84,23 @@
                 &:hover {
                     opacity: 1;
                 }
+
                 opacity: 0.8;
                 max-width: 100%;
                 max-height: 100%;
                 transition: none;
             }
+
         }
-        .prev-song, .play-status, .next-song {
+
+        .prev-song,
+        .play-status,
+        .next-song {
             cursor: pointer;
             max-width: @control-size;
             max-height: @control-size;
         }
+
     }
 
     /***********************************************************
@@ -108,10 +119,12 @@
             align-items: center;
             border-right: 0.1rem solid @table-border;
 
-            .played-time, .total-time {
+            .played-time,
+            .total-time {
                 min-width: 3.5rem;
                 line-height: 1.3rem;
             }
+
             .progress-bar {
                 position: relative;
                 height: 0.5rem;
@@ -129,10 +142,12 @@
                     background-color: @buffer-bar;
                     border-radius: 0.4rem;
                 }
+
                 .progress-drag-bar {
                     &:hover {
                         border-color: @red;
                     }
+
                     &:before {
                         content: '';
                         position: absolute;
@@ -144,6 +159,7 @@
                         border: 0.1rem solid @red;
                         border-radius: @drag-bar-radius;
                     }
+
                     position: absolute;
                     cursor: pointer;
                     background-color: @white;
@@ -155,7 +171,9 @@
                     border-radius: @drag-bar-radius;
                     transition: none;
                 }
+
             }
+
             .song-quality {
                 color: @white;
                 width: 4.6rem;
@@ -164,19 +182,24 @@
                 padding: 0.2rem 0.4rem;
                 border: 0.1rem solid @white;
             }
+
             .song-quality.high {
                 color: @green;
                 border-color: @green;
             }
+
             .song-quality.medium {
                 color: @yellow;
                 border-color: @yellow;
             }
+
             .song-quality.low {
                 color: @red;
                 border-color: @red;
             }
+
         }
+
     }
 
     /***********************************************************
@@ -202,12 +225,15 @@
                     &:hover {
                         opacity: 1;
                     }
+
                     opacity: 0.8;
                     max-width: @volume-size;
                     max-height: @volume-size;
                     transition: none;
                 }
+
             }
+
             .volume-bar {
                 position: relative;
                 width: 65%;
@@ -219,6 +245,7 @@
                     &:hover {
                         border-color: @red;
                     }
+
                     &:before {
                         content: '';
                         position: absolute;
@@ -230,6 +257,7 @@
                         border: 0.1rem solid @red;
                         border-radius: @drag-bar-radius;
                     }
+
                     position: absolute;
                     cursor: pointer;
                     background-color: @white;
@@ -241,8 +269,11 @@
                     border-radius: @drag-bar-radius;
                     transition: none;
                 }
+
             }
+
         }
+
     }
 
     /***********************************************************
@@ -262,14 +293,17 @@
             .play-mode {
                 cursor: pointer;
 
-                .mode-icon, .mode-text {
+                .mode-icon,
+                .mode-text {
                     display: inline-block;
                     vertical-align: middle;
                 }
+
                 .mode-icon {
                     &:hover {
                         opacity: 1;
                     }
+
                     opacity: 0.8;
                     background-repeat: no-repeat;
                     background-position: center;
@@ -277,28 +311,39 @@
                     width: 2rem;
                     height: 2rem;
                 }
+
                 .mode-text {
                     color: @table-font;
                     font-size: 1.2rem;
                     height: 2rem;
                     line-height: 2rem;
                 }
+
             }
+
             .sequence-mode {
                 .mode-icon {
                     background-image: url(../../assets/sequence.png);
                 }
+
             }
+
             .random-mode {
                 .mode-icon {
                     background-image: url(../../assets/random.png);
                 }
+
             }
+
             .loop-mode {
                 .mode-icon {
                     background-image: url(../../assets/loop.png);
                 }
+
             }
+
         }
+
     }
+
 }

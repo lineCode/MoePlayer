@@ -129,7 +129,7 @@ function dlSetting(event, item, webContents) {
  * @param  {object} song  songInfo
  */
 function dlCover(event, song) {
-    let savePath = `${config.save_path}/专辑封面/《${song.song_album}》.jpg`;
+    let savePath = `${config.save_path}/专辑封面/${song.song_album}.jpg`;
     let c = _.assign({
         save_path: savePath
     }, song);

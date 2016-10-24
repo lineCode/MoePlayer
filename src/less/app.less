@@ -14,6 +14,7 @@
 .hidden {
     display: none !important;
 }
+
 .not-select {
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -22,12 +23,15 @@
     -o-user-select: none;
     user-select: none;
 }
+
 .animation-paused {
     -webkit-animation-play-state: paused !important;
     animation-play-state: paused !important;
 }
+
 .loading {
     position: relative;
+    cursor: default !important;
 
     &:before {
         content: '';
@@ -39,9 +43,9 @@
         opacity: 1 !important;
         background-color: rgba(0, 0, 0, 0.9) !important;
         background-image: none !important;
-        cursor: default !important;
         z-index: 1;
     }
+
     &:after {
         content: '';
         position: absolute;
@@ -58,4 +62,24 @@
         margin-top: -1rem;
         z-index: 1;
     }
+
+    &.small {
+        &:after {
+            width: 1rem;
+            height: 1rem;
+            margin-left: -0.5rem;
+            margin-top: -0.5rem;
+        }
+
+    }
+
+    &.circle {
+        border-radius: 50%;
+        border: 0.01rem solid white;
+        &:before {
+            border-radius: 50%;
+            border: 0.01rem solid white;
+        }
+    }
+
 }

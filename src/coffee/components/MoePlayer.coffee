@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-8-29 11:13:18
+# @Update 2016-10-24 11:41:09
 ##
 
 BaseComp = require './BaseComp'
@@ -365,6 +365,7 @@ class MoePlayer extends BaseComp
         @pause false
 
         # 加载歌曲数据
+        $(@status).addClass 'small circle loading'
         $(@player).attr 'src', @fixSongURL(song.song_info.song_url)
         @player.load()
 
@@ -390,6 +391,7 @@ class MoePlayer extends BaseComp
             @curIndex = parseInt(song.song_info.idx)
 
             # 切换图标状态
+            $(@status).removeClass 'small circle loading'
             $(@status).addClass 'playing'
                 .find('img').attr 'src', @ICONS.PAUSE
 
@@ -407,6 +409,8 @@ class MoePlayer extends BaseComp
             @stop()
             @CUR_SONG = null
             @curIndex = undefined
+
+            $(@status).removeClass 'small circle loading'
 
             Util.showMsg @TIPS.URL_ERROR, 3000, 3
             @eventBus.emit 'MoePlayer::UrlError', song
