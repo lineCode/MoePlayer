@@ -174,7 +174,7 @@ module.exports = {
             return false
 
         color = option and option.color or '#4caf50'
-        duration = option and option.duration or 3000
+        duration = option and option.duration or 2000
         height = option and parseInt(option.height) or 5
         width = option and parseInt(option.width) or 20
 

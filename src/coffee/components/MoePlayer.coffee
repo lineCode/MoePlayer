@@ -228,9 +228,7 @@ class MoePlayer extends BaseComp
                     @PLAY_MODE = 1
                     $(@playMode).attr 'class', 'play-mode random-mode'
                     $(@playMode).find('.mode-text').text '随机播放'
-                    Util.toast '随机播放', {
-                        duration: -1
-                    }
+                    Util.toast '随机播放'
                 when 1
                     @PLAY_MODE = 2
                     $(@playMode).attr 'class', 'play-mode loop-mode'
@@ -255,11 +253,17 @@ class MoePlayer extends BaseComp
             # 播放状态
             if $target.hasClass 'playing'
                 @pause()
-                Util.toast '暂停播放'
+                Util.toast '暂停播放', {
+                    color: '#ffffff',
+                    duration: 1000
+                }
             # 暂停状态
             else
                 @resume()
-                Util.toast '恢复播放'
+                Util.toast '恢复播放', {
+                    color: '#ffffff',
+                    duration: 1000
+                }
 
         # 切换歌曲
         $(@prev).on 'click', (evt) =>

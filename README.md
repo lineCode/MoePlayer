@@ -2,7 +2,7 @@
 An anime music player based on [electron](http://electron.atom.io)
 
 ### Install
-- `npm install -g electron-prebuilt` (Make sure electron version >= 1.2.7)
+- `npm install -g electron-prebuilt` (Make sure electron version >= 1.4.0)
 - `npm install`
 - For Developing, run `gulp`
 - For Distributing, run `gulp release`
