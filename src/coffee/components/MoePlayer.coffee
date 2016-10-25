@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-10-24 11:41:09
+# @Update 2016-10-25 16:28:04
 ##
 
 BaseComp = require './BaseComp'
@@ -228,14 +228,19 @@ class MoePlayer extends BaseComp
                     @PLAY_MODE = 1
                     $(@playMode).attr 'class', 'play-mode random-mode'
                     $(@playMode).find('.mode-text').text '随机播放'
+                    Util.toast '随机播放', {
+                        duration: -1
+                    }
                 when 1
                     @PLAY_MODE = 2
                     $(@playMode).attr 'class', 'play-mode loop-mode'
                     $(@playMode).find('.mode-text').text '单曲循环'
+                    Util.toast '单曲循环'
                 when 2
                     @PLAY_MODE = 0
                     $(@playMode).attr 'class', 'play-mode sequence-mode'
                     $(@playMode).find('.mode-text').text '顺序播放'
+                    Util.toast '顺序播放'
 
     # 播放控制
     playControl: ->
@@ -250,9 +255,11 @@ class MoePlayer extends BaseComp
             # 播放状态
             if $target.hasClass 'playing'
                 @pause()
+                Util.toast '暂停播放'
             # 暂停状态
             else
                 @resume()
+                Util.toast '恢复播放'
 
         # 切换歌曲
         $(@prev).on 'click', (evt) =>
@@ -303,7 +310,6 @@ class MoePlayer extends BaseComp
             }
 
             @stop()
-
 
     # 同步播放进度
     # @param {number} timeWidth 总时间长度(毫秒)

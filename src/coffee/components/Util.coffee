@@ -1,7 +1,7 @@
 ##
 # 工具函数
 # @Author VenDream
-# @Update 2016-8-26 23:02:31
+# @Update 2016-10-25 16:28:11
 ##
 
 fs = window.require 'fs'
@@ -97,6 +97,16 @@ module.exports = {
 
         return rlt
 
+    # 生产n位的唯一ID
+    # @param {number} n ID长度
+    uniqueId: (n) ->
+        ID = ''
+        while ID.length < n
+            ID += Math.random().toString(36).substr(2)
+        ID = ID.substr(0, n)
+
+        return ID
+
     # 展示消息提示
     # @param {string} msg      提示文本（可含HTML标签）
     # @param {number} duration 消息持续时间(负数表示一直存在直到用户点击)
@@ -149,4 +159,55 @@ module.exports = {
                         $msgBox.remove()
                 $(@).removeClass 'slideIn'
                     .addClass 'slideOut'
+
+    # 显示toast通知
+    # @param {string} msg    toast消息文本
+    # @param {object} option toast选项
+    # 
+    # option可选配置：
+    # duration toast持续时间，负数则表示一直显示直到用户点击(可选)
+    # height   toast窗体高度(可选)
+    # width    toast窗体宽度(可选)
+    # color    toast消息文本前景色(可选)
+    toast: (msg, option) ->
+        if msg is ''
+            return false
+
+        color = option and option.color or '#4caf50'
+        duration = option and option.duration or 3000
+        height = option and parseInt(option.height) or 5
+        width = option and parseInt(option.width) or 20
+
+        uniqueId = @uniqueId 8
+        $tw = $("<div class=\"toastWrapper #{uniqueId}\"></div>")
+        ae = 'webkitAnimationEnd ' + 'mozAnimationEnd ' + 
+             'MSAnimationEnd ' + 'oanimationend ' + 'animationend'
+
+        $('.toastWrapper').one ae, (evt) ->
+            $(@).remove()
+        .addClass 'zoomOut'
+
+        $('body').append $tw
+
+        $tw.text msg
+            .addClass 'zoomIn'
+            .css {
+                'color': color,
+                'height': height + 'rem',
+                'width': width + 'rem',
+                'marginLeft': (- width / 2) + 'rem',
+                'marginTop': (- height / 2) + 'rem'
+            }
+
+        if duration >= 0
+            setTimeout ->
+                $tw.one ae, (evt) ->
+                    $(@).remove()
+                .removeClass 'zoomIn'
+                .addClass 'zoomOut'
+            , duration
+        else
+            $tw.on 'click', (evt) ->
+                $(@).removeClass 'zoomIn'
+                    .addClass 'zoomOut'
 }

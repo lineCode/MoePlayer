@@ -63,7 +63,7 @@ class SearchBox extends BaseComp
                     <option data-type="album">专辑</option>
                 </select>
                 <input name="music-info" type="text" class="search-input" 
-                    placeholder="输入歌曲信息（名称、歌手）" />
+                    placeholder="输入关键词（名称、歌手、专辑）" />
                 <div class="go-btn not-select" title="搜索">搜索</div>
                 <div class="clear-btn not-select" title="清空">清空</div>
                 <div class="loader not-select">
