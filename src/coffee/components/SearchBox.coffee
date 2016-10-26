@@ -55,6 +55,7 @@ class SearchBox extends BaseComp
                 <select class="source" title="音乐库">
                     <option data-src="qq">QQ音乐(推荐)</option>
                     <option data-src="netease">网易云音乐</option>
+                    <option data-src="xiami">虾米音乐</option>
                     <option data-src="kuwo">酷我音乐</option>
                 </select>
                 <select class="stype" disabled title="搜索类型">
