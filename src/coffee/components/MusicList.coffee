@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-10-22 18:06:43
+# @Update 2016-10-28 18:32:49
 ##
 
 BaseComp = require './BaseComp'
@@ -233,7 +233,11 @@ class MusicList extends BaseComp
                 """
                 <tr class="song not-select #{
                     if String(s.song_id) is String(@curSongId) then 'playing' else ''
-                } #{c}" data-sid="#{s.song_id}" data-alid="#{s.album_id}" data-idx="#{i}">
+                } #{c}" data-sid="#{s.song_id}" data-alid="#{s.album_id}" data-idx="#{i}" #{
+                    if s.player_info 
+                    then 'data-xiami=\"' + encodeURIComponent(JSON.stringify(s.player_info)) + '\"'
+                    else ''
+                }>
                     <td class="index-col">#{idx}</td>
                     <td class="title-col">#{s.song_name}</td>
                     <td class="artist-col">#{s.artist_name}</td>
@@ -306,13 +310,13 @@ class MusicList extends BaseComp
     # 获取歌曲信息并播放
     # @param {string} sid        歌曲ID
     # @param {number} idx        歌曲索引
-    getSongInfoAndPlay: (sid, idx, loaderText) ->
+    getSongInfoAndPlay: (sid, idx) ->
         $.ajax {
             type: 'POST',
             url: @API.INFO,
             data: {
                 song_id: sid,
-                src: @src
+                src: @src,
             },
             beforeSend: =>
                 $('.song').removeClass 'playing'
@@ -320,7 +324,13 @@ class MusicList extends BaseComp
             ,
             success: (data) =>
                 if data and data.status is 'success'
-                    s = data.data.song_info
+                    if @src is 'xiami'
+                        $sr = $('.song[data-sid="' + sid + '"]')
+                        xiamiInfo = $sr.attr 'data-xiami' 
+                        s = JSON.parse(decodeURIComponent(xiamiInfo))
+                        s.song_lyric = data.data.song_info.song_lyric
+                    else
+                        s = data.data.song_info
                     s.idx = idx
                     id = s.song_id
                     ar = s.song_artist
@@ -332,6 +342,7 @@ class MusicList extends BaseComp
                         s.song_url = localpath
 
                     @fixSongInfo s
+                    data.data.song_info = s
                     @updatePlayingSong sid
                     @eventBus.emit 'MusicList::PlaySong', data.data
                 else
