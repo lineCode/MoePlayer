@@ -1,7 +1,7 @@
 ##
 # 歌词面板组件
 # @Author VenDream
-# @Update 2016-10-22 18:06:34
+# @Update 2016-10-31 15:38:06
 ##
 
 BaseComp = require './BaseComp'
@@ -31,6 +31,18 @@ class LrcPanel extends BaseComp
             BY: /\[by:([^\[\]:]*)\]\\n/
             # 时间补偿值
             OFFSET: /\[offset:([^\[\]:]*)\]\\n/
+        }
+
+        # 虾米歌词标签正则结合
+        @XIAMI_TAG_REG_MAP = {
+            LY: /\[ly:([^\[\]:]*)\]\\n/,
+            MU: /\[mu:([^\[\]:]*)\]\\n/,
+            PU: /\[pu:([^\[\]:]*)\]\\n/,
+            MA: /\[ma:([^\[\]:]*)\]\\n/,
+            LR: /\[lr:([^\[\]:]*)\]\\n/,
+            CO: /\[co:([^\[\]:]*)\]\\n/,
+            AG: /\[ag:([^\[\]:]*)\]\\n/,
+            TOTAL: /\[total:([^\[\]:]*)\]\\n/,
         }
 
         # 时间标签正则集合
@@ -147,6 +159,10 @@ class LrcPanel extends BaseComp
             res = lrc.match reg
             @TAGS[tag] = res and res[1] or ''
 
+            lrc = lrc.replace reg, ''
+
+        # 剔除无用标签(针对虾米歌词)
+        for tag, reg of @XIAMI_TAG_REG_MAP
             lrc = lrc.replace reg, ''
 
         # 获取内容信息

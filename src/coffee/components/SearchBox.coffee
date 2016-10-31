@@ -1,7 +1,7 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2016-10-22 18:06:13
+# @Update 2016-10-31 16:06:15
 ##
 
 BaseComp = require './BaseComp'
@@ -87,6 +87,14 @@ class SearchBox extends BaseComp
 
     eventBinding: ->
         $(@goBtn).attr 'data-searching', '0'
+
+        # 切换音乐库
+        $(@source).on 'change', (evt) =>
+            sn = $(evt.target).val()
+            tx = "音乐库切换为: 『#{sn}』"
+            Util.toast tx, {
+                width: 25
+            }
 
         # 搜索
         $(@goBtn).on 'click', (evt) =>
