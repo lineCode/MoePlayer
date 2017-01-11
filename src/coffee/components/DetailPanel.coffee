@@ -1,7 +1,7 @@
 ##
 # 歌曲详情面板组件
 # @Author VenDream
-# @Update 2016-10-24 11:40:35
+# @Update 2017-1-11 11:26:02
 ##
 
 BaseComp = require './BaseComp'
@@ -193,9 +193,9 @@ class DetailPanel extends BaseComp
         switch s.song_quality
             when 320
                 c = 'high'
-            when 128, 192
+            when 192, 128
                 c = 'medium'
-            when 96
+            when 96, 48
                 c = 'low'
         $(@quality).attr 'class',  "quality #{c}"
 
