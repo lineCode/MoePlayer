@@ -93,34 +93,6 @@ gulp.task 'reload', ->
 gulp.task 'restart', ->
     electron.restart()
 
-# 转移文件
-gulp.task 'copyFiles', ->
-    # 转移assets
-    gulp.src paths.assets, {base: './'}
-        .pipe gulp.dest paths.app
-
-    # 转移lib文件
-    gulp.src paths.lib, {base: './'}
-        .pipe gulp.dest paths.app
-
-    # 转移编译后的代码
-    gulp.src paths.dist, {base: './'}
-        .pipe gulp.dest paths.app
-
-    # 转移入口文件及配置文件
-    gulp.src ['main.js', 'config.js']
-        .pipe gulp.dest paths.app
-
-    # 转移其他文件
-    gulp.src ['index.html', 'package.json', 'LICENSE', 'README.md']
-        .pipe gulp.dest paths.app
-    gulp.src [
-        'node_modules/underscore/**/*', 
-        'node_modules/devtron/**/*',
-        'node_modules/electron-connect/**/*'
-    ], {base: './'}
-        .pipe gulp.dest paths.app
-
 # 运行打包命令
 gulp.task 'packCMD', ->
     appName = rI.appName
@@ -131,10 +103,9 @@ gulp.task 'packCMD', ->
     packVer = rI.packVer
     icon = rI.icon
 
-    packCmd = "electron-packager #{paths.app} #{appName} --platform=#{platform} \
+    packCmd = "electron-packager . #{appName} --platform=#{platform} \
            --arch=#{arch} --version=#{packVer} --asar --app-version=#{appVer} \
-           --app-copyright=#{copyright} --icon=#{icon} --overwrite"
-
+           --app-copyright=#{copyright} --icon=#{icon} --overwrite --ignore=node_modules"
     run(packCmd).exec()
 
 # 运行重命名命令
@@ -178,7 +149,6 @@ gulp.task 'release', ->
         'cleanAll',
         'coffee',
         'less',
-        'copyFiles',
         'packCMD',
         'renameCMD',
         'cleanTemp'

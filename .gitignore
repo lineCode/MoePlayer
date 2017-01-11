@@ -42,3 +42,4 @@ release/
 download/
 app/
 tags
+config.js

@@ -1,4 +1,3 @@
-const _ = require('underscore');
 const fs = require('fs');
 
 const electron = require('electron');
@@ -9,9 +8,14 @@ const {
     BrowserWindow
 } = electron;
 
-const devtron = require('devtron');
 const config = require('./config');
-const client = require('electron-connect').client;
+let client = null;
+let devtron = null;
+
+if (config.env !== 'production') {
+    devtron = require('devtron')
+    client = require('electron-connect').client;
+}
 
 let win;
 let session;
@@ -45,9 +49,9 @@ function createWin() {
     win.loadURL(`file://${__dirname}/index.html`);
 
     // Whether To Open Dev Tools
-    if (config.debug === true) {
+    if (config.env === 'dev' && config.debug === true) {
         win.webContents.openDevTools();
-        devtron.install();
+        devtron.install()
         client.create(win, {
             sendBounds: false
         });
@@ -130,7 +134,7 @@ function dlSetting(event, item, webContents) {
  */
 function dlCover(event, song) {
     let savePath = `${config.save_path}/专辑封面/${song.song_album}.jpg`;
-    let c = _.assign({
+    let c = Object.assign({
         save_path: savePath
     }, song);
 
@@ -154,7 +158,7 @@ function dlCover(event, song) {
  */
 function dlSong(event, song) {
     let savePath = `${config.save_path}/${song.song_artist}/[${song.song_id}] ${song.song_artist} - ${song.song_name}.mp3`;
-    let s = _.assign({
+    let s = Object.assign({
         save_path: savePath
     }, song);
 
