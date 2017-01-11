@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2016-10-28 18:32:49
+# @Update 2017-1-11 14:45:58
 ##
 
 BaseComp = require './BaseComp'
@@ -21,15 +21,14 @@ class MusicList extends BaseComp
         super selector, eventBus
 
         @TIPS = {
-            NO_SONG: '噫，都没有歌曲可以下载0v0',
+            NO_SONG: '噫，都没有歌曲可以下载',
             SUGGEST: '搜索点什么听听吧ww',
             DOWNLOAD_START: '加入下载列表',
             DOWNLOAD_FAILED: '歌曲下载失败',
             DOWNLOAD_SUCCESS: '歌曲下载完成',
-            NOT_FOUND_ERROR: '搜索不到相关的东西惹QAQ',
-            NETWORK_ERROR: '服务器出小差啦，请重试QAQ',
-            RETRY: '请求失败了，请重试QAQ',
-            NO_COPYRIGHT: '该歌曲为付费版权歌曲QAQ'
+            NOT_FOUND_ERROR: '搜索不到相关的东西惹',
+            NETWORK_ERROR: '服务器出小差啦，请重试',
+            RETRY: '请求失败了，请重试',
         }
 
         @CONTEXT = {
@@ -331,6 +330,7 @@ class MusicList extends BaseComp
                         s.song_lyric = data.data.song_info.song_lyric
                     else
                         s = data.data.song_info
+
                     s.idx = idx
                     id = s.song_id
                     ar = s.song_artist
@@ -346,10 +346,7 @@ class MusicList extends BaseComp
                     @updatePlayingSong sid
                     @eventBus.emit 'MusicList::PlaySong', data.data
                 else
-                    if data.status is 'copyright'
-                        Util.showMsg @TIPS.NO_COPYRIGHT, 3000, 3
-                    else
-                        Util.showMsg @TIPS.NETWORK_ERROR, 3000, 3
+                    Util.showMsg @TIPS.NETWORK_ERROR, 3000, 3
                     @eventBus.emit 'MusicList::GetSongInfoFailed'
 
                     return false

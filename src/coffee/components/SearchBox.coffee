@@ -1,7 +1,7 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2016-10-31 16:06:15
+# @Update 2017-1-11 15:05:04
 ##
 
 BaseComp = require './BaseComp'
@@ -49,14 +49,19 @@ class SearchBox extends BaseComp
         @eventBinding()
 
     render: ->
+        opcls = ''
+        host = config.host
+        if host.indexOf('43.') > 0
+            opcls = 'hidden'
+
         htmls = 
             """
             <div class="searchBox">
                 <select class="source" title="音乐库">
                     <option data-src="qq">QQ音乐(推荐)</option>
                     <option data-src="netease">网易云音乐</option>
-                    <option data-src="xiami">虾米音乐</option>
-                    <option data-src="kuwo">酷我音乐</option>
+                    <option data-src="xiami" class="#{opcls}">虾米音乐</option>
+                    <option data-src="kuwo" class="#{opcls}">酷我音乐</option>
                 </select>
                 <select class="stype" disabled title="搜索类型">
                     <option data-type="single">单曲</option>
