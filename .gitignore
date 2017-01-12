@@ -38,7 +38,7 @@ jspm_packages
 
 *.asar
 dist/
-release/
+MoePlayer*/
 download/
 app/
 tags

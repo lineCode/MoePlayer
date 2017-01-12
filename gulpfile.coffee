@@ -2,7 +2,7 @@
 # 配置自动化流程
 # Author: VenDream
 # E-mail: yeshenxue@qq.com
-# Update: 2016-8-26 18:59:35
+# Update: 2017-1-12 17:28:15
 ##
 
 options = {
@@ -25,6 +25,8 @@ sequence = require 'run-sequence'
 electron = (require 'electron-connect').server.create(options)
 
 rI = require('./config').release
+packDir = "#{rI.appName}-#{rI.platform}-#{rI.arch}"
+releaseDir = "#{rI.appName}_v#{rI.appVer}"
 
 # 定义项目相关路径
 paths = 
@@ -49,14 +51,12 @@ logError = (e) ->
 
 # 清理文件
 gulp.task 'cleanAll', ->
-    packDir = "#{rI.appName}-#{rI.platform}-#{rI.arch}"
-
-    gulp.src ['app/', 'dist/', 'release/', packDir], {read: false}
+    gulp.src ['dist/', releaseDir, packDir], {read: false}
         .pipe clean({force: true})
 
 # 清理中间过程文件
 gulp.task 'cleanTemp', ->
-    gulp.src ['app/', 'dist/'], {read: false}
+    gulp.src ['dist/'], {read: false}
         .pipe clean({force: true})
 
 # 把coffee文件编译为js文件
@@ -105,16 +105,21 @@ gulp.task 'packCMD', ->
 
     packCmd = "electron-packager . #{appName} --platform=#{platform} \
            --arch=#{arch} --version=#{packVer} --asar --app-version=#{appVer} \
-           --app-copyright=#{copyright} --icon=#{icon} --overwrite --ignore=node_modules"
+           --app-copyright=#{copyright} --icon=#{icon} --overwrite \
+           --ignore=node_modules/ --ignore=download/ --ignore=src/ --ignore=config.example.js \
+           --ignore=.gitignore --ignore=.jshintrc --ignore=config.example.js \
+           --ignore=gulpfile.coffee --ignore=README.md"
     run(packCmd).exec()
 
 # 运行重命名命令
 gulp.task 'renameCMD', ->
-    packDir = "#{rI.appName}-#{rI.platform}-#{rI.arch}"
-    releaseDir = 'release'
     renameCmd = "mv #{packDir} #{releaseDir}"
-
     run(renameCmd).exec()
+
+gulp.task 'releaseStatus', ->
+    console.log '---------------------------------------------'
+    console.log "Done...! See #{releaseDir}/ for more details."
+    console.log '---------------------------------------------'
 
 # 监听文件改动
 gulp.task 'watch', ->
@@ -151,5 +156,6 @@ gulp.task 'release', ->
         'less',
         'packCMD',
         'renameCMD',
-        'cleanTemp'
+        'cleanTemp',
+        'releaseStatus'
     )
