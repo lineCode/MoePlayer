@@ -1,13 +1,27 @@
 @import url(variables.less);
 @import url(animation.less);
 
+.bgCover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-filter: blur(8px);
+    -moz-filter: blur(8px);
+    -ms-filter: blur(8px);
+    filter: blur(8px);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
 .detailPanel {
     width: 100%;
     height: 100%;
     font-size: 0;
     padding: 1rem;
     position: relative;
-    background-color: @bg;
+    background-color: rgba(22, 24, 28, 0.8);
 
     .shrinkBtn {
         &:hover {
@@ -58,7 +72,6 @@
             &:before {
                 border-radius: 50%;
             }
-            
             width: 30rem;
             height: 30rem;
             border: 3rem solid @black;

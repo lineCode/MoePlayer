@@ -1,7 +1,7 @@
 ##
 # 歌曲详情面板组件
 # @Author VenDream
-# @Update 2017-1-11 11:26:02
+# @Update 2017-1-12 11:26:46
 ##
 
 BaseComp = require './BaseComp'
@@ -21,6 +21,7 @@ class DetailPanel extends BaseComp
         @LRC_PANEL = null
 
     init: ->
+        @bgCover = @html.querySelector '.bgCover'
         @panel = @html.querySelector '.detailPanel'
 
         @shrinkBtn = @html.querySelector '.shrinkBtn'
@@ -57,6 +58,7 @@ class DetailPanel extends BaseComp
     render: ->
         htmls = 
             """
+            <div class="bgCover"></div>
             <div class="detailPanel">
                 <div class="shrinkBtn"></div>
                 <div class="panel-left">
@@ -148,8 +150,11 @@ class DetailPanel extends BaseComp
         # 显示封面
         $(@cover).addClass 'loading'
         $img = $(@cover).find('img')
-        $img.attr 'src', song.song_info.song_cover or @defaultCover
+        $img.attr 'src', s.song_cover or @defaultCover
         $img[0].onload = =>
+            $(@bgCover).css {
+                'backgroundImage': "url(#{s.song_cover})"
+            }
             $(@cover).removeClass 'rotate'
                 .removeClass 'loading'
 
