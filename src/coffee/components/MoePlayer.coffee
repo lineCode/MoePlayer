@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2016-10-25 16:28:04
+# @Update 2017-1-12 16:35:32
 ##
 
 BaseComp = require './BaseComp'
@@ -59,6 +59,7 @@ class MoePlayer extends BaseComp
         #-------------
         @volumeIcon = @volume.querySelector '.volume-icon'
         @volumeBar = @volume.querySelector '.volume-bar'
+        @volumnColorBar = @volume.querySelector '.volume-color-bar'
         @volumeDragBar = @volume.querySelector '.volume-drag-bar'
         #-------------
         @playMode = @addons.querySelector '.play-mode'
@@ -109,6 +110,7 @@ class MoePlayer extends BaseComp
                                 <img src="#{@ICONS.VOLUME}" alt="音量">
                             </div>
                         <div class="volume-bar">
+                            <div class="volume-color-bar"></div>
                             <div class="volume-drag-bar"></div>
                         </div>
                     </div>
@@ -213,6 +215,9 @@ class MoePlayer extends BaseComp
         # 调节音量
         @DRAGGER.on "Dragger::Dragging##{name}", (percent) =>
             @player.volume = percent
+            $(@volumnColorBar).css {
+                'width': "#{percent * 100}%"
+            }
 
             if percent is 0
                 $vIcon.attr 'src', @ICONS.MUTE

@@ -240,6 +240,19 @@
                 height: 0.5rem;
                 background-color: @progress-bar;
                 margin-left: 0.5rem;
+                border-radius: 0.4rem;
+
+                .volume-color-bar {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: @red;
+                    border-radius: 0.4rem;
+                    -webkit-transition: none;
+                    transition: none;
+                }
 
                 .volume-drag-bar {
                     &:hover {
