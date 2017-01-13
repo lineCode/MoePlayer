@@ -129,7 +129,7 @@ module.exports = {
                 ln = 'success'
             when 3
                 ln = 'error'
-                shell.beep()
+                # shell.beep()
             else
                 ln = 'normal'
 

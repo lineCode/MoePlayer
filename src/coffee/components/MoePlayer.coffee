@@ -1,7 +1,7 @@
 ##
 # 播放器组件
 # @Author VenDream
-# @Update 2017-1-12 16:35:32
+# @Update 2017-1-13 17:58:03
 ##
 
 BaseComp = require './BaseComp'
@@ -13,13 +13,28 @@ class MoePlayer extends BaseComp
     constructor: (selector, eventBus) ->
         super selector, eventBus
 
-        @LIST = []
-        @TIMER = null
-        @DRAGGER = null
-        @CUR_TIME = 0
-        @CUR_SONG = null
-        @PLAY_MODE = 0
+        @initAttr()
 
+    init: () ->
+        @initNode()
+        @bindEvents()
+
+    # Init component attributes
+    initAttr:() ->
+        @LIST = []          # Song list
+        @CUR_TIME = 0       # Current time
+        @CUR_SONG = null    # Current song
+        @CUR_INDEX = -1     # Current index
+        @PLAY_MODE = 0      # Play mode
+
+        # Create a HTML5 Audio object
+        @PLAYER = new Audio()
+        # Create a Timer object to sync player progress
+        @TIMER = new Timer()
+        # Create a Dragger object to enable dragging
+        @DRAGGER = new Dragger()
+
+        # Icons
         @ICONS = {
             COVER: 'assets/cover.png',
             PREV: 'assets/prev.png',
@@ -27,54 +42,47 @@ class MoePlayer extends BaseComp
             PLAY: 'assets/play.png',
             PAUSE: 'assets/pause.png',
             VOLUME: 'assets/volume.png',
-            MUTE: 'assets/mute.png'
+            MUTE: 'assets/mute.png',
+            DEFAULT: 'assets/default_cover.jpg'
         }
 
+        # Msg tips
         @TIPS = {
-            URL_ERROR: '播放地址无效QAQ',
+            ERROR: '歌曲URL无效QAQ',
+            SWITCH: '歌曲URL无效，尝试切换音质...',
             STALLED: '网络不太给力啊QAQ'
         }
 
-    init: ->
-        # common child
-        @player = @html.querySelector '.mp-player'
+    # Init componet DOM nodes
+    initNode: () ->
         @cover = @html.querySelector '.mp-cover'
-        #-------------
         @control = @html.querySelector '.mp-control'
         @time = @html.querySelector '.mp-time'
         @volume = @html.querySelector '.mp-volume'
         @addons = @html.querySelector '.mp-addons'
 
-        # detail child
         @prev = @control.querySelector '.prev-song'
         @status = @control.querySelector '.play-status'
         @next = @control.querySelector '.next-song'
-        #-------------
+
         @playedTime = @time.querySelector '.played-time'
         @progressBar = @time.querySelector '.progress-bar'
         @bufferBar = @time.querySelector '.buffer-bar'
         @progressDragBar = @time.querySelector '.progress-drag-bar'
         @totalTime = @time.querySelector '.total-time'
         @quality = @time.querySelector '.song-quality'
-        #-------------
+
         @volumeIcon = @volume.querySelector '.volume-icon'
         @volumeBar = @volume.querySelector '.volume-bar'
         @volumnColorBar = @volume.querySelector '.volume-color-bar'
         @volumeDragBar = @volume.querySelector '.volume-drag-bar'
-        #-------------
+
         @playMode = @addons.querySelector '.play-mode'
 
-        @defaultCover = 'assets/default_cover.jpg'
-        @TIMER = new Timer()
-        @DRAGGER = new Dragger()
-
-        @eventBinding()
-
-    render: ->
+    render: () ->
         htmls = 
             """
             <div class="moePlayer">
-                <audio preload="auto" class="mp-player hidden"></audio>
                 <div class="mp-part mp-cover not-select">
                     <div class="cover-c">
                         <img src="#{@ICONS.COVER}" alt="封面图片">
@@ -124,97 +132,109 @@ class MoePlayer extends BaseComp
                     </div>
                 </div>
             </div>
-            """
+            """.replace /\n\s+/ig, ''
 
         @html.innerHTML = htmls
-
         @emit 'renderFinished'
 
-    eventBinding: ->
-        @playerBind()
-        @progressBind()
-        @volumeControl()
-        @playModeControl()
-        @playControl()
+    bindEvents: () ->
+        @ctrlPlayer()
+        @ctrlVolume()
+        @ctrlProgress()
+        @ctrlPlayMode()
+        @ctrlUserAction()
 
-        $(@cover).find('img').on 'load', =>
-            $(@cover).removeClass 'loading'
-        $(@cover).unbind().on 'click', =>
-            @CUR_SONG and @eventBus.emit 'MoePlayer::ExpandDetailPanel'
+    # Bind events for Audio player
+    ctrlPlayer: () ->
+        # Update currentTime
+        @PLAYER.addEventListener 'timeupdate', () =>
+            @eventBus.emit 'MoePlayer::UpdateTime', @PLAYER.currentTime
 
-    # Audio事件绑定
-    playerBind: ->
-        $(@player).on 'timeupdate', =>
-            @eventBus.emit 'MoePlayer::UpdateTime', @player.currentTime
-        .on 'stalled', =>
+        # On progress
+        @PLAYER.addEventListener 'progress', () =>
+            @syncBuffer @PLAYER.buffered
+
+        # On canplaythrough
+        @PLAYER.addEventListener 'canplaythrough', () =>
+            if not @CUR_SONG
+                return false
+
+            index = parseInt(@CUR_SONG?.song_info.idx) ? -1
+            duration = @CUR_SONG?.song_info.song_duration
+
+            # Trigger Audio.play()
+            @PLAYER.play()
+
+            # Update current index and duration
+            @CUR_INDEX = index
+            $(@totalTime).text Util.normalizeSeconds(duration)
+
+            # Update play status icon
+            $(@status)
+                .removeClass 'small circle loading'
+                .addClass('playing')
+                .find('img').attr 'src', @ICONS.PAUSE
+
+            # Sync progress
+            @syncProgress duration
+            @syncBuffer @PLAYER.buffered
+
+        # On stalled
+        @PLAYER.addEventListener 'stalled', () =>
             @pause()
             Util.showMsg @TIPS.STALLED, 3000, 3
 
-    # 进度拖拽事件监听
-    progressBind: ->
-        name = 'Progress'
+        # On error
+        @PLAYER.addEventListener 'error', () =>
+            quality =  @CUR_SONG.song_info.song_quality
 
-        @DRAGGER.on "Dragger::Dragging##{name}", (percent) =>
-            @CUR_SONG && (
-                totalTime = @CUR_SONG.song_info.song_duration / 1000
-                curTime = totalTime * percent
-                @CUR_TIME = Math.round curTime
-                $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
-            )
-        @DRAGGER.on "Dragger::DragEnd##{name}", (percent) =>
-            @CUR_SONG && (
-                totalTime = @CUR_SONG.song_info.song_duration / 1000
-                curTime = totalTime * percent
-                @player.currentTime = curTime
-                @DRAGGER.disableDragging @progressDragBar, @time
+            # Try to fall back to poor quality
+            if @CUR_SONG.source is 'QQ音乐' and quality >= 128
+                if quality >= 320
+                    higherRegex = /M800/ig
+                    formatRegex = /\.mp3/ig
+                    lowerKey = 'M500'
+                    quality = 128
+                    format = '.mp3'
+                else
+                    higherRegex = /M500/ig
+                    formatRegex = /\.mp3/ig
+                    lowerKey = 'C200'
+                    quality = 48
+                    format = '.m4a'
 
-                @resume()
-            )
+                poorUrl = @CUR_SONG.song_info.song_url
+                    .replace(higherRegex, lowerKey)
+                    .replace(formatRegex, format)
 
-        $(@bufferBar).unbind().on 'mousedown', (e) =>
-            @CUR_SONG && (
-                totalTime = @CUR_SONG.song_info.song_duration / 1000
-                barLeft = @progressBar.getBoundingClientRect().left
-                barWidth = $(@progressBar).width()
-                dragBarWidth = $(@progressDragBar).width()
-                offset =  Math.max(e.clientX - barLeft, 0)
-                percent = offset / barWidth
-                curTime = totalTime * percent
+                @CUR_SONG.song_info.song_quality = quality
+                @CUR_SONG.song_info.song_url = poorUrl
 
-                @player.currentTime = curTime
+                Util.showMsg @TIPS.SWITCH, 3000, 3
+                @eventBus.emit 'MoePlayer::SwitchQuality', @CUR_SONG
+            else
+                @stop()
+                Util.showMsg @TIPS.ERROR, 3000, 3
+                $(@status).removeClass 'small circle loading'
+                @eventBus.emit 'MoePlayer::UrlError'
 
-                @CUR_TIME = Math.round curTime
-                $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
-
-                $(@progressDragBar).css 'left', (offset - dragBarWidth / 2) + 'px'
-            )
-
-        $(@progressDragBar).unbind().on 'mousedown', (e) =>
-            @CUR_SONG && (
-                @pause()
-                @regProgressDragging()
-            )
-
-    # 绑定进度条拖拽
-    regProgressDragging: ->
-        name = 'Progress'
-        pbw = $(@progressBar).width()
-        bbw = $(@bufferBar).width()
-        pdbw = $(@progressDragBar).width()
-        @DRAGGER.enableDragging @progressDragBar, -pdbw / 2, bbw - pdbw / 2, pbw, 0, @time, name
-
-    # 音量控制
-    volumeControl: ->
-        # 拖拽绑定
+    # Bind events for volume
+    ctrlVolume: () ->
         name = 'Volume'
         vbw = $(@volumeBar).width()
         vdbw = $(@volumeDragBar).width()
+        min = -vdbw / 2
+        max = vbw - vdbw / 2
+        total = vbw
         $vIcon = $(@volumeIcon).find('img')
-        @DRAGGER.enableDragging @volumeDragBar, -vdbw / 2, vbw - vdbw / 2, vbw, 0, @volume, name
 
-        # 调节音量
+        # Enable dragging volume-bar
+        @DRAGGER.enableDragging @volumeDragBar, min, max, total, 0, @volume, name
+
+        # Update volume
         @DRAGGER.on "Dragger::Dragging##{name}", (percent) =>
-            @player.volume = percent
+            @PLAYER.volume = percent
+
             $(@volumnColorBar).css {
                 'width': "#{percent * 100}%"
             }
@@ -225,29 +245,87 @@ class MoePlayer extends BaseComp
                 if $vIcon.attr('src') isnt @ICONS.VOLUME
                     $vIcon.attr 'src', @ICONS.VOLUME
 
-    # 播放模式控制
-    playModeControl: ->
+    # Bind events for progress bar
+    ctrlProgress: () ->
+        name = 'Progress'
+
+        enableDragging = () =>
+            pbw = $(@progressBar).width()
+            bbw = $(@bufferBar).width()
+            pdbw = $(@progressDragBar).width()
+            min = -pdbw / 2
+            max = bbw - pdbw / 2
+            total = pbw
+            @DRAGGER.enableDragging @progressDragBar, min, max, total, 0, @time, name
+
+        # Click progress-drag-bar to trigger dragging
+        $(@progressDragBar).unbind().on 'mousedown', (e) =>
+            @CUR_SONG and (
+                @pause()
+                enableDragging()
+            )
+
+        # On dragging
+        @DRAGGER.on "Dragger::Dragging##{name}", (percent) =>
+            @CUR_SONG and (
+                totalTime = @CUR_SONG.song_info.song_duration / 1000
+                curTime = totalTime * percent
+                @CUR_TIME = Math.round curTime
+                $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
+            )
+
+        # On drag end
+        @DRAGGER.on "Dragger::DragEnd##{name}", (percent) =>
+            @CUR_SONG and (
+                totalTime = @CUR_SONG.song_info.song_duration / 1000
+                curTime = totalTime * percent
+                @PLAYER.currentTime = curTime
+                @DRAGGER.disableDragging @progressDragBar, @time
+                @resume()
+            )
+
+        # On click buffer bar
+        $(@bufferBar).unbind().on 'mousedown', (e) =>
+            @CUR_SONG and (
+                totalTime = @CUR_SONG.song_info.song_duration / 1000
+                barLeft = @progressBar.getBoundingClientRect().left
+                barWidth = $(@progressBar).width()
+                dragBarWidth = $(@progressDragBar).width()
+                offset =  Math.max(e.clientX - barLeft, 0)
+                percent = offset / barWidth
+                curTime = totalTime * percent
+
+                @PLAYER.currentTime = curTime
+                @CUR_TIME = Math.round curTime
+                $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
+                $(@progressDragBar).css 'left', (offset - dragBarWidth / 2) + 'px'
+            )
+
+    # Bind events for selecting play mode
+    ctrlPlayMode: () ->
+        $text = $(@playMode).find('.mode-text')
+
         $(@playMode).on 'click', (evt) =>
             switch @PLAY_MODE
                 when 0
                     @PLAY_MODE = 1
-                    $(@playMode).attr 'class', 'play-mode random-mode'
-                    $(@playMode).find('.mode-text').text '随机播放'
+                    $text.text '随机播放'
                     Util.toast '随机播放'
+                    $(@playMode).attr 'class', 'play-mode random-mode'
                 when 1
                     @PLAY_MODE = 2
-                    $(@playMode).attr 'class', 'play-mode loop-mode'
-                    $(@playMode).find('.mode-text').text '单曲循环'
+                    $text.text '单曲循环'
                     Util.toast '单曲循环'
+                    $(@playMode).attr 'class', 'play-mode loop-mode'
                 when 2
                     @PLAY_MODE = 0
-                    $(@playMode).attr 'class', 'play-mode sequence-mode'
-                    $(@playMode).find('.mode-text').text '顺序播放'
+                    $text.text '顺序播放'
                     Util.toast '顺序播放'
+                    $(@playMode).attr 'class', 'play-mode sequence-mode'
 
-    # 播放控制
-    playControl: ->
-        # 播放暂停
+    # Bind events for user actions
+    ctrlUserAction: ->
+        # Play | Pause
         $(@status).on 'click', (evt) =>
             evt.stopPropagation()
             $target = $(evt.currentTarget)
@@ -255,14 +333,12 @@ class MoePlayer extends BaseComp
             if not @CUR_SONG
                 return
 
-            # 播放状态
             if $target.hasClass 'playing'
                 @pause()
                 Util.toast '暂停播放', {
                     color: '#ffffff',
                     duration: 1000
                 }
-            # 暂停状态
             else
                 @resume()
                 Util.toast '恢复播放', {
@@ -270,71 +346,74 @@ class MoePlayer extends BaseComp
                     duration: 1000
                 }
 
-        # 切换歌曲
+        # Prev song
         $(@prev).on 'click', (evt) =>
             evt.stopPropagation()
             $target = $(evt.currentTarget)
 
-            if @LIST.length is 0 or @curIndex is undefined
+            if @LIST.length is 0 or @CUR_INDEX is -1
                 return false
 
-            # 播放模式
             switch @PLAY_MODE
                 when 0
-                    prevIndex = Math.max(@curIndex - 1, 0)
+                    prevIndex = Math.max(@CUR_INDEX - 1, 0)
                 when 1
-                    prevIndex = Util.random 0, @LIST.length - 1, @curIndex
+                    prevIndex = Util.random 0, @LIST.length - 1, @CUR_INDEX
                 when 2
-                    prevIndex = @curIndex
+                    prevIndex = @CUR_INDEX
 
             prevSong = @LIST[prevIndex]
-
+            @stop()
             @eventBus.emit 'MoePlayer::PlayPrevSong', {
                 song_id: prevSong.song_id,
                 idx: prevIndex
             }
 
-            @stop()
-
+        # Next song
         $(@next).on 'click', (evt) =>
             evt.stopPropagation()
             $target = $(evt.currentTarget)
 
-            if @LIST.length is 0 or @curIndex is undefined
+            if @LIST.length is 0 or @CUR_INDEX is -1
                 return false
 
-            # 播放模式
             switch @PLAY_MODE
                 when 0
-                    nextIndex = Math.min(@curIndex + 1, @LIST.length - 1)
+                    nextIndex = Math.min(@CUR_INDEX + 1, @LIST.length - 1)
                 when 1
-                    nextIndex = Util.random 0, @LIST.length - 1, @curIndex
+                    nextIndex = Util.random 0, @LIST.length - 1, @CUR_INDEX
                 when 2
-                    nextIndex = @curIndex
+                    nextIndex = @CUR_INDEX
             
             nextSong = @LIST[nextIndex]
+            @stop()
             @eventBus.emit 'MoePlayer::PlayNextSong', {
                 song_id: nextSong.song_id,
                 idx: nextIndex
             }
 
-            @stop()
+        # Expend detail panel
+        $(@cover).unbind().on 'click', =>
+            @CUR_SONG and @eventBus.emit 'MoePlayer::ExpandDetailPanel'
 
-    # 同步播放进度
-    # @param {number} timeWidth 总时间长度(毫秒)
+        # On cover loaded
+        $(@cover).find('img').on 'load', =>
+            $(@cover).removeClass 'loading'
+
+    # ---------------------------------------------------
+
+    # Sync progress
+    # @param {number} timeWidth - song duration
     syncProgress: (timeWidth) ->
         timeWidth = timeWidth / 1000
 
-        # 计数清零
-        @CUR_TIME = 0
-
-        # 计算每一秒进度指示器应该移动多少距离
+        # Decide stepWidth per second
         barWidth = parseFloat $(@progressBar).css('width')
         stepWidth = barWidth / timeWidth
 
-        # 逐秒更新位置
-        updatePos = =>
-            if @player.ended is true
+        # Update position
+        updatePos = () =>
+            if @PLAYER.ended is true
                 @stop()
                 $(@next).trigger 'click'
                 return
@@ -347,11 +426,12 @@ class MoePlayer extends BaseComp
             $(@progressDragBar).css('left', newPos + 'px')
             $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
 
+        # Setup timer and start
         @TIMER.set updatePos, 1000
             .start()
 
-    # 同步缓冲进度
-    # @param {TimeRange} buffered 已缓冲范围
+    # Sync buffer
+    # @param {TimeRange} buffered - buffered range
     syncBuffer: (buffered) ->
         @CUR_SONG and (
             total = @CUR_SONG.song_info.song_duration / 1000
@@ -361,35 +441,37 @@ class MoePlayer extends BaseComp
             $(@bufferBar).css 'width', (percent * 100) + '%'
         )
 
-    # 修正歌曲的路径问题
-    # @param {string} path 歌曲路径
+    # Fix song url
+    # @param {string} path - song url
     fixSongURL: (path) ->
-        if @player.baseURI and @player.baseURI.indexOf('app.asar') >= 0 and \
+        if @PLAYER.baseURI and @PLAYER.baseURI.indexOf('app.asar') >= 0 and \
         /^https?:\/\//g.test(path) is false
             path = "../../#{path}"
 
         return path
 
-    #---------------------------------------------------
-    #                     对外接口
-    #---------------------------------------------------
+    # ---------------------------------------------------
 
-    # 播放
-    # param {object} song 歌曲对象
+    # Play
+    # param {object} song - song object
     play: (song) ->
-        @pause false
+        @stop()
 
-        # 加载歌曲数据
+        # Load song
+        @CUR_SONG = song
+        @PLAYER.src = @fixSongURL(@CUR_SONG.song_info.song_url)
+        @PLAYER.preload = 'auto'
+        @PLAYER.load()
+
+        # Set status icon
         $(@status).addClass 'small circle loading'
-        $(@player).attr 'src', @fixSongURL(song.song_info.song_url)
-        @player.load()
 
-        # 载入封面
+        # Set cover
         $(@cover).addClass 'loading'
-        $(@cover).find('img').attr 'src', song.song_info.song_cover or @defaultCover
+            .find('img').attr 'src', @CUR_SONG.song_info.song_cover or @ICONS.DEFAULT
 
-        # 切换音质显示
-        sq = parseInt(song.song_info.song_quality)
+        # Set quality
+        sq = parseInt(@CUR_SONG.song_info.song_quality)
         if sq >= 320
             $(@quality).text '高音质'
             @quality.className = 'song-quality high'
@@ -400,100 +482,67 @@ class MoePlayer extends BaseComp
             $(@quality).text '低音质'
             @quality.className = 'song-quality low'
 
-        @player.play().then =>
-            # 切换新歌曲
-            @CUR_SONG = song
-            @curIndex = parseInt(song.song_info.idx)
-
-            # 切换图标状态
-            $(@status).removeClass 'small circle loading'
-            $(@status).addClass 'playing'
-                .find('img').attr 'src', @ICONS.PAUSE
-
-            # 载入总时长
-            $(@totalTime).text Util.normalizeSeconds(song.song_info.song_duration)
-
-            # 同步播放/缓冲进度
-            @syncProgress song.song_info.song_duration
-            @syncBuffer @player.buffered
-
-            $(@player).unbind('progress').on 'progress', =>
-                @syncBuffer @player.buffered
-
-        .catch (e) =>
-            @stop()
-            @CUR_SONG = null
-            @curIndex = undefined
-
-            $(@status).removeClass 'small circle loading'
-
-            Util.showMsg @TIPS.URL_ERROR, 3000, 3
-            @eventBus.emit 'MoePlayer::UrlError', song
-
-    # 继续播放
-    # @param {boolean} isEmit 是否发送事件
+    # Resume
     resume: (isEmit = true) ->
-        @player.play()
+        @PLAYER.play()
         $(@status).addClass 'playing'
         $(@status).find('img').attr 'src', @ICONS.PAUSE
 
         @TIMER.resume()
-
         isEmit and @eventBus.emit 'MoePlayer::Resume'
 
-    # 暂停播放
-    # @param {boolean} isEmit 是否发送事件
+    # Pause
     pause: (isEmit = true) ->
-        @player.pause()
+        @PLAYER.pause()
         $(@status).removeClass 'playing'
         $(@status).find('img').attr 'src', @ICONS.PLAY
 
         @TIMER.pause()
-
         isEmit and @eventBus.emit 'MoePlayer::Pause'
 
-    # 停止播放
-    stop: ->
-        @player.pause()
-        $(@status).removeClass 'playing'
-        $(@status).find('img').attr 'src', @ICONS.PLAY
+    # Stop
+    stop: () ->
+        @PLAYER.pause()
+        @CUR_TIME = 0
+        @CUR_SONG = null
+        @PLAYER.currentTime = 0
 
-        # 封面还原为默认
+        # Reset status icon and cover
+        $(@status).removeClass 'playing'
+            .find('img').attr 'src', @ICONS.PLAY
         $(@cover).find('img').attr 'src', @ICONS.COVER
 
-        # 时间重置为 00:00
+        # Rest time
         $(@playedTime).text '00:00'
         $(@totalTime).text '00:00'
 
-        # 音质还原
+        # Reset quality
         $(@quality).text '默认'
         @quality.className = 'song-quality'
 
-        # 进度指示器回到原位置
+        # Reset progress bar and buffer bar
         oriPos = -$(@progressDragBar).width() / 2
         $(@progressDragBar).css('left', oriPos + 'px')
         $(@bufferBar).css 'width', 0
 
-        # 解除缓冲进度同步
-        $(@player).unbind('progress')
-
+        # Stop timer
         @TIMER.stop()
     
-    # 更新播放列表
-    # @param {object} data 数据对象
+    # Update song list
+    # @param {object} data - data
     updateList: (data) ->
         if data and data.songs
             @LIST = data.songs
 
-    # 清空播放列表
-    clearList: ->
+    # Clear song list
+    clearList: () ->
         @LIST = []
 
-    # 快捷键响应
-    # @param {number} kc 键码
+    # Map hotkeys
+    # @param {number} kc - key code
     hotKeyResponse: (kc) ->
         switch kc
-            # 空格键
+            # Type space to play or pause
             when 32
                 $(@status).trigger 'click'
 

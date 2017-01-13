@@ -98,12 +98,9 @@ eventBinding = ->
         detailPanel && detailPanel.resume() 
 
     # 播放异常
-    eventBus.on 'MoePlayer::UrlError', (song) ->
+    eventBus.on 'MoePlayer::UrlError', () ->
         musicList && musicList.resetPlaying()
-    eventBus.on 'MoePlayer::Stalled', (song) ->
-        musicList && (
-            musicList.getSongInfoAndPlay song.song_id, song.idx
-        )
+        
     # 切换歌曲
     eventBus.on 'MoePlayer::PlayPrevSong', (data) ->
         musicList && (
@@ -120,6 +117,12 @@ eventBinding = ->
 
     # 歌曲详情
     eventBus.on 'MoePlayer::ExpandDetailPanel', ->
-        detailPanel && detailPanel.expand() 
+        detailPanel && detailPanel.expand()
+
+    # 切换音质
+    eventBus.on 'MoePlayer::SwitchQuality', (song) ->
+        searchBox && searchBox.hideLoader()
+        moePlayer && moePlayer.play song
+        detailPanel && detailPanel.show song
 
 $(document).ready initComp

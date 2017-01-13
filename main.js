@@ -49,7 +49,7 @@ function createWin() {
     win.loadURL(`file://${__dirname}/index.html`);
 
     // Whether To Open Dev Tools
-    if (config.env === 'dev' && config.debug === true) {
+    if (config.env === 'dev') {
         win.webContents.openDevTools();
         devtron.install()
         client.create(win, {

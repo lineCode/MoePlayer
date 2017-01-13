@@ -1,15 +1,10 @@
 ##
-# 配置自动化流程
+# Dev auto-flow
 # Author: VenDream
 # E-mail: yeshenxue@qq.com
-# Update: 2017-1-12 17:28:15
+# Update: 2017-1-13 16:38:23
 ##
 
-options = {
-    verbose: false
-}
-
-# 引入自动化工具
 fs = require 'fs'
 gulp = require 'gulp'
 run = require 'gulp-run'
@@ -17,84 +12,77 @@ clean = require 'gulp-clean'
 coffee = require 'gulp-coffee'
 less = require 'gulp-less'
 browserify = require 'gulp-browserify'
-livereload = require 'gulp-livereload'
 extReplace = require 'gulp-ext-replace'
-uglify = require 'gulp-uglify'
-uglifycss = require 'gulp-uglifycss'
+uglifyJs = require 'gulp-uglify'
+uglifyCss = require 'gulp-uglifycss'
 sequence = require 'run-sequence'
-electron = (require 'electron-connect').server.create(options)
+electron = (require 'electron-connect').server.create()
 
-rI = require('./config').release
+config = require './config'
+rI = config.release
+env = config.env
 packDir = "#{rI.appName}-#{rI.platform}-#{rI.arch}"
 releaseDir = "#{rI.appName}_v#{rI.appVer}"
+eFunc = () ->
 
-# 定义项目相关路径
-paths = 
-    # 打包用的目录
-    app: 'app/'
-    # 第三方库
-    lib: ['lib/**/*']
-    # 编译后的发布代码
-    dist: ['dist/**/*']
-    # 静态文件(主要为图片)
-    assets: ['assets/**/*']
-    # 视图文件(HTML)
-    views: ['./*.html']
-    # less源码
-    lessSrc: ['src/less/**/**.less']
-    # coffee源码
-    coffeeSrc: ['src/coffee/**/**.coffee']
+# Some paths 
+paths = {
+    dist: 'dist'                               # dist
+    lessSrc: ['src/less/**/**.less']           # less src
+    lessDist: 'dist/css'                       # less dist
+    coffeeSrc: ['src/coffee/**/**.coffee']     # coffee
+    coffeeDist: 'dist/js'                      # coffee dist
+}
 
-# 错误打印
-logError = (e) ->
-    console.log e
+# Clean all
+gulp.task 'cleanAll', () ->
+    gulp.src [paths.dist, releaseDir, packDir], { read: false }
+        .pipe clean({ force: true })
 
-# 清理文件
-gulp.task 'cleanAll', ->
-    gulp.src ['dist/', releaseDir, packDir], {read: false}
-        .pipe clean({force: true})
+# Clean temp
+gulp.task 'cleanTemp', () ->
+    gulp.src [paths.dist], { read: false }
+        .pipe clean({ force: true })
 
-# 清理中间过程文件
-gulp.task 'cleanTemp', ->
-    gulp.src ['dist/'], {read: false}
-        .pipe clean({force: true})
+# Coffee -> Javascript
+gulp.task 'coffee', () ->
+    js = gulp.src paths.coffeeSrc, { read: false }
+            .pipe browserify {
+                debug: false,
+                transform: ['coffeeify'],
+                extensions: ['.coffee']
+            }
+            .pipe extReplace '.js'
 
-# 把coffee文件编译为js文件
-gulp.task 'coffee', ->
-    gulp.src paths.coffeeSrc, {read: false}
-        .pipe browserify
-            debug: false,
-            transform: ['coffeeify'],
-            extensions: ['.coffee'],
-        .on 'error', logError
-        .pipe extReplace '.js'
-        .pipe uglify()
-        .pipe gulp.dest 'dist/js'
-        # .pipe livereload()
+    if env is 'production'
+        js.pipe(uglifyJs()).pipe gulp.dest paths.coffeeDist
+    else
+        js.pipe gulp.dest paths.coffeeDist
 
-# 把less文件编译为css文件
-gulp.task 'less', ->
-    gulp.src paths.lessSrc
-        .pipe less()
-        .pipe uglifycss()
-        .on 'error', logError
-        .pipe gulp.dest 'dist/css'
-        # .pipe livereload()
+# Less -> CSS
+gulp.task 'less', () ->
+    css = gulp.src paths.lessSrc
+            .pipe less()
 
-# 启动electron服务
-gulp.task 'server', ->
+    if env is 'production'
+        css.pipe(uglifyCss()).pipe gulp.dest paths.lessDist
+    else
+        css.pipe gulp.dest paths.lessDist
+
+# Start Electron
+gulp.task 'server', () ->
     electron.start()
 
-# 重新装载文件
-gulp.task 'reload', ->
+# Reload Electron
+gulp.task 'reload', () ->
     electron.reload()
 
-# 重新启动electron进程
-gulp.task 'restart', ->
+# Restart Electron
+gulp.task 'restart', () ->
     electron.restart()
 
-# 运行打包命令
-gulp.task 'packCMD', ->
+# Run electron-packager CMD
+gulp.task 'packCMD', () ->
     appName = rI.appName
     copyright = rI.copyright
     platform = rI.platform
@@ -102,27 +90,28 @@ gulp.task 'packCMD', ->
     appVer = rI.appVer
     packVer = rI.packVer
     icon = rI.icon
-
     packCmd = "electron-packager . #{appName} --platform=#{platform} \
            --arch=#{arch} --version=#{packVer} --asar --app-version=#{appVer} \
            --app-copyright=#{copyright} --icon=#{icon} --overwrite \
            --ignore=node_modules/ --ignore=download/ --ignore=src/ --ignore=config.example.js \
            --ignore=.gitignore --ignore=.jshintrc --ignore=config.example.js \
            --ignore=gulpfile.coffee --ignore=README.md"
+
     run(packCmd).exec()
 
-# 运行重命名命令
-gulp.task 'renameCMD', ->
+# Run rename CMD
+gulp.task 'renameCMD', () ->
     renameCmd = "mv #{packDir} #{releaseDir}"
     run(renameCmd).exec()
 
-gulp.task 'releaseStatus', ->
+# Show release success info
+gulp.task 'releaseStatus', () ->
     console.log '---------------------------------------------'
     console.log "Done...! See #{releaseDir}/ for more details."
     console.log '---------------------------------------------'
 
-# 监听文件改动
-gulp.task 'watch', ->
+# Watch files
+gulp.task 'watch', () ->
     gulp.watch ['main.js'], ['restart']
 
     gulp.watch ['config.js'], ->
@@ -138,8 +127,8 @@ gulp.task 'watch', ->
 
 #--------------------------------------------------------------
 
-# 默认任务流程
-gulp.task 'default', ->
+# Default
+gulp.task 'default', () ->
     sequence(
         'cleanAll',
         'coffee',
@@ -148,8 +137,8 @@ gulp.task 'default', ->
         'watch'
     )
 
-# 打包发布
-gulp.task 'release', ->
+# Release
+gulp.task 'release', () ->
     sequence(
         'cleanAll',
         'coffee',
