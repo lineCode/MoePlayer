@@ -13,7 +13,9 @@
             top: 45%;
             left: 40%;
         }
+
     }
+
     .panel-c {
         text-align: center;
         width: 100%;
@@ -40,12 +42,19 @@
                 line-height: 2rem;
                 font-size: 1.3rem;
                 height: 2rem;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                font-family: 'Futura Book';
             }
+
             .showing {
-                font-weight: bold;
                 color: @theme-color;
-                text-shadow: 0 0 2rem @theme-color;
+                text-shadow: 0 0 0.1rem @theme-color;
             }
+
         }
+
     }
+
 }

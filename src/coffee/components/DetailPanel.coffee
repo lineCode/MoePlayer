@@ -1,7 +1,7 @@
 ##
 # 歌曲详情面板组件
 # @Author VenDream
-# @Update 2017-1-12 11:26:46
+# @Update 2017-1-14 10:37:30
 ##
 
 BaseComp = require './BaseComp'
@@ -187,6 +187,7 @@ class DetailPanel extends BaseComp
 
         # 信息面板
         $(@name).text s.song_name or '暂无'
+        $(@name).attr 'title', s.song_name or '暂无'
         $(@quality).text "#{s.song_quality}K"
         $(@album).text "专辑: #{s.song_album}"
             .attr 'title', s.song_album

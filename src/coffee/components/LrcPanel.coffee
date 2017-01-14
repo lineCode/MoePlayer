@@ -1,7 +1,7 @@
 ##
 # 歌词面板组件
 # @Author VenDream
-# @Update 2016-10-31 15:38:06
+# @Update 2017-1-14 10:46:42
 ##
 
 BaseComp = require './BaseComp'
@@ -88,7 +88,8 @@ class LrcPanel extends BaseComp
                 li = 
                     """
                     <li data-line="#{lo.lineNo}"
-                        data-offset="#{lo.lineNo * @LINE_HEIGHT}">
+                        data-offset="#{lo.lineNo * @LINE_HEIGHT}"
+                        title="#{lo.text}">
                         #{lo.text}
                     </li>
                     """
@@ -241,14 +242,15 @@ class LrcPanel extends BaseComp
             @CUR_LINE = l
 
             $line = $(@lrcUL).find("li[data-line=\"#{@CUR_LINE}\"]")
+            if $line.hasClass('showing')
+                return false
 
             # 高亮显示
             $(@lrcUL).find('li').removeClass 'showing'
-            if $line.hasClass('showing') is false
-                $line.addClass 'showing'
-                if la.length > 1
-                    $nLine = $(@lrcUL).find("li[data-line=\"#{@CUR_LINE + 1}\"]")
-                    $nLine.addClass 'showing'
+            $line.addClass 'showing'
+            if la.length > 1
+                $nLine = $(@lrcUL).find("li[data-line=\"#{@CUR_LINE + 1}\"]")
+                $nLine.addClass 'showing'
 
             # 歌词滚动
             top = parseInt $line.attr('data-offset')
