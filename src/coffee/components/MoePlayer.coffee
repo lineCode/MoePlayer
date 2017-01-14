@@ -1,7 +1,7 @@
 ##
-# 播放器组件
+# MoePlayer Component
 # @Author VenDream
-# @Update 2017-1-13 17:58:03
+# @Update 2017-1-14 14:58:23
 ##
 
 BaseComp = require './BaseComp'
@@ -185,7 +185,16 @@ class MoePlayer extends BaseComp
             Util.showMsg @TIPS.STALLED, 3000, 3
 
         # On error
-        @PLAYER.addEventListener 'error', () =>
+        @PLAYER.addEventListener 'error', (e) =>
+            # Here error is a Media Error object
+            errorType = [
+                'MEDIA_ERR_ABORTED',
+                'MEDIA_ERR_NETWORK',
+                'MEDIA_ERR_DECODE',
+                'MEDIA_ERR_SRC_NOT_SUPPORTED'
+            ]
+            error = e.currentTarget.error
+            msg = errorType[error.code - 1]
             quality =  @CUR_SONG.song_info.song_quality
 
             # Try to fall back to poor quality
@@ -210,11 +219,12 @@ class MoePlayer extends BaseComp
                 @CUR_SONG.song_info.song_quality = quality
                 @CUR_SONG.song_info.song_url = poorUrl
 
-                Util.showMsg @TIPS.SWITCH, 3000, 3
+                Util.showMsg @TIPS.SWITCH, 3000
                 @eventBus.emit 'MoePlayer::SwitchQuality', @CUR_SONG
             else
                 @stop()
-                Util.showMsg @TIPS.ERROR, 3000, 3
+                # Util.showMsg @TIPS.ERROR, 3000, 3
+                Util.showMsg "网络错误，错误原因: #{msg}", -1, 3
                 $(@status).removeClass 'small circle loading'
                 @eventBus.emit 'MoePlayer::UrlError'
 
@@ -299,6 +309,7 @@ class MoePlayer extends BaseComp
                 @CUR_TIME = Math.round curTime
                 $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
                 $(@progressDragBar).css 'left', (offset - dragBarWidth / 2) + 'px'
+                @eventBus.emit 'MoePlayer::Resume'
             )
 
     # Bind events for selecting play mode
@@ -324,7 +335,7 @@ class MoePlayer extends BaseComp
                     $(@playMode).attr 'class', 'play-mode sequence-mode'
 
     # Bind events for user actions
-    ctrlUserAction: ->
+    ctrlUserAction: () ->
         # Play | Pause
         $(@status).on 'click', (evt) =>
             evt.stopPropagation()
@@ -393,11 +404,11 @@ class MoePlayer extends BaseComp
             }
 
         # Expend detail panel
-        $(@cover).unbind().on 'click', =>
+        $(@cover).unbind().on 'click', () =>
             @CUR_SONG and @eventBus.emit 'MoePlayer::ExpandDetailPanel'
 
         # On cover loaded
-        $(@cover).find('img').on 'load', =>
+        $(@cover).find('img').on 'load', () =>
             $(@cover).removeClass 'loading'
 
     # ---------------------------------------------------

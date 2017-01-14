@@ -1,7 +1,7 @@
 ##
 # 歌词面板组件
 # @Author VenDream
-# @Update 2017-1-14 10:46:42
+# @Update 2017-1-14 14:22:25
 ##
 
 BaseComp = require './BaseComp'
@@ -85,14 +85,14 @@ class LrcPanel extends BaseComp
         if @LRC_ARR.length > 0
             $(@lrcPanel).removeClass 'empty'
             @LRC_ARR.map (lo, i) =>
-                li = 
-                    """
-                    <li data-line="#{lo.lineNo}"
-                        data-offset="#{lo.lineNo * @LINE_HEIGHT}"
-                        title="#{lo.text}">
-                        #{lo.text}
+                li = """
+                    <li data-offset="#{lo.lineNo * @LINE_HEIGHT}"
+                        data-line="#{lo.lineNo}">
+                        <span class="lrc-text" title="#{lo.text}">
+                            #{lo.text}
+                        </span>
                     </li>
-                    """
+                """.replace /\n\s+/ig, ''
 
                 $(@lrcUL).append $(li)
 
