@@ -93,7 +93,7 @@ class DetailPanel extends BaseComp
                                     <span class="text"></span>
                                 </div>
                                 <div class="source">
-                                    <span>专辑: </span>
+                                    <span>来源: </span>
                                     <span class="text"></span>
                                 </div>
                             </div>

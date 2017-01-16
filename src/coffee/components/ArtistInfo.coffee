@@ -1,7 +1,7 @@
 ##
 # Artist Info Component
 # @Author VenDream
-# @Update 2017-1-16 18:21:46
+# @Update 2017-1-16 18:47:06
 ##
 
 BaseComp = require './BaseComp'
@@ -90,11 +90,11 @@ class ArtistInfo extends BaseComp
         @NODE.BIO_TEXT.innerText = bio
         @NODE.BIO_TEXT.scrollTop = 0
 
-    # Show error or empty tips
-    # @param {string} text - error text
-    showErrorInfo: (text) ->
+    # Reset info panel
+    reset: () ->
         @NODE.AVATAR.src = @IMG.DEFAULT_AVATAR
-        @NODE.BIO_TEXT.innerText = text
+        @NODE.NAME.innerText = '歌手：歌手名'
+        @NODE.BIO_TEXT.innerText = '歌手信息'
 
     # ---------------------------------------------------
 
@@ -124,12 +124,6 @@ class ArtistInfo extends BaseComp
             complete: () =>
                 $(@NODE.PANEL).removeClass 'loading'
         }
-
-    # Reset info panel
-    reset: () ->
-        @NODE.AVATAR.src = @IMG.DEFAULT_AVATAR
-        @NODE.NAME.innerText = '歌手：歌手名'
-        @NODE.BIO_TEXT.innerText = '歌手信息'
 
     # Close the info panel
     close: () ->
