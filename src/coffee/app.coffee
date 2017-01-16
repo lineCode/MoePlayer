@@ -4,6 +4,7 @@ MusicList = require './components/MusicList'
 MoePlayer = require './components/MoePlayer'
 DetailPanel = require './components/DetailPanel'
 SettingPanel = require './components/SettingPanel'
+ArtistInfo = require './components/ArtistInfo'
 Util = require './components/Util'
 config = require '../../config'
 
@@ -13,6 +14,7 @@ musicList = null
 moePlayer = null
 detailPanel = null
 settingPanel = null
+artistInfo = null
 
 initComp = ->
     eventBus = new EventEmitter()
@@ -21,12 +23,14 @@ initComp = ->
     moePlayer = new MoePlayer '.moePlayer-c', eventBus
     detailPanel = new DetailPanel '.detailPanel-c', eventBus
     settingPanel = new SettingPanel '.settingPanel-c', eventBus
+    artistInfo = new ArtistInfo '.artistInfo-c', eventBus
 
     searchBox.render()
     musicList.render()
     moePlayer.render()
     detailPanel.render()
     settingPanel.render()
+    artistInfo.render()
 
     # 设置版本号
     $('.app-ver').text config.release.appVer
@@ -39,6 +43,11 @@ initComp = ->
     eventBinding()
 
 eventBinding = ->
+    # 图片禁止拖动
+    $('img').on 'mousedown', (e) ->
+        e.preventDefault()
+        return false
+
     # 快捷键绑定
     $('body').on 'keydown', (evt) ->
         kc = evt.keyCode
@@ -51,6 +60,7 @@ eventBinding = ->
         moePlayer && moePlayer.updateList data.data.data
         detailPanel && detailPanel.shrink()
         settingPanel && settingPanel.close()
+        artistInfo && artistInfo.close()
     eventBus.on 'SearchBox::ClearSearchResult', ->
         musicList && musicList.clear()
         moePlayer && moePlayer.clearList()
@@ -90,6 +100,12 @@ eventBinding = ->
         detailPanel && detailPanel.updateDLingSong sid
     eventBus.on 'DetailPanel::DownloadSong', (sid) ->
         musicList && musicList.updateDLingSong sid
+
+    # 查看歌手详情
+    eventBus.on 'DetailPanel::ShowArtistInfo', (artist) ->
+        artistInfo && artistInfo.show artist
+    eventBus.on 'MusicList::ShowArtistInfo', (artist) ->
+        artistInfo && artistInfo.show artist
 
     # 暂停恢复
     eventBus.on 'MoePlayer::Pause', ->

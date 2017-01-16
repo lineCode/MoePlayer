@@ -180,9 +180,10 @@ class MoePlayer extends BaseComp
             @syncBuffer @PLAYER.buffered
 
         # On stalled
-        @PLAYER.addEventListener 'stalled', () =>
+        @PLAYER.addEventListener 'stalled', (e) =>
             @pause()
             Util.showMsg @TIPS.STALLED, 3000, 3
+            console.log e
 
         # On error
         @PLAYER.addEventListener 'error', (e) =>

@@ -184,6 +184,11 @@ function dlSong(event, song) {
  */
 function openMenu(event) {
     let template = [{
+        label: '查看歌手详情',
+        click: () => {
+            webController.send('ipcMain::ShowArtistInfo');
+        }
+    }, {
         label: '搜索这位歌手',
         click: () => {
             webController.send('ipcMain::SearchArtist');

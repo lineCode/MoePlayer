@@ -1,7 +1,7 @@
 ##
 # 歌曲详情面板组件
 # @Author VenDream
-# @Update 2017-1-14 10:37:30
+# @Update 2017-1-16 18:04:51
 ##
 
 BaseComp = require './BaseComp'
@@ -84,9 +84,18 @@ class DetailPanel extends BaseComp
                                 <div class="quality"></div>
                             </div>
                             <div>
-                                <div class="album"></div>
-                                <div class="artist"></div>
-                                <div class="source"></div>
+                                <div class="album">
+                                    <span>专辑: </span>
+                                    <span class="text"></span>
+                                </div>
+                                <div class="artist">
+                                    <span>歌手: </span>
+                                    <span class="text"></span>
+                                </div>
+                                <div class="source">
+                                    <span>专辑: </span>
+                                    <span class="text"></span>
+                                </div>
                             </div>
                         </div>
                         <div class="lyric-c"></div>
@@ -125,6 +134,14 @@ class DetailPanel extends BaseComp
                     .text '下载中...'
                 ipcRenderer.send 'ipcRenderer::DownloadCover', @CUR_SONG
             )
+
+        # 查看歌手信息
+        $(@artist).find('.text').unbind().on 'click', (evt) =>
+            if not @CUR_SONG
+                return false
+
+            artist = @CUR_SONG.song_artist
+            @eventBus.emit 'DetailPanel::ShowArtistInfo', artist
 
     #---------------------------------------------------
     #                     对外接口
@@ -186,15 +203,15 @@ class DetailPanel extends BaseComp
                 .text '下载封面'
 
         # 信息面板
-        $(@name).text s.song_name or '暂无'
-        $(@name).attr 'title', s.song_name or '暂无'
+        $(@name).text s.song_name
+        $(@name).attr 'title', s.song_name
         $(@quality).text "#{s.song_quality}K"
-        $(@album).text "专辑: #{s.song_album}"
-            .attr 'title', s.song_album
-        $(@artist).text "歌手: #{s.song_artist or '暂无'}"
-            .attr 'title', s.song_artist or '暂无'
-        $(@source).text "来源: #{song.source or '暂无'}"
-            .attr 'title', song.source or '暂无'
+        $(@album).find('.text').text s.song_album or '-'
+        $(@artist).find('.text').text s.song_artist or '-'
+        $(@source).find('.text').text song.source or '-'
+
+        $(@panel).find('.text').map (i, node) ->
+            $(node).attr 'title', $(node).text()
 
         switch s.song_quality
             when 320

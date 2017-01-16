@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2017-1-11 14:45:58
+# @Update 2017-1-16 18:09:13
 ##
 
 BaseComp = require './BaseComp'
@@ -121,6 +121,9 @@ class MusicList extends BaseComp
 
     # 创建右键菜单
     buildCtcMenu: ->
+        # 查看歌手详情
+        ipcRenderer.on 'ipcMain::ShowArtistInfo', =>
+            @CONTEXT.AR and @eventBus.emit 'MusicList::ShowArtistInfo', @CONTEXT.AR
         # 搜索歌手
         ipcRenderer.on 'ipcMain::SearchArtist', =>
             @CONTEXT.AR and @eventBus.emit 'MusicList::SearchArtist', @CONTEXT.AR
