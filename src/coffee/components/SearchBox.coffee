@@ -1,7 +1,7 @@
 ##
 # 搜索框组件
 # @Author VenDream
-# @Update 2017-1-11 15:05:04
+# @Update 2017-1-18 15:18:00
 ##
 
 BaseComp = require './BaseComp'
@@ -167,7 +167,7 @@ class SearchBox extends BaseComp
                 return false
 
         $.ajax {
-            type: 'POST',
+            type: 'GET',
             url: api,
             data: {
                 sstr: sstr,

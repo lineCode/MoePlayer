@@ -1,7 +1,7 @@
 ##
 # Artist Info Component
 # @Author VenDream
-# @Update 2017-1-16 18:47:06
+# @Update 2017-1-18 15:11:38
 ##
 
 BaseComp = require './BaseComp'
@@ -105,7 +105,7 @@ class ArtistInfo extends BaseComp
 
         $.ajax {
             url: @API.ARTIST,
-            type: 'POST',
+            type: 'GET',
             data: {
                 artist: artist
             },
@@ -127,7 +127,9 @@ class ArtistInfo extends BaseComp
 
     # Close the info panel
     close: () ->
-        @reset()
         $(@NODE.PANEL).parent().removeClass 'expand'
+        setTimeout () =>
+            @reset()
+        , 200
 
 module.exports = ArtistInfo

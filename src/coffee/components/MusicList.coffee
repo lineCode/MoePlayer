@@ -1,7 +1,7 @@
 ##
 # 音乐列表组件
 # @Author VenDream
-# @Update 2017-1-16 18:09:13
+# @Update 2017-1-18 15:17:46
 ##
 
 BaseComp = require './BaseComp'
@@ -314,7 +314,7 @@ class MusicList extends BaseComp
     # @param {number} idx        歌曲索引
     getSongInfoAndPlay: (sid, idx) ->
         $.ajax {
-            type: 'POST',
+            type: 'GET',
             url: @API.INFO,
             data: {
                 song_id: sid,
@@ -363,7 +363,7 @@ class MusicList extends BaseComp
     # @param {string} sid 歌曲ID
     getSongInfoAndDownload: (sid) ->
         $.ajax {
-            type: 'POST',
+            type: 'GET',
             url: @API.INFO,
             data: {
                 song_id: sid,
