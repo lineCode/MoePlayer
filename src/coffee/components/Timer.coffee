@@ -1,7 +1,7 @@
 ##
 # 计时器组件
 # @Author VenDream
-# @Update 2016-7-29 18:13:23
+# @Update 2017-1-20 10:33:34
 ##
 
 class Timer
@@ -11,7 +11,8 @@ class Timer
     # @param {function} action 执行函数
     # @param {number}   delay  计时间隔
     # @param {boolean}  isLoop 是否循环计时
-    set: (action, delay, isLoop = true) ->
+    # @param {string}   name   计时器名称
+    set: (action, delay, isLoop = true, name = 'timer') ->
         @stop()
         @clear()
 
@@ -24,6 +25,9 @@ class Timer
         )
         typeof isLoop is 'boolean' && (
             @isLoop = isLoop
+        )
+        typeof name is 'string' && (
+            @name = name
         )
 
         return @
@@ -75,6 +79,7 @@ class Timer
 
     # 重置计时器
     clear: ->
+        @stop()
         @timeId = 0
         @startTL = 0
         @endTL = 0
@@ -83,7 +88,11 @@ class Timer
         @delay = 0
         @isLoop = true
         @isActive = true
+        @name = null
 
         return @
+
+    isSet: ->
+        return if @name then true else false
 
 module.exports = Timer

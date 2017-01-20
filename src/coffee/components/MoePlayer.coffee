@@ -1,7 +1,7 @@
 ##
 # MoePlayer Component
 # @Author VenDream
-# @Update 2017-1-14 14:58:23
+# @Update 2017-1-20 17:34:59
 ##
 
 BaseComp = require './BaseComp'
@@ -29,8 +29,10 @@ class MoePlayer extends BaseComp
 
         # Create a HTML5 Audio object
         @PLAYER = new Audio()
+        # Create a Timer object to detect audio buffering
+        @BUFFER_TIMER = new Timer()
         # Create a Timer object to sync player progress
-        @TIMER = new Timer()
+        @PROGRESS_TIMER = new Timer()
         # Create a Dragger object to enable dragging
         @DRAGGER = new Dragger()
 
@@ -50,7 +52,7 @@ class MoePlayer extends BaseComp
         @TIPS = {
             ERROR: '歌曲URL无效QAQ',
             SWITCH: '歌曲URL无效，尝试切换音质...',
-            STALLED: '网络不太给力啊QAQ'
+            STALLED: '音频数据不再可用，重新播放...'
         }
 
     # Init componet DOM nodes
@@ -156,7 +158,7 @@ class MoePlayer extends BaseComp
 
         # On canplaythrough
         @PLAYER.addEventListener 'canplaythrough', () =>
-            if not @CUR_SONG
+            if not @CUR_SONG or @PROGRESS_TIMER.isSet()
                 return false
 
             index = parseInt(@CUR_SONG?.song_info.idx) ? -1
@@ -179,11 +181,8 @@ class MoePlayer extends BaseComp
             @syncProgress duration
             @syncBuffer @PLAYER.buffered
 
-        # On stalled
-        @PLAYER.addEventListener 'stalled', (e) =>
-            @pause()
-            Util.showMsg @TIPS.STALLED, 3000, 3
-            console.log e
+            # Start buffering detector
+            @detectBuffering()
 
         # On error
         @PLAYER.addEventListener 'error', (e) =>
@@ -271,6 +270,8 @@ class MoePlayer extends BaseComp
 
         # Click progress-drag-bar to trigger dragging
         $(@progressDragBar).unbind().on 'mousedown', (e) =>
+            if $(@status).hasClass('loading')
+                return false
             @CUR_SONG and (
                 @pause()
                 enableDragging()
@@ -291,12 +292,16 @@ class MoePlayer extends BaseComp
                 totalTime = @CUR_SONG.song_info.song_duration / 1000
                 curTime = totalTime * percent
                 @PLAYER.currentTime = curTime
+                @detectBuffering curTime
                 @DRAGGER.disableDragging @progressDragBar, @time
                 @resume()
             )
 
         # On click buffer bar
         $(@bufferBar).unbind().on 'mousedown', (e) =>
+            if $(@status).hasClass('loading')
+                return false
+
             @CUR_SONG and (
                 totalTime = @CUR_SONG.song_info.song_duration / 1000
                 barLeft = @progressBar.getBoundingClientRect().left
@@ -308,6 +313,7 @@ class MoePlayer extends BaseComp
 
                 @PLAYER.currentTime = curTime
                 @CUR_TIME = Math.round curTime
+                @detectBuffering curTime
                 $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
                 $(@progressDragBar).css 'left', (offset - dragBarWidth / 2) + 'px'
                 @eventBus.emit 'MoePlayer::Resume'
@@ -342,7 +348,7 @@ class MoePlayer extends BaseComp
             evt.stopPropagation()
             $target = $(evt.currentTarget)
 
-            if not @CUR_SONG
+            if not @CUR_SONG or $(@status).hasClass('loading')
                 return
 
             if $target.hasClass 'playing'
@@ -439,7 +445,8 @@ class MoePlayer extends BaseComp
             $(@playedTime).text Util.normalizeSeconds(@CUR_TIME, 1)
 
         # Setup timer and start
-        @TIMER.set updatePos, 1000
+        @PROGRESS_TIMER
+            .set updatePos, 1000, true, 'PROGRESS_TIMER'
             .start()
 
     # Sync buffer
@@ -452,6 +459,36 @@ class MoePlayer extends BaseComp
             percent > 1.0 and percent = 1.0
             $(@bufferBar).css 'width', (percent * 100) + '%'
         )
+
+    # Detect if the player is buffering
+    detectBuffering: (start = 0) ->
+        checkInterval = 50
+        lastPlayPos = start
+        currPlayPos = start
+        offset = 1 / checkInterval
+        bufferingDetected = false
+
+        doDetect = () =>
+            currPlayPos = @PLAYER.currentTime
+
+            if not @PLAYER.paused
+                if not bufferingDetected and currPlayPos < (lastPlayPos + offset)
+                    bufferingDetected = true
+                    @PROGRESS_TIMER.pause()
+                    $(@status).addClass 'small circle loading'
+                    @eventBus.emit 'MoePlayer::Pause'
+                if bufferingDetected and currPlayPos > (lastPlayPos + offset)
+                    bufferingDetected = false
+                    @PROGRESS_TIMER.resume()
+                    $(@status).removeClass 'small circle loading'
+                    @eventBus.emit 'MoePlayer::Resume'
+
+            lastPlayPos = currPlayPos
+
+        @BUFFER_TIMER
+            .clear()
+            .set doDetect, checkInterval, true, 'BUFFER_TIMER'
+            .start()
 
     # Fix song url
     # @param {string} path - song url
@@ -500,7 +537,7 @@ class MoePlayer extends BaseComp
         $(@status).addClass 'playing'
         $(@status).find('img').attr 'src', @ICONS.PAUSE
 
-        @TIMER.resume()
+        @PROGRESS_TIMER.resume()
         isEmit and @eventBus.emit 'MoePlayer::Resume'
 
     # Pause
@@ -509,7 +546,7 @@ class MoePlayer extends BaseComp
         $(@status).removeClass 'playing'
         $(@status).find('img').attr 'src', @ICONS.PLAY
 
-        @TIMER.pause()
+        @PROGRESS_TIMER.pause()
         isEmit and @eventBus.emit 'MoePlayer::Pause'
 
     # Stop
@@ -518,6 +555,8 @@ class MoePlayer extends BaseComp
         @CUR_TIME = 0
         @CUR_SONG = null
         @PLAYER.currentTime = 0
+        @PROGRESS_TIMER.clear()
+        @BUFFER_TIMER.clear()
 
         # Reset status icon and cover
         $(@status).removeClass 'playing'
@@ -538,7 +577,7 @@ class MoePlayer extends BaseComp
         $(@bufferBar).css 'width', 0
 
         # Stop timer
-        @TIMER.stop()
+        @PROGRESS_TIMER.stop()
     
     # Update song list
     # @param {object} data - data
